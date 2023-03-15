@@ -89,16 +89,6 @@ function getSteamData($sid){
         return array("name"=>$upd_personanm,"avatarfull"=>$upd_avatar);
     }
 }
-function toCommunityID($id) {
-    if (preg_match("/^STEAM_/",$id)) {
-        $parts = explode(":",$id);
-        return bcadd(bcadd(bcmul($parts[2],"2"),"76561197960265728"),$parts[1]);
-    } elseif (is_numeric($id) && strlen($id) < 16) {
-        return bcadd($id,"76561197960265728");
-    } else {
-        return $id;
-    }
-}
 if (!isset($_SESSION["db_updated"])&&isset($_SESSION["steamid"])){//cache steam data and update online status each 20 sec
 	$data = fetchdata($_SESSION["steamid"]);
 	$upd_personanm = $GLOBALS["database"]->real_escape_string($data["response"]["players"][0]["personaname"]);

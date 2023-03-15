@@ -6,7 +6,6 @@ $qiwi_themecode="";//get at p2p.qiwi.com
 $rooturl=(!empty($_SERVER["HTTPS"])?"https":"http")."://".$_SERVER["HTTP_HOST"]."/";
 if (isset($_GET["check"])){
 	include_once("../../core/db.php");
-	include_once("../../core/rcon.php");
 	require_once("../../core/qiwi_billpayments/BillPayments.php");
 	require_once("../../core/qiwi_billpayments/BillPaymentsException.php");
 	$amount = number_format($_GET["amount"],2,".","");// "2.50"
@@ -21,22 +20,25 @@ if (isset($_GET["check"])){
 		"billId" => $billPayments->generateId(),
 		"comment" => $description,
 		"successUrl" => $rooturl,
-		"customFields" => ["sv_name"=>$server["sv_name"],"steamid"=>$steamid,"themeCode"=>$qiwi_themecode]
+		"customFields" => array("sv_name"=>$server["sv_name"],"steamid"=>$steamid,"themeCode"=>$qiwi_themecode)
 	];
 	header("Location: ".$billPayments->createPaymentForm($params));
 }elseif(isset($_GET["accept"])){///////////
+	include_once("../../core/rcon.php");
+	include_once("../../core/db.php");
+	require_once("../../core/qiwi_billpayments/BillPayments.php");
+	require_once("../../core/qiwi_billpayments/BillPaymentsException.php");
 	$json = file_get_contents("php://input");
 	$decoded = json_decode($json,true);
 	$sv_name = $decoded["bill"]["customFields"]["sv_name"];
 	$steamid = $decoded["bill"]["customFields"]["steamid"];
 	$amount = $decoded["bill"]["amount"]["value"];
 	$status = $decoded["bill"]["status"]["value"];
-	$steamid64 = toCommunityID($steamid);
 	$head = array_change_key_case(getallheaders(),CASE_LOWER);
 	$validSignatureFromNotificationServer = $head[mb_strtolower("x-api-signature-SHA256")];
 	if ($billPayments->checkNotificationSignature($validSignatureFromNotificationServer,$decoded,QIWI_SECRET)){
 		$row=$database->query("SELECT * FROM servers WHERE sv_name='$sv_name';")->fetch_assoc();
-		$database->query("INSERT INTO transactions (credits,steamid,timestamp) VALUES ('$amount','$steamid64',UNIX_TIMESTAMP(NOW()))");
+		$database->query("INSERT INTO transactions (credits,steamid,timestamp) VALUES ('$amount','$steamid',UNIX_TIMESTAMP(NOW()))");
 		if ($row){
 			Rcon($row["sv_ip"],$row["sv_port"],'es_setbalance "'.$steamid.'" "'.$amount.'"');
 		}
