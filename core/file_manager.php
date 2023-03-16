@@ -44,7 +44,7 @@ if (!Cache::get("storage_check")){
         }elseif($settings["storage"]["autodelete"]){
             $actualsid=basename($dir);
             $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$actualsid';")->fetch_assoc();
-            if ($settings["storage"]["require_activity"]&&(!isset($userdata["last_played"])||(time()-$userdata["last_played"])>2419200)){
+            if (!isset($userdata["last_played"])||(time()-$userdata["last_played"])>$settings["storage"]["unactive_time"]){
                 array_map("unlink",glob("$dir/*.*"));
                 rmdir($dir);
             }
@@ -58,7 +58,7 @@ if (isset($_POST["file_submit"]))
     $sid=$_SESSION["steamid"];
     $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
     unset($sid);
-    if ($settings["storage"]["require_activity"]&&(!isset($userdata["last_played"])||(time()-$userdata["last_played"])>2419200)){
+    if ($settings["storage"]["require_activity"]&&(!isset($userdata["last_played"])||(time()-$userdata["last_played"])>$settings["storage"]["unactive_time"])){
         echo json_encode(array("error"=>"Чтобы воспользоваться хранилищем - вам нужно проявить активность на наших серверах, так как вы вовсе не играли у нас, либо не заходили более месяца!"));
     }else{
         $filename=$_FILES["file"]["name"];
