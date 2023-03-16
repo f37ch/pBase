@@ -19,6 +19,7 @@
         ],
         "storage"=>[
             "require_activity"=> true,//require server activity to use storage
+            "autodelete"=> true,//autodelete files of unactive users
             "filesize_limit" => 10000000,//10 MB (size in bytes)
             "storage_limit" => 50000000,//50 MB Limit storage size per user
             "storage_maxfiles" => 50,//50 files per one user
