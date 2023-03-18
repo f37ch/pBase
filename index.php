@@ -9,7 +9,7 @@
           <h1 class="modal-title w-100 fs-5" id="staticBackdropLabel">List</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="edamodal">
+        <div class="table-responsive" id="edamodal">
         </div>
       </div>
     </div>

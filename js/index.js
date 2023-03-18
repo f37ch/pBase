@@ -4,7 +4,7 @@ function get_players(sv) {
     form.append("get_players",sv);
     xmlhttp.open("POST","core/rcon.php");
     xmlhttp.onload = function() {
-        document.getElementById("edamodal").innerHTML="<div class='table-responsive'></div><table class='table table table-bordered table-striped table-custom'><thead><tr><th scope='col'>#</th><th scope='col'>Имя</th><th scope='col'>Время на сервере</th><th scope='col'>Счёт</th></tr></thead><tbody id='sudalol'></tbody></table></div>"
+        document.getElementById("edamodal").innerHTML="<table class='table table table-bordered table-striped table-custom'><thead><tr><th scope='col'>#</th><th scope='col'>Имя</th><th scope='col'>Время на сервере</th><th scope='col'>Счёт</th></tr></thead><tbody id='sudalol'></tbody></table>"
         document.getElementById("sudalol").innerHTML="";
         document.getElementById("staticBackdropLabel").innerHTML="Список игроков "+sv;
         if (this.readyState == 4 && this.status == 200) {
