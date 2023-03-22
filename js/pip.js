@@ -69,7 +69,7 @@ function get_file_list(){
       for (var i = 0, row; row = da[i]; i++) {
         let counter=eval(i+1)
         let fid="file_"+counter
-        document.getElementById("filetable").innerHTML=document.getElementById("filetable").innerHTML+"<tr id='"+fid+"'><th scope='row' >"+counter+"</th><td>"+row.slice(-30)+"</td><td><div class='btn-group column-gap-1'><button class='btn btn-outline-dark btn-sm' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+'/storage/"+da.sid+"/"+row+"')\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm' href='/storage/"+da.sid+"/"+row+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row+"')\"><i class='bi bi-trash'></i></button></div></td></tr>";
+        document.getElementById("filetable").innerHTML=document.getElementById("filetable").innerHTML+"<tr id='"+fid+"'><th scope='row' >"+counter+"</th><td>"+row.slice(-30)+"</td><td><div class='btn-group column-gap-1'><button class='btn btn-outline-dark btn-sm' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+da.sid+"/"+row+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm' href='/storage/"+da.sid+"/"+row+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row+"')\"><i class='bi bi-trash'></i></button></div></td></tr>";
       }
     }
   }
