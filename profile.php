@@ -77,7 +77,7 @@ function elapsed($when)
   <div class="row justify-content-center mt-3">
     <div class="col-auto"><div class="input-group mb-3">
       <div class="input-group-prepend">
-        <a target="_blank" href="https://steamcommunity.com/profiles/<?=$_SESSION["steamid"]?>" class="btn btn-secondary fw-bold bg-white"><i class="bi bi-steam"></i> Профиль</a></div> <input onclick="this.select()" value="<?=$_SESSION["steamid"]?>" readonly="readonly" class="form-control border-custom" style="text-align: center;">
+        <a target="_blank" href="https://steamcommunity.com/profiles/<?=$_SESSION["steamid"]?>" class="btn btn-secondary fw-bold bg-white"><i class="bi bi-steam"></i> Профиль</a></div> <input onclick="this.select()" value="<?=$_SESSION["steamid"]?>" readonly="readonly" class="form-control shadow-none border-custom" style="text-align: center;">
       </div>
       <a class="btn w-100 btn-danger fw-bold btn-success btn-sm col-2" href="?logout">Разлогиниться</a>
     </div>
