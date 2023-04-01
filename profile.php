@@ -160,7 +160,7 @@ function elapsed($when)
               <label class="form-check-label" for="enable_banlist">Включить Баны</label>
             </div>
 
-            <div class="mt-3 input-group input-group-sm align-items-center">
+            <div class="mt-3 input-group input-group-sm">
               <span class="input-group-text">Задний Фон</span>
               <input type="color" class="form-control form-control-color shadow-none" id="BGColorInput" value="#1e3a3d" title="Gradient #1">
               <input type="color" class="form-control form-control-color shadow-none" id="BGColorInput2" value="#752443" title="Gradient #2">
