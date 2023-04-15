@@ -37,7 +37,7 @@ function elapsed($when)
 <?php if (!isset($_GET["error"])){ ?>
   <?php if (isset($settings["access"][$_SESSION["steamid"]]["notes"])){ ?>
     <script src="https://cdn.tiny.cloud/1/<?=$settings["tinymce_apikey"]?>/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>tinymce.init({selector:'textarea',image_advtab:true,plugins:'preview importcss searchreplace autolink autosave save directionality  code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor  insertdatetime   advlist lists wordcount help charmap emoticons',resize:false,branding:false});</script>
+    <script>tinymce.init({selector:'textarea',image_advtab:true,plugins:'preview importcss searchreplace autolink autosave save directionality  code visualblocks visualchars fullscreen image link media codesample table charmap pagebreak nonbreaking anchor  insertdatetime   advlist lists wordcount help charmap emoticons',resize:false,branding:false});</script>
     <div class="modal fade text-black" id="write_modal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel"  aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
