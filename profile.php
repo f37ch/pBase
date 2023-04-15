@@ -145,19 +145,19 @@ function elapsed($when)
           <div class="accordion-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="enable_news" onclick="toggleswitch(this)" <?php echo getSetting("enable_news",true)?"checked":"";?>>
-              <label class="form-check-label" for="enable_news">Включить Новости</label>
+              <label class="form-check-label" for="enable_news">Раздел новостей</label>
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="enable_help" onclick="toggleswitch(this)" <?php echo getSetting("enable_help",true)?"checked":"";?>>
-              <label class="form-check-label" for="enable_help">Включить Помощь</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="enable_serverlist" onclick="toggleswitch(this)" <?php echo getSetting("enable_serverlist",true)?"checked":"";?>>
-              <label class="form-check-label" for="enable_serverlist">Включить Серверы</label>
+              <label class="form-check-label" for="enable_help">Раздел помощи</label>
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="enable_banlist" onclick="toggleswitch(this)" <?php echo getSetting("enable_banlist",true)?"checked":"";?>>
-              <label class="form-check-label" for="enable_banlist">Включить Баны</label>
+              <label class="form-check-label" for="enable_banlist">Раздел банов</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="enable_serverlist" onclick="toggleswitch(this)" <?php echo getSetting("enable_serverlist",true)?"checked":"";?>>
+              <label class="form-check-label" for="enable_serverlist">Отображать сервера</label>
             </div>
 
             <div class="mt-3 input-group input-group-sm">
