@@ -140,6 +140,7 @@ max-width: 100%!important;
 
 .rcon_r {
   white-space: nowrap;
+  overflow: auto;
 }
 .c2 {
   display: inline-block;
