@@ -63,7 +63,7 @@ $types=$database->query("SELECT DISTINCT(type) FROM bans")??NULL;
             <th scope="col" style="width:6%">Тип</th>
 				    <th scope="col">Нарушитель</th>
 			      <th scope="col">Админ</th>
-            <th scope="col"style="width:12%">Длина</th>
+            <th scope="col"style="width:13%">Длина</th>
             <th scope="col">Причина</th>
     		</tr>
     	</thead>
