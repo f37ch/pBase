@@ -94,12 +94,17 @@ if (isset($_POST["file_delete"]))
 }
 if (isset($_POST["file_list"]))
 {
+    $sid=$_SESSION["steamid"];
+    $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
     $ara=array_values(array_diff(scandir($user_storageroot),array("..",".")));
-    $ara["sid"]=$_SESSION["steamid"];
+    $ara["sid"]=$sid;
     $ara["storagelimit"]=$storagelimit;
     $ara["spaceleft"]=$storagelimit-$storageinf["size"];
     $ara["storagecnt"]=$storageinf["cnt"];
     $ara["storagemaxcnt"]=$storagemaxf;
+    if ($storageinf["cnt"]>0&&$settings["storage"]["require_activity"]&&isset($userdata["last_played"])&&(time()-$userdata["last_played"])>calc_percent($settings["storage"]["unactive_time"],20)){
+        $ara["warn"]="Если вы в ближайшее время не проявите активность на наших серверах, все ваши файлы будут удалены!";
+    }
     echo json_encode($ara);
 }
 ?>
