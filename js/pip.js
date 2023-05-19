@@ -65,7 +65,6 @@ function get_file_list(){
       let da=JSON.parse(xmlhttp.responseText)
       document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(da.spaceleft)+")"
       document.getElementById("fldrop").innerHTML="Список файлов ("+da.storagecnt+"/"+da.storagemaxcnt+")"
-      document.getElementById("filesinf").innerHTML="ФАЙЛЫ: "+da.storagecnt;
       for (var i = 0, row; row = da[i]; i++) {
         let counter=eval(i+1)
         let fid="file_"+counter

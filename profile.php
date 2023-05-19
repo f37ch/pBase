@@ -283,7 +283,6 @@ function elapsed($when)
         Дополнительная Информация
       </div>
       <div class="card-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3">
-        <p class="fw-bold" id="filesinf"></p>
         <p class="fw-bold text-uppercase">АКТИВ НА САЙТЕ: <span id="sitetime"><?=elapsed($userdata["last_online"]);?></span></p>
         <p class="fw-bold text-uppercase">АКТИВ НА СЕРВЕРЕ: <span id="servertime"><?=$userdata["last_played"]?elapsed($userdata["last_played"]):"НИКОГДА";?></span></p>
       </div>
