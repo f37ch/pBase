@@ -32,6 +32,22 @@
             "mute"=>"<i class='bi bi-dash-square'></i>",
             "block"=>"<i class='bi bi-camera-video-off'></i>"
         ],
+        //loading screen url: yourdomain/loading.php
+        "loading_music"=>[//loading screen music.
+            ["title"=>"SizzleBird - Memory","file"=>"music/Memory.ogg"],
+            ["title"=>"SizzleBird - Elixir","file"=>"music/Elixir.ogg"],
+            ["title"=>"NOFAL - Forest","file"=>"music/nofal.ogg"]
+        ],
+        "loading_imgs"=>[//images displays based on what server gamemode is set. You can use link insted if you want tho.
+            "cinema"=>"img/etcinema_v103f.png",
+            "unknwn"=>"img/unknwn.jpg"
+        ],
+        "loading_words"=>[//loading screen words.
+            "Добро пожаловать!",
+	        "Проверка на наличие нужных для комфортной игры аддонов...",
+	        "Внимательно изучите правила сервера дабы избежать недопониманий и споров с администрацией."
+        ],
+        "loading_volume"=>2,//music volume, where 100 is max.
         "dev_mode"=>true
     ];
 ?>
