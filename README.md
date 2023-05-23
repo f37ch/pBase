@@ -1,5 +1,5 @@
 # pBase
-Community space that contains filehosting for players, bans and autodonate with modules included. Made for source server projects (used by me on my Garry's Mod project).
+Community space that contains filehosting for players, bans, loadingscreen and autodonate with modules included. Made for source server projects (used by me on my Garry's Mod project).
 
 This project using [PHP-Source-Query](https://github.com/xPaw/PHP-Source-Query) by xPaw | [SteamAuthentication](https://github.com/SmItH197/SteamAuthentication) by SmItH197
 ### Installation ###
