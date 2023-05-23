@@ -36,6 +36,13 @@ function dir_size($directory) {
     }
     return array("size"=>$size,"cnt"=>$cnt);
 }
+function filter_filename($filename){
+    $filename=preg_replace('~[<>:"/\\\|?*]|[\x00-\x1F]|[\x7F\xA0\xAD]|[#\[\]@!$&\'()+,;=]|[{}^\~`]~x',"-",$filename);
+    $filename=ltrim($filename,".-");
+    $ext=pathinfo($filename,PATHINFO_EXTENSION);
+    $filename=mb_strcut(pathinfo($filename,PATHINFO_FILENAME),0,50-($ext?strlen($ext)+1:0),mb_detect_encoding($filename)).($ext?".".$ext:"");//filename only 50 bite max.
+    return $filename;
+}
 if (!Cache::get("storage_check")){
     $dirs=glob($storageroot."*",GLOB_ONLYDIR+GLOB_NOSORT);
     foreach($dirs as $dir){
@@ -61,7 +68,7 @@ if (isset($_POST["file_submit"]))
     if ($settings["storage"]["require_activity"]&&(!isset($userdata["last_played"])||(time()-$userdata["last_played"])>$settings["storage"]["unactive_time"])){
         echo json_encode(array("error"=>"Чтобы воспользоваться хранилищем - вам нужно проявить активность на наших серверах, так как вы вовсе не играли у нас, либо не заходили более месяца!"));
     }else{
-        $filename=$_FILES["file"]["name"];
+        $filename=filter_filename($_FILES["file"]["name"]);
         $size=$_FILES["file"]["size"];
         if ($size>$limitsize){
             echo json_encode(array("error"=>"Слишком большой размер файла!"));
