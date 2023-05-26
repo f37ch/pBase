@@ -29,7 +29,7 @@ if (isset($_GET["synch_ban"]))
         $server=$_POST["server"];
         $reason=$_POST["reason"];
         $expires=$_POST["expires"];
-        $database->query("INSERT INTO bans (type,offender_steamid,server,reason".(isset($admin)?",admin_steamid":"").",created".($expires>0?",expires":"").") VALUES ('$type','$sid','$server','$reason',".(isset($admin)?",'$admin',":"")."UNIX_TIMESTAMP(NOW())".($expires>0?",'$expires'":"").")");
+        $database->query("INSERT INTO bans (type,offender_steamid,server,reason".(isset($admin)?",admin_steamid":"").",created".($expires>0?",expires":"").") VALUES ('$type','$sid','$server','$reason',".(isset($admin)?"'$admin',":"")."UNIX_TIMESTAMP(NOW())".($expires>0?",'$expires'":"").")");
 	}elseif(!isset($_POST["unban"])){
         $reason=$_POST["reason"];
         $expires=$_POST["expires"];
