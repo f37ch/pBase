@@ -34,7 +34,7 @@ if (isset($_GET["synch_ban"]))
         $reason=$_POST["reason"];
         $expires=$_POST["expires"];
         $type=$_POST["type"];
-        $database->query("UPDATE bans SET reason='$reason',expires='$expires' where steamid='$sid' AND type='$type' ORDER BY created DESC LIMIT 1");
+        $database->query("UPDATE bans SET reason='$reason',expires='$expires' where offender_steamid='$sid' AND type='$type' ORDER BY created DESC LIMIT 1");
 	}else{
         $type=$_POST["type"];
         $database->query("UPDATE bans SET expires=UNIX_TIMESTAMP(NOW()) where offender_steamid='$sid' AND type='$type' ORDER BY created DESC LIMIT 1");
