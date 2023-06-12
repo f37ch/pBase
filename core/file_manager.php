@@ -109,7 +109,7 @@ if (isset($_POST["file_list"]))
     $ara["spaceleft"]=$storagelimit-$storageinf["size"];
     $ara["storagecnt"]=$storageinf["cnt"];
     $ara["storagemaxcnt"]=$storagemaxf;
-    if ($storageinf["cnt"]>0&&$settings["storage"]["require_activity"]&&isset($userdata["last_played"])&&(time()-$userdata["last_played"])>calc_percent($settings["storage"]["unactive_time"],20)){
+    if ($storageinf["cnt"]>0&&$settings["storage"]["require_activity"]&&isset($userdata["last_played"])&&(time()-$userdata["last_played"])>calc_percent($settings["storage"]["unactive_time"],80)){
         $ara["warn"]="Если вы в ближайшее время не проявите активность на наших серверах, все ваши файлы будут удалены!";
     }
     echo json_encode($ara);
