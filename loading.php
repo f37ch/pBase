@@ -2,7 +2,7 @@
 <h3 class="mb-3 pn" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
 <div data-aos="zoom-in" data-aos-delay="100" class="card mt-auto mb-auto border-0 bggrad text-white" style="border-radius:20px; overflow: hidden; height: auto;">
   <div class="d-flex mt-1 p-2" style="overflow: hidden;height:15vw;">
-    <img id="gm_img" class="rounded-4 mb-1" style="height: auto;" src="https://i.imgur.com/HKIws2U.png">
+    <img id="gm_img" class="rounded-4 mb-1" style="height:100%;aspect-ratio:1/1;" src="https://i.imgur.com/HKIws2U.png">
     <div class="d-flex fw-bold mt-1 flex-column" style="justify-content: center;width: 100%;">
       <h1 id="gameinf">err</h1>
       <h5 id="mapinf">err</h5>
