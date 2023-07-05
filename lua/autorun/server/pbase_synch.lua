@@ -1,6 +1,6 @@
 --user activity synch
-local apikey=""//api_key from components/config.php
-local host="exemple.com"//your site adress (with no schema and slashes)
+local apikey=""--api_key from components/config.php
+local host="exemple.com"--your site adress (with no schema and slashes)
 hook.Add("PlayerInitialSpawn","SynhWithWeb",function(ply)
 	http.Post("http://"..host.."/core/api.php?api_key="..apikey.."&synch_user="..ply:SteamID64(),{},
 	function(body)
@@ -89,4 +89,34 @@ hook.Add("SAM.UnmutePlayer","SynhMuteWithWeb",function(sid,admin_steamid,automat
 	if not automatic then --automatic unban, does not need to send.
 		synhthis(sid,os.time(),nil,nil,"mute",true,true)
 	end
+end)
+
+--GMDONATE SYNCH
+local ProjectID=1424--project ID(get at gmdonate admin panel)
+local ProjectKey=""--project api key(get at gmdonate admin panel)
+local uid=string.format("gmd_%s_%s",ProjectID,ProjectKey)
+local url="https://poll.gmod.app/"..uid.."/getUpdates?sleep=30&ts=0"
+if !file.Exists("gmd_pol.txt","DATA") then
+	file.Write("gmd_pol.txt",0)
+end
+gmd_ts=tonumber(file.Read("gmd_pol.txt","DATA"))
+timer.Create("gmd_upd",10,0,function()
+    http.Fetch(url,function(json)
+        local t = util.JSONToTable(json)
+        if t and t.ok then
+            if gmd_ts<t.ts then
+                local updcnt=t.ts-gmd_ts-1
+                for i=#t.updates-updcnt,#t.updates do--we get new donation, do stuff with data
+                    RunConsoleCommand("es_setbalance",t.updates[i].data.SteamID64,t.updates[i].data.orderSum)
+                    http.Post("https://"..host.."/modules/autodonate/gmd.php?accept&steamid="..t.updates[i].data.SteamID64.."&amount="..t.updates[i].data.orderSum.."&key="..apikey)
+                end
+                gmd_ts=t.ts
+                file.Write("gmd_pol.txt",t.ts)
+            end
+        else
+           print("response is not a json")
+        end
+    end,function(http_err)
+        print(http_err)
+    end)
 end)
