@@ -97,21 +97,25 @@ local ProjectKey=""--project api key(get at gmdonate admin panel)
 local uid=string.format("gmd_%s_%s",ProjectID,ProjectKey)
 local url="https://poll.gmod.app/"..uid.."/getUpdates?sleep=30&ts=0"
 if !file.Exists("gmd_pol.txt","DATA") then
-	file.Write("gmd_pol.txt",0)
+	file.Write("gmd_pol.txt",util.TableToJSON({}))
 end
-gmd_ts=tonumber(file.Read("gmd_pol.txt","DATA"))
+local gmd_ts=util.JSONToTable(file.Read("gmd_pol.txt","DATA"))
 timer.Create("gmd_upd",10,0,function()
     http.Fetch(url,function(json)
         local t = util.JSONToTable(json)
         if t and t.ok then
-            if gmd_ts<t.ts then
-                local updcnt=t.ts-gmd_ts-1
-                for i=#t.updates-updcnt,#t.updates do--we get new donation, do stuff with data
-                    RunConsoleCommand("es_setbalance",t.updates[i].data.SteamID64,t.updates[i].data.orderSum)
-                    http.Post("https://"..host.."/modules/autodonate/gmd.php?accept&steamid="..t.updates[i].data.SteamID64.."&amount="..t.updates[i].data.orderSum.."&key="..apikey)
+            if #t.updates>0 then
+                for k,v in pairs(t.updates) do
+					local pid=tonumber(v.data.paymentId)
+                    if not gmd_ts[pid] then
+                        gmd_ts[pid]=true
+                        file.Write("gmd_pol.txt",util.TableToJSON(gmd_ts))
+                    	RunConsoleCommand("es_setbalance",t.updates[i].data.SteamID64,t.updates[i].data.orderSum)
+                    	http.Post("https://"..host.."/modules/autodonate/gmd.php?accept&steamid="..t.updates[i].data.SteamID64.."&amount="..t.updates[i].data.orderSum.."&key="..apikey)
+					end
                 end
-                gmd_ts=t.ts
-                file.Write("gmd_pol.txt",t.ts)
+			else
+				file.Write("gmd_pol.txt",util.TableToJSON({}))
             end
         else
            print("response is not a json")
