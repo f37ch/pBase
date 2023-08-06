@@ -106,12 +106,14 @@ timer.Create("gmd_upd",10,0,function()
         if t and t.ok then
             if #t.updates>0 then
                 for k,v in pairs(t.updates) do
-					local pid=tonumber(v.data.paymentId)
-                    if not gmd_ts[pid] then
-                        gmd_ts[pid]=true
-                        file.Write("gmd_pol.txt",util.TableToJSON(gmd_ts))
-                    	RunConsoleCommand("es_setbalance",t.updates[i].data.SteamID64,t.updates[i].data.orderSum)
-                    	http.Post("https://"..host.."/modules/autodonate/gmd.php?accept&steamid="..t.updates[i].data.SteamID64.."&amount="..t.updates[i].data.orderSum.."&key="..apikey)
+					if v.method=="payment.UpdateStatus" then
+						local pid=tonumber(v.data.paymentId)
+                    	if not gmd_ts[pid] then
+                    	    gmd_ts[pid]=true
+                    	    file.Write("gmd_pol.txt",util.TableToJSON(gmd_ts))
+                    		RunConsoleCommand("es_setbalance",t.updates[i].data.SteamID64,t.updates[i].data.orderSum)
+                    		http.Post("https://"..host.."/modules/autodonate/gmd.php?accept&steamid="..t.updates[i].data.SteamID64.."&amount="..t.updates[i].	data.orderSum.."&key="..apikey)
+						end
 					end
                 end
 			else
