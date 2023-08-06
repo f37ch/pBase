@@ -66,7 +66,7 @@ if (isset($_POST["file_submit"]))
     $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
     $banned=$GLOBALS["database"]->query("SELECT * FROM bans WHERE offender_steamid='$sid' ORDER BY id DESC LIMIT 1;")->fetch_array();
     unset($sid);
-    if ($banned["expires"]>time()){
+    if ($banned["expires"]==0||$banned["expires"]>time()){
         echo json_encode(array("error"=>"Вы были забанены на одном из наших серверов. Только после разбана вам будет разрешено загружать файлы!"));
     }elseif($settings["storage"]["require_activity"]&&(!isset($userdata["last_played"])||(time()-$userdata["last_played"])>$settings["storage"]["unactive_time"])){
         echo json_encode(array("error"=>"Чтобы воспользоваться хранилищем - вам нужно проявить активность на наших серверах, так как вы вовсе не играли у нас, либо не заходили более месяца!"));
