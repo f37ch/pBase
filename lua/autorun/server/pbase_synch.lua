@@ -107,7 +107,7 @@ timer.Create("gmd_upd",10,0,function()
             if #t.updates>0 then
                 for k,v in pairs(t.updates) do
 					if v.method=="payment.UpdateStatus" and v.data.paymentId then
-						local pid=tonumber(v.data.paymentId)
+						local pid=tonumber(v.data.paymentId)||v.data.paymentId
                     	if not gmd_ts[pid] then
                     	    gmd_ts[pid]=true
                     		RunConsoleCommand("es_setbalance",v.data.SteamID64,v.data.orderSum)
