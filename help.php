@@ -41,27 +41,27 @@
 <ul class="pagination justify-content-right mt-4" data-aos-offset="0" data-aos="fade-up" data-aos-delay="200">
   <?php if($page>4) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="news.php?list=1" aria-label="Next">
+      <a class="page-link text-black shadow-none" href="help.php?list=1" aria-label="Next">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
   <?php } ?>
   <li class="page-item <?= $page==1?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="news.php?list=<?= $prev; ?>" aria-label="Previous">
+    <a class="page-link text-black shadow-none" href="help.php?list=<?= $prev; ?>" aria-label="Previous">
       <span aria-hidden="true">Prev</span>
     </a>
   </li>
   <?php for($i = max(1,$page-3); $i < min($pages+1,$page+3); $i++) { ?>
-		<li class="page-item"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" href="news.php?list=<?= $i; ?>"><?= $i; ?></a></li>
+		<li class="page-item"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" href="help.php?list=<?= $i; ?>"><?= $i; ?></a></li>
 	<?php }; ?>
   <li class="page-item <?= $page==$pages?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="news.php?list=<?= $nxt; ?>" aria-label="Next">
+    <a class="page-link text-black shadow-none" href="help.php?list=<?= $nxt; ?>" aria-label="Next">
       <span aria-hidden="true">Next</span>
     </a>
   </li>
   <?php if($page<$pages-2) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="news.php?list=<?=$pages;?>" aria-label="Next">
+      <a class="page-link text-black shadow-none" href="help.php?list=<?=$pages;?>" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>
