@@ -13,7 +13,7 @@
 ?>
   <div data-aos="zoom-out" data-aos-delay="100">
     <h3 style="text-align:left!important;"><?php echo $mgoaltxt.":"?><small style="color: rgb(94, 197, 130);">&nbsp;<?php echo $collected."/".$mgoal.  $currency?></small><h3>
-    <div class="progress" role="progressbar" style="height: 10px;" aria-label="Success striped example" aria-valuenow="25" aria-valuemin="0"  aria-valuemax="100">
+    <div class="progress" role="progressbar" style="height: 10.6px;" aria-label="Success striped example" aria-valuenow="25" aria-valuemin="0"  aria-valuemax="100">
       <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" style="width: <?php echo $percentage?>%;"></div>
     </div>
     <form class="input-group input-group mt-3" action="methods.php" method="get">
