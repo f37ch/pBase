@@ -170,3 +170,4 @@ max-width: 100%!important;
     border-color: orange;
   }
 }
+.stuser:hover{background-color:#EAEAEA;transition: 0.2s;};

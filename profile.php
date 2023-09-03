@@ -64,6 +64,20 @@ function elapsed($when)
       </div>
     </div>
   <?php } ?>
+  <?php if (isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){ ?>
+    <div class="modal fade text-black" id="filemanager_modal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel2"  aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+          <div class="modal-header text-center">
+            <h1 class="modal-title w-100 fs-5" id="fm_lbl">file manager</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body d-flex flex-wrap justify-content-around column-gap-3" id="filemb">
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php } ?>
   <div class="card mb-4 text-black" style="border-radius:25px; margin-top: 5%;" data-aos="fade-down" data-aos-delay="100">
     <div class="card-body">
       <div class="row p-2 text-center justify-content-center d-flex align-items-center mb-2" style="margin: -10%;">
@@ -77,7 +91,7 @@ function elapsed($when)
   <div class="row justify-content-center mt-3">
     <div class="col-auto"><div class="input-group mb-3">
       <div class="input-group-prepend">
-        <a target="_blank" href="https://steamcommunity.com/profiles/<?=$_SESSION["steamid"]?>" class="btn btn-secondary fw-bold bg-white"><i class="bi bi-steam"></i> Профиль</a></div> <input onclick="this.select()" value="<?=$_SESSION["steamid"]?>" readonly="readonly" class="form-control shadow-none border-custom" style="text-align: center;">
+        <a target="_blank" href="https://steamcommunity.com/profiles/<?=$_SESSION["steamid"]?>" class="btn btn-secondary fw-bold bg-white"><i class="bi bi-steam"></i> Профиль</a></div> <input onclick="this.select()" value="<?=$_SESSION["steamid"]?>" readonly="readonly" class="form-control border-custom shadow-none" style="text-align: center;">
       </div>
       <a class="btn w-100 btn-danger fw-bold btn-success btn-sm col-2" href="?logout">Разлогиниться</a>
     </div>
@@ -115,18 +129,8 @@ function elapsed($when)
       </button>
     </h2>
     <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
-      <div class="accordion-body table-responsive">
-      <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Имя Файла</th>
-              <th scope="col">Дейсвтие</th>
-            </tr>
-          </thead>
-          <tbody id="filetable">
-          </tbody>
-          </table>
+      <div class="accordion-body d-flex flex-wrap justify-content-around column-gap-2" id="filemanager">
+
       </div>
     </div>
   </div>
@@ -256,7 +260,7 @@ function elapsed($when)
     <?php } ?>
 
     <?php if (isset($settings["access"][$_SESSION["steamid"]]["rcon"])){ ?>
-    <div class="accordion-item">
+        <div class="accordion-item">
         <h2 class="accordion-header" id="headingFour">
           <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour"><i class="bi bi-terminal-fill"></i>&nbsp;RCON</button>
         </h2>
@@ -275,7 +279,52 @@ function elapsed($when)
           </div>
           </div>
         </div>
-        <?php } ?>
+    <?php } ?>
+
+    <?php if (isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){ ?>
+        <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFive">
+          <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive"><i class="bi bi-folder-check"></i></i>&nbsp;Модерация Хранилища</button>
+        </h2>
+        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionDada">
+          <div class="accordion-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3">
+          <?php
+          function format_size($size) {
+            $mod=1024;
+            $units=explode(" ","B KB MB GB TB PB");
+            for ($i=0;$size>$mod;$i++) {
+                $size/=$mod;
+            }
+            return round($size,2)." ".$units[$i];
+          }
+          $dirs=glob("storage".DIRECTORY_SEPARATOR."*",GLOB_ONLYDIR+GLOB_NOSORT);
+          foreach($dirs as $dir){
+            $actualsid=basename($dir);
+            if ($actualsid==$_SESSION["steamid"]){continue;}
+            $size=0;
+            $cnt=0;
+            foreach(new FilesystemIterator($dir) as $file){
+                $size+=$file->getSize();
+                $cnt++;
+            }
+            $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$actualsid';")->fetch_assoc();?>
+            <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:200px; cursor: pointer;" onclick="get_file_list('<?php echo $actualsid; ?>','<?php echo $userdata['name']; ?>')">
+              <div class="card-body">
+              <div class="row p-1 mb-1">
+                <div class="col">
+                  <img class="col-auto rounded-circle mb-3" style="width: 80px;border: 4px solid #000;" src="<?=$userdata["avatarfull"] ?>">
+                  <h4 class="title my-0"><?=$userdata["name"]?></h1> 
+                  <h6 class="title" style="color:#5ec582;"><?=$settings["ranks"][$actualsid]??"User";?></h6>
+                  <small class="title" style="color:#46B7AA; font-weight: bold;"><?=format_size($size);?> | Файлов: <?=$cnt;?></small>
+                </div>
+                </div>
+              </div>
+            </div>
+          <?php } ?>
+          </div>
+          </div>
+        </div>
+    <?php } ?>
   </div>
   <?php } ?>
     <div class="card mt-4" data-aos-offset="0" data-aos="flip-left" data-aos-delay="100">

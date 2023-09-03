@@ -42,38 +42,69 @@ function formatsize(size){
   }
   return size
 }
-function file_delete(id,file){
+function file_delete(id,file,sid){
   let xmlhttp = new XMLHttpRequest();
   let form = new FormData();
   form.append("file_delete",file);
+  if (sid){
+    form.append("sid",sid);
+  }
   xmlhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      get_file_list()
+      let da=JSON.parse(xmlhttp.responseText)
+      if (da.fm_mod){
+        get_file_list(sid)
+      }else{
+        get_file_list()
+      }
     }
   }
   xmlhttp.open("POST","core/file_manager.php")
   xmlhttp.send(form)
 }
-function get_file_list(){
+function gen_preview(extension,sid,name){
+  if (extension=="jpg"||extension=="png"||extension=="gif"){
+    return "<img class='col-auto mb-3' style='border: 2px solid #46B7AA;' src='"+location.protocol+"//"+location.hostname+encodeURI("/storage/"+sid+"/"+name)+"'></img>";
+  }else if(extension=="mp4"||extension=="webm"){
+    return "<video controls class='col-auto mb-3' style='border: 2px solid #46B7AA; width:100%;' src='"+location.protocol+"//"+location.hostname+encodeURI("/storage/"+sid+"/"+name)+"'></video>";
+  }else if (extension=="zip"){
+    return "<i style='color: #46B7AA;' class='h1 bi bi-file-earmark-zip-fill'></i>";
+  }else if (extension=="txt"){
+    return "<i style='color: #46B7AA;' class='h1 bi bi-filetype-txt'></i>"
+  }else{
+    return "<i style='color: #46B7AA;' class='h1 bi bi-file-earmark-text-fill'></i>"
+  }
+}
+function get_file_list(sid,name){
   let xmlhttp = new XMLHttpRequest();
   let form = new FormData();
   form.append("file_list","");
+  if (sid){
+    form.append("sid",sid);
+  }
   xmlhttp.onload = function() {
     if (this.status == 200) {
-      document.getElementById("filetable").innerHTML=""
-      document.getElementById("fldrop").innerHTML=""
-      document.getElementById("stinf").innerHTML=""
+      document.getElementById(sid?"filemb":"filemanager").innerHTML=""
       let da=JSON.parse(xmlhttp.responseText)
-      document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(da.spaceleft)+")"
-      document.getElementById("fldrop").innerHTML="Список файлов ("+da.storagecnt+"/"+da.storagemaxcnt+")"
-      document.getElementById("stinf").innerHTML="Размер Хранилища: "+formatsize(da.storagelimit)
+      if (da.spaceleft){
+        document.getElementById("fldrop").innerHTML=""
+        document.getElementById("stinf").innerHTML=""
+        document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(da.spaceleft)+")"
+        document.getElementById("fldrop").innerHTML="Список файлов ("+da.storagecnt+"/"+da.storagemaxcnt+")"
+        document.getElementById("stinf").innerHTML="Размер хранилища: "+formatsize(da.storagelimit)
+      }
       for (var i = 0, row; row = da[i]; i++) {
         let counter=eval(i+1)
         let fid="file_"+counter
-        document.getElementById("filetable").innerHTML=document.getElementById("filetable").innerHTML+"<tr id='"+fid+"'><th scope='row' >"+counter+"</th><td>"+row.slice(-30)+"</td><td><div class='btn-group column-gap-1'><button class='btn btn-outline-dark btn-sm' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+da.sid+"/"+row+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm' href='/storage/"+da.sid+"/"+row+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row+"')\"><i class='bi bi-trash'></i></button></div></td></tr>";
+        document.getElementById(sid?"filemb":"filemanager").innerHTML=document.getElementById(sid?"filemb":"filemanager").innerHTML+"<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,da.sid,row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+da.sid+"/"+row.name+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+da.sid+"/"+row.name+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+(sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
       }
       if (da.warn){
         document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Внимание!</strong> "+da.warn+".<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
+      }
+      if (sid&&name){
+        var myModal = new bootstrap.Modal(document.getElementById("filemanager_modal"));
+        myModal.toggle();
+        document.getElementById("fm_lbl").innerHTML="Moderate "+name+"'s Files"
       }
     }
   }
@@ -121,7 +152,6 @@ if (document.getElementById("write_modal")!=null){
       let tinydata=tinymce.get("tiny").getContent();
       let form = new FormData();
       if (tinymce.activeEditor.modaledit){
-        console.log("edit")
         form.append("write_update",tinymce.activeEditor.editingid);
         form.append("headimg",document.getElementById("iinpimg").value);
         form.append("title",document.getElementById("iinpttl").value);
@@ -351,7 +381,6 @@ if (document.getElementById("rcon_submit")!=null){
     form.append("command",document.getElementById("rcon_string").value);
     document.getElementById("typer").classList.add("d-none")
     xmlhttp.onload = function() {
-      console.log(xmlhttp.responseText)
       let si=JSON.parse(xmlhttp.responseText)
       document.getElementById("typer").classList.remove("d-none")
       document.getElementById("rcon_response_place").innerHTML=">"+si.success
@@ -359,4 +388,8 @@ if (document.getElementById("rcon_submit")!=null){
     xmlhttp.open("POST","core/rcon.php");
     xmlhttp.send(form);
   })
+}
+function nicedate(str){
+  str=new Date(str)
+  return str.toString().replace(/^[^\s]+\s([^\s]+)\s([^\s]+)\s([^\s]+)\s([^\s]+)\s.*$/ig,'$3-'+(str.getMonth()+1)+'-$2 $4').slice(0,-3);
 }

@@ -5,7 +5,7 @@
         "api_key"=>"",//api key to make secure api calls from your servers to synch bans for exemple.
         "tinymce_apikey"=>"",//text editor api. Get at https://www.tiny.cloud/
         "access"=>[
-            "76561198106529373" => ["global"=>1,"rcon"=>2,"notes"=>3,"servers"=>4],//replace to your steamid64
+            "76561198106529373" => ["global"=>1,"rcon"=>2,"notes"=>3,"servers"=>4,"storagemoderate"=>5],//replace to your steamid64
         ],
         "ranks"=>[
             "76561198106529373" => "Horse",
