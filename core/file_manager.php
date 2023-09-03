@@ -28,13 +28,17 @@ function dir_size($directory) {
     if(!is_dir($directory)) {
         mkdir($directory);
     }
-    $size = 0;
+    $size=0;
     $cnt=0;
     foreach(new FilesystemIterator($directory) as $file){
         $size+=$file->getSize();
         $cnt++;
     }
     return array("size"=>$size,"cnt"=>$cnt);
+}
+function calc_percent($val,$percent)
+{
+	return $val*($percent/100); 
 }
 function filter_filename($filename){
     $filename=preg_replace('~[<>:"/\\\|?*]|[\x00-\x1F]|[\x7F\xA0\xAD]|[#\[\]@!$&\'()+,;=]|[{}^\~`]~x',"-",$filename);
@@ -101,26 +105,48 @@ if (isset($_POST["file_submit"]))
 }
 if (isset($_POST["file_delete"]))
 {
-    $path=$user_storageroot.DIRECTORY_SEPARATOR.$_POST["file_delete"];
+    if (isset($_POST["sid"])&&!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){
+        http_response_code(403);
+        die(json_encode(array("error"=>"Access denied.")));
+    }
+    $sid=$_POST["sid"]??$_SESSION["steamid"];
+    $path=$storageroot.$sid.DIRECTORY_SEPARATOR.$_POST["file_delete"];
     if (!unlink($path)){
-        echo json_encode(array("error"=>"Произошла ошибка удаления файла!"));
+        echo json_encode(array("fm_mod"=>isset($_POST["sid"]),"error"=>"Произошла ошибка удаления файла!"));
     }else{
-        echo json_encode(array("success"=>"Файл успешно удалён!"));
+        echo json_encode(array("fm_mod"=>isset($_POST["sid"]),"success"=>"Файл успешно удалён!"));
     }
 }
 if (isset($_POST["file_list"]))
 {
-    $sid=$_SESSION["steamid"];
-    $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
-    $ara=array_values(array_diff(scandir($user_storageroot),array("..",".")));
-    $ara["sid"]=$sid;
-    $ara["storagelimit"]=$storagelimit;
-    $ara["spaceleft"]=$storagelimit-$storageinf["size"];
-    $ara["storagecnt"]=$storageinf["cnt"];
-    $ara["storagemaxcnt"]=$storagemaxf;
-    if ($storageinf["cnt"]>0&&$settings["storage"]["require_activity"]&&isset($userdata["last_played"])&&(time()-$userdata["last_played"])>calc_percent($settings["storage"]["unactive_time"],80)){
-        $ara["warn"]="Если вы в ближайшее время не проявите активность на наших серверах, все ваши файлы будут удалены!";
+    if (isset($_POST["sid"])&&!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){
+        http_response_code(403);
+        die(json_encode(array("error"=>"Access denied.")));
     }
-    echo json_encode($ara);
+    $sid=$_POST["sid"]??$_SESSION["steamid"];
+    $fileList=array();
+    $filesroot=$storageroot.$sid.DIRECTORY_SEPARATOR;
+    foreach (scandir($filesroot) as $file) {
+        if ($file!=="."&&$file!=="..") {
+            $extension = pathinfo($file,PATHINFO_EXTENSION);
+            $fileList[]=array(
+                "name"=>$file,
+                "extension"=>$extension,
+                "size"=>format_size(filesize($filesroot.$file))
+            );
+        }
+    }
+    $fileList["sid"]=$sid;
+    $fileList["storagelimit"]=$storagelimit;
+    if (!isset($_POST["sid"])){
+        $fileList["spaceleft"]=$storagelimit-$storageinf["size"];
+        $fileList["storagecnt"]=$storageinf["cnt"];
+        $fileList["storagemaxcnt"]=$storagemaxf;
+        $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
+        if ($storageinf["cnt"]>0&&$settings["storage"]["require_activity"]&&isset($userdata["last_played"])&&(time()-$userdata["last_played"])>calc_percent($settings["storage"]["unactive_time"],80)){
+            $fileList["warn"]="Если вы в ближайшее время не проявите активность на наших серверах, все ваши файлы будут удалены.";
+        }
+    }
+    echo json_encode($fileList);
 }
 ?>
