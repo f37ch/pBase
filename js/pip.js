@@ -137,15 +137,16 @@ if (document.getElementById("write_modal")!=null){
       document.getElementById("iittl").classList.add("d-none")
       document.getElementById("iiimg").classList.add("d-none")
       document.getElementById("publish").innerHTML="Опубликовать"
-      tinymce.activeEditor.execCommand('mceNewDocument');
+      tinymce.activeEditor.execCommand("mceNewDocument");
     }
   })
-  document.getElementById("write_modal").addEventListener("hide.bs.modal", e => {
+  document.getElementById("write_modal").addEventListener("hide.bs.modal",e=>{
     tinymce.activeEditor.modaledit=false
+    tinymce.activeEditor.isNotDirty=1;
   })
   function toggleWritedrop(item) {
     document.getElementById("write_selector").selected=item
-    document.getElementById("write_selector").innerHTML = item.innerHTML;
+    document.getElementById("write_selector").innerHTML=item.innerHTML;
   };
   document.getElementById("publish").addEventListener("click",()=>{
       let xmlhttp = new XMLHttpRequest();
@@ -167,13 +168,13 @@ if (document.getElementById("write_modal")!=null){
           document.getElementById("cancel").click();
           if (yes.success){
             get_notes()
-            document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible mt-4' role='alert'  data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+yes. success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+            document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible mt-4' role='alert'  data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+yes.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
           }
       }
       xmlhttp.send(form);
   });
-  document.addEventListener('focusin', function (e) { //fix focus tinymce with bootstrap modal
-      if (e.target.closest('.tox-tinymce-aux, .moxman-window, .tam-assetmanager-root') !== null) { 
+  document.addEventListener("focusin",function(e){ //fix focus tinymce with bootstrap modal
+      if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) { 
         e.stopImmediatePropagation();
       } 
   });
@@ -208,8 +209,8 @@ if (document.getElementById("write_modal")!=null){
         
         var myModal = new bootstrap.Modal(document.getElementById("write_modal"));
         myModal.toggle();
-        tinymce.activeEditor.execCommand('mceNewDocument');
-        tinymce.activeEditor.execCommand('mceInsertContent',false,decodeURIComponent(escape(atob(da.content))));
+        tinymce.activeEditor.execCommand("mceNewDocument");
+        tinymce.activeEditor.execCommand("mceInsertContent",false,decodeURIComponent(escape(atob(da.content))));
       }
     }
     xmlhttp.open("POST","core/api.php")
