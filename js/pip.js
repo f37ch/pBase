@@ -63,7 +63,7 @@ function file_delete(id,file,sid){
   xmlhttp.send(form)
 }
 function gen_preview(extension,sid,name){
-  if (extension=="jpg"||extension=="png"||extension=="gif"){
+  if (extension=="jpeg"||extension=="jpg"||extension=="png"||extension=="gif"){
     return "<img class='col-auto mb-3' style='border: 2px solid #46B7AA;' src='"+location.protocol+"//"+location.hostname+encodeURI("/storage/"+sid+"/"+name)+"'></img>";
   }else if(extension=="mp4"||extension=="webm"){
     return "<video controls class='col-auto mb-3' style='border: 2px solid #46B7AA; width:100%;' src='"+location.protocol+"//"+location.hostname+encodeURI("/storage/"+sid+"/"+name)+"'></video>";
