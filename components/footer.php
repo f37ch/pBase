@@ -8,6 +8,7 @@
     <script src="../js/aos.js"></script>
     <script type="text/javascript">
       AOS.init();
+      window.onscroll=function(){AOS.refresh()};
     </script>
   </body>
 </html>
