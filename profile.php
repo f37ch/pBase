@@ -57,7 +57,9 @@ function elapsed($when)
           <textarea id="tiny"></textarea>
           </div>
           <div class="modal-footer">
-            <button type="button" id="cancel" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+            <button type="button" id="nremove" class="btn btn-danger me-auto" data-bs-dismiss="modal">Удалить</button>
+      
+            <button type="button" id="cancel" class="btn btn-dark" data-bs-dismiss="modal">Отмена</button>
             <button type="button" id="publish" class="btn btn-success">Опубликовать</button>
           </div>
         </div>
@@ -241,19 +243,8 @@ function elapsed($when)
             <input type="text" class="form-control shadow-none" id="newsheadimg" placeholder="image url">
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#write_modal"><i class="bi bi-database-fill-up" ></i> Написать</button>
           </div>
-          <div id="writeralert"></div>
-          <table class="table table-sm mt-4">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Тип</th>
-              <th scope="col">Название</th>
-              <th scope="col">Действие</th>
-            </tr>
-          </thead>
-          <tbody id="notetable">
-          </tbody>
-          </table>
+          <div id="writeralert" class="mb-4"></div>
+          <div id="notes_list" class="d-flex flex-wrap justify-content-around column-gap-3"></div>
       </div>
       </div>
     </div>

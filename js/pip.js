@@ -206,6 +206,7 @@ if (document.getElementById("write_modal")!=null){
         document.getElementById("iinpttl").value=da.title
         document.getElementById("iinpimg").value=da.headimg
         document.getElementById("publish").innerHTML="Сохранить"
+        document.getElementById("nremove").onclick=function(){note_rm(id)}
         
         var myModal = new bootstrap.Modal(document.getElementById("write_modal"));
         myModal.toggle();
@@ -222,11 +223,10 @@ if (document.getElementById("write_modal")!=null){
     form.append("get_notes","");
     xmlhttp.onload = function() {
       if (this.status == 200) {
-        document.getElementById("notetable").innerHTML=""
+        document.getElementById("notes_list").innerHTML=""
         let da=JSON.parse(xmlhttp.responseText)
         for (var i = 0, row; row = da[i]; i++) {
-          let counter=eval(i+1)
-          document.getElementById("notetable").innerHTML=document.getElementById("notetable").innerHTML+"<tr><th scope='row'>"+counter+"</th><td>"+row.type+"</td><td>"+row.title+"</td><td><div class='btn-group column-gap-1'><button title='Редактировать запись' class='btn btn-outline-dark btn-sm' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil'></i></button><button class='btn btn-outline-dark btn-sm' title='Удалить запись' onclick=\"note_rm('"+row.id+"')\"><i class='bi bi-trash'></i></button></div></td></td></tr>";
+          document.getElementById("notes_list").innerHTML=document.getElementById("notes_list").innerHTML+"<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'><img class='col-auto mb-3' style='border: 2px solid #46B7AA;' src='"+row.headimg+"'></img><h6 class='title'>"+row.title+"</h6><h6 class='title' style='color:#46B7AA;'>Тип: "+row.type+"</h6></div></div></div><button title='Редактировать запись' class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0 border-start-0' onclick=\"note_edit('"+row.id+"')\">Редактировать</button>"
         }
       }
     }
