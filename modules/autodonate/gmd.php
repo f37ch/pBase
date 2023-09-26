@@ -5,7 +5,7 @@ if (isset($_GET["check"])){
 	$amount=number_format($_GET["amount"],2,".","");// "1.50"
 	$steamid=$_GET["steamid"];
     $svid=$_GET["svid"]==1?1424:1785;//your project ids from gmd panel
-	$projectSecret="";//your project key from gmd panel
+	$projectSecret=$_GET["svid"]==1?"key1":"key2";//your project keys from gmd panel
 	$params=[
         "sid"=>$steamid,
         "sum"=>$amount
