@@ -41,7 +41,8 @@ function calc_percent($val,$percent)
 	return $val*($percent/100); 
 }
 function filter_filename($filename){
-    $filename=preg_replace('~[<>:"/\\\|?*]|[\x00-\x1F]|[\x7F\xA0\xAD]|[#\[\]@!$&\'()+,;=]|[{}^\~`]~x',"-",$filename);
+    $filename=mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])","",$filename);
+    $filename=mb_ereg_replace("([\.]{2,})","",$filename);
     $filename=ltrim($filename,".-");
     $ext=pathinfo($filename,PATHINFO_EXTENSION);
     $filename=mb_strcut(pathinfo($filename,PATHINFO_FILENAME),0,50-($ext?strlen($ext)+1:0),mb_detect_encoding($filename)).($ext?".".$ext:"");//filename only 50 bite max.
