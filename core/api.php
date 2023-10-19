@@ -2,6 +2,33 @@
 require_once("db.php");
 require_once("steamauth/steamauth.php");
 
+//Get donations data
+if (isset($_GET["donations"]))
+{
+    if ($settings["api_key"]!=$_GET["api_key"]){
+        http_response_code(403);
+		die(json_encode(array("error"=>"Access denied.")));
+    }
+    $topsupp=$database->query("SELECT steamid,SUM(credits) FROM transactions GROUP BY steamid ORDER BY SUM(credits) DESC LIMIT 10");
+    $recentdon=$database->query("SELECT * FROM transactions ORDER BY id DESC LIMIT 10");
+    $mgoal=$database->query("SELECT value FROM global_settings WHERE name = 'donate_goal'")->fetch_row()[0]??"5000";
+    $collected=$database->query("SELECT SUM(credits) FROM transactions where FROM_UNIXTIME(timestamp,'%m %y') = FROM_UNIXTIME(UNIX_TIMESTAMP(NOW()),'%m %y')")->fetch_row()[0]??"0";
+    $table=array("top"=>array(),"recent"=>array(),"goal"=>$mgoal,"collected"=>$collected);
+    $cnt=0;
+    while ($row=$topsupp->fetch_assoc()) {
+        $user=getSteamData($row["steamid"]);
+        $table["top"][$cnt]=array($user["name"],$row["SUM(credits)"],$row["steamid"],$user["avatarfull"]);
+        $cnt++;
+    }
+    $cnt=0;
+    while ($row=$recentdon->fetch_assoc()){
+        $user=getSteamData($row["steamid"]);
+        $table["recent"][$cnt]=array($user["name"],$row["credits"],$row["steamid"],$user["avatarfull"]);
+        $cnt++;
+    }
+    echo json_encode($table);
+}
+
 //Synch bans and activity
 if (isset($_GET["synch_user"]))
 {
