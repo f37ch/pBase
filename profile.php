@@ -317,8 +317,8 @@ function elapsed($when)
           </div>
         </div>
       <?php } ?>
-    <?php } ?>
-    </div>
+      </div>
+    <?php } ?> </div>
     <div class="card mt-4" data-aos-offset="0" data-aos="flip-left" data-aos-delay="100">
       <div class="card-header text-black fw-bold">
         Дополнительная Информация
