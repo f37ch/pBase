@@ -5,7 +5,7 @@ $enot_secret="";//get at enot.io
 $enot_secret2="";//get at enot.io
 if (isset($_GET["check"])){
     include_once("../../core/db.php");
-    $amount=number_format($_GET["amount"],2,".","");//"2.50"
+    $amount=round($_GET["amount"]);
     $svid=$_GET["svid"];
 	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
     $steamid=$_GET["steamid"];
