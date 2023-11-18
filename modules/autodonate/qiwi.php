@@ -8,7 +8,7 @@ if (isset($_GET["check"])){
 	include_once("../../core/db.php");
 	require_once("../../core/qiwi_billpayments/BillPayments.php");
 	require_once("../../core/qiwi_billpayments/BillPaymentsException.php");
-	$amount = number_format($_GET["amount"],2,".","");// "2.50"
+	$amount = round($_GET["amount"]);
 	$svid = $_GET["svid"];
 	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
 	$steamid = $_GET["steamid"];
