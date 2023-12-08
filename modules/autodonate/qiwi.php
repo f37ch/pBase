@@ -32,7 +32,7 @@ if (isset($_GET["check"])){
 	$decoded = json_decode($json,true);
 	$sv_name = $decoded["bill"]["customFields"]["sv_name"];
 	$steamid = $decoded["bill"]["customFields"]["steamid"];
-	$amount = $decoded["bill"]["amount"]["value"];
+	$amount = round($decoded["bill"]["amount"]["value"]);
 	$status = $decoded["bill"]["status"]["value"];
 	$head = array_change_key_case(getallheaders(),CASE_LOWER);
 	$validSignatureFromNotificationServer = $head[mb_strtolower("x-api-signature-SHA256")];

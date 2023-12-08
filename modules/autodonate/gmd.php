@@ -25,7 +25,7 @@ if (isset($_GET["check"])){
 	include_once("../../core/rcon.php");
 	include_once("../../core/db.php");
     $key=$_GET["key"];
-	$amount=$_GET["amount"];
+	$amount=round($_GET["amount"]);
 	$steamid=$_GET["steamid"];
 	if ($settings["api_key"]==$key){
 		$database->query("INSERT INTO transactions (credits,steamid,timestamp) VALUES ('$amount','$steamid',UNIX_TIMESTAMP(NOW()))");

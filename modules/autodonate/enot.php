@@ -42,7 +42,7 @@ if (isset($_GET["check"])){
     ksort($decoded);
     $sv_name=$decoded["custom_fields"]["sv_name"];
     $steamid=$decoded["custom_fields"]["steamid"];
-    $amount=$decoded["amount"];
+    $amount=round($decoded["amount"]);
     $status=$decoded["status"];
 
     $signature_header=$_SERVER["HTTP_X_API_SHA256_SIGNATURE"]??"";
