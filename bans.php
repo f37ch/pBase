@@ -96,13 +96,13 @@ $types=$database->query("SELECT DISTINCT(type) FROM bans")??NULL;
 <ul class="pagination justify-content-left" data-aos-offset="0" data-aos="fade-up" data-aos-delay="200">
   <?php if($page>4) { ?>
     <li class="page-item" onclick="href.searchParams.set('pg',1); location = href.toString()">
-      <a class="page-link text-black shadow-none" aria-label="Next">
+      <a class="page-link text-black shadow-none">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
   <?php } ?>
   <li class="page-item <?= $page==1?"disabled":""; ?>" onclick="if (!this.classList.contains('disabled')){href.searchParams.set('pg','<?= $prev; ?>'); location = href.toString()}">
-    <a class="page-link text-black shadow-none" aria-label="Previous">
+    <a class="page-link text-black shadow-none">
       <span aria-hidden="true">Prev</span>
     </a>
   </li>
@@ -110,13 +110,13 @@ $types=$database->query("SELECT DISTINCT(type) FROM bans")??NULL;
 		<li class="page-item" onclick="href.searchParams.set('pg','<?= $i; ?>'); location = href.toString()"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" ><?= $i; ?></a></li>
 	<?php }; ?>
   <li class="page-item <?= $page==$pages?"disabled":""; ?>"onclick="if (!this.classList.contains('disabled')){href.searchParams.set('pg','<?= $nxt; ?>'); location = href.toString()}">
-    <a class="page-link text-black shadow-none" aria-label="Next">
+    <a class="page-link text-black shadow-none">
       <span aria-hidden="true">Next</span>
     </a>
   </li>
   <?php if($page<$pages-2) { ?>
     <li class="page-item" onclick="href.searchParams.set('pg','<?=$pages;?>'); location = href.toString()">
-      <a class="page-link text-black shadow-none" aria-label="Next">
+      <a class="page-link text-black shadow-none">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>

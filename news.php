@@ -41,13 +41,13 @@
 <ul class="pagination justify-content-right mt-4" data-aos-offset="0" data-aos="fade-up" data-aos-delay="200">
   <?php if($page>4) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="news.php?pg=1" aria-label="Next">
+      <a class="page-link text-black shadow-none" href="news.php?pg=1">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
   <?php } ?>
   <li class="page-item <?= $page==1?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="news.php?pg=<?= $prev; ?>" aria-label="Previous">
+    <a class="page-link text-black shadow-none" href="news.php?pg=<?= $prev; ?>">
       <span aria-hidden="true">Prev</span>
     </a>
   </li>
@@ -55,13 +55,13 @@
 		<li class="page-item"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" href="news.php?pg=<?= $i; ?>"><?= $i; ?></a></li>
 	<?php }; ?>
   <li class="page-item <?= $page==$pages?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="news.php?pg=<?= $nxt; ?>" aria-label="Next">
+    <a class="page-link text-black shadow-none" href="news.php?pg=<?= $nxt; ?>">
       <span aria-hidden="true">Next</span>
     </a>
   </li>
   <?php if($page<$pages-2) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="news.php?pg=<?=$pages;?>" aria-label="Next">
+      <a class="page-link text-black shadow-none" href="news.php?pg=<?=$pages;?>">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>
