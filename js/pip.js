@@ -116,26 +116,18 @@ function get_file_list(sid,name){
 
 
 //Notes
+let write_selected=null;
 if (document.getElementById("write_modal")!=null){
   document.getElementById("write_modal").addEventListener("show.bs.modal", e => {
     if (!tinymce.activeEditor.modaledit){
-      document.getElementById("newstitle").classList.remove("is-invalid")
-      document.getElementById("newsheadimg").classList.remove("is-invalid")
-      document.getElementById("write_selector").classList.remove("btn-outline-danger")
-      if (!document.getElementById("write_selector").selected){
+      if (!write_selected){
         e.preventDefault()
-        document.getElementById("write_selector").classList.add("btn-outline-danger")
-      }else if (document.getElementById("newstitle").value==""){
-        e.preventDefault()
-        document.getElementById("newstitle").classList.add("is-invalid")
-      }else if(document.getElementById("newsheadimg").value==""){
-        e.preventDefault()
-        document.getElementById("newsheadimg").classList.add("is-invalid")
       }else{
-        document.getElementById("modallbl").innerHTML="ultr4 "+document.getElementById("write_selector").selected.id+" wr1t3r 3000"
+        document.getElementById("modallbl").innerHTML="ultr4 "+write_selected.id+" wr1t3r 3000"
       }
-      document.getElementById("iittl").classList.add("d-none")
-      document.getElementById("iiimg").classList.add("d-none")
+      document.getElementById("iinpttl").value="type title"
+      document.getElementById("iinpimg").value="type link to img"
+      document.getElementById("nremove").classList.add("d-none")
       document.getElementById("publish").innerHTML="Опубликовать"
       tinymce.activeEditor.execCommand("mceNewDocument");
     }
@@ -145,8 +137,10 @@ if (document.getElementById("write_modal")!=null){
     tinymce.activeEditor.isNotDirty=1;
   })
   function toggleWritedrop(item) {
-    document.getElementById("write_selector").selected=item
-    document.getElementById("write_selector").innerHTML=item.innerHTML;
+    var mod=document.getElementById("write_modal");
+    var myModal=new bootstrap.Modal(mod);
+    write_selected=item
+    myModal.toggle();
   };
   document.getElementById("publish").addEventListener("click",()=>{
       let xmlhttp = new XMLHttpRequest();
@@ -154,13 +148,11 @@ if (document.getElementById("write_modal")!=null){
       let form = new FormData();
       if (tinymce.activeEditor.modaledit){
         form.append("write_update",tinymce.activeEditor.editingid);
-        form.append("headimg",document.getElementById("iinpimg").value);
-        form.append("title",document.getElementById("iinpttl").value);
       }else{
-        form.append("write_save",document.getElementById("write_selector").selected.id);
-        form.append("headimg",document.getElementById("newsheadimg").value);
-        form.append("title",document.getElementById("newstitle").value);
+        form.append("write_save",write_selected.id);
       }
+      form.append("headimg",document.getElementById("iinpimg").value);
+      form.append("title",document.getElementById("iinpttl").value);
       form.append("content",tinydata);
       xmlhttp.open("POST","core/api.php");
       xmlhttp.onload = function() {
@@ -186,7 +178,6 @@ if (document.getElementById("write_modal")!=null){
       if (this.status == 200) {
         var da=JSON.parse(this.responseText)
         document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible mt-4' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+da.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
-        get_notes()
       }
     }
     xmlhttp.open("POST","core/api.php")
@@ -203,6 +194,7 @@ if (document.getElementById("write_modal")!=null){
         tinymce.activeEditor.editingid=id
         document.getElementById("iittl").classList.remove("d-none")
         document.getElementById("iiimg").classList.remove("d-none")
+        document.getElementById("nremove").classList.remove("d-none")
         document.getElementById("iinpttl").value=da.title
         document.getElementById("iinpimg").value=da.headimg
         document.getElementById("publish").innerHTML="Сохранить"
@@ -217,16 +209,30 @@ if (document.getElementById("write_modal")!=null){
     xmlhttp.open("POST","core/api.php")
     xmlhttp.send(form)
   }
-  function get_notes(){
+  function get_notes(np){
     let xmlhttp = new XMLHttpRequest();
     let form = new FormData();
-    form.append("get_notes","");
+    form.append("get_notes",np??1);
     xmlhttp.onload = function() {
       if (this.status == 200) {
-        document.getElementById("notes_list").innerHTML=""
+        let noteList=document.getElementById("notes_list")
+        noteList.innerHTML=""
         let da=JSON.parse(xmlhttp.responseText)
-        for (var i = 0, row; row = da[i]; i++) {
-          document.getElementById("notes_list").innerHTML=document.getElementById("notes_list").innerHTML+"<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'><img class='col-auto mb-3' style='border: 2px solid #46B7AA;' src='"+row.headimg+"'></img><h6 class='title'>"+row.title+"</h6><h6 class='title' style='color:#46B7AA;'>Тип: "+row.type+"</h6></div></div></div><button title='Редактировать запись' class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0 border-start-0' onclick=\"note_edit('"+row.id+"')\">Редактировать</button>"
+        for (var i = 0, row; row = da.data[i]; i++) {
+          noteList.innerHTML=noteList.innerHTML+"<div class='card mb-2 text-black hoverscale' style='height:fit-content; cursor: pointer;overflow: hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'>"+row.title+"</h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div>"
+        }
+        if(da.pages>1){
+          let notespag=document.getElementById("notes_pag")
+          notespag.classList.remove("d-none")
+          notespag.innerHTML=""
+          notespag.innerHTML=notespag.innerHTML+(da.page>4?"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes()\"><span aria-hidden='true'>&laquo;</span></a></li>":"")+"<li class='page-item "+(da.page==1?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.prev+"')\"><span aria-hidden='true'>Prev</span></a></li>"
+          for (let i=1;i<=da.pages;i++){
+            notespag.innerHTML=notespag.innerHTML+"<li class='page-item'><a class='page-link shadow-none text-black "+(da.page==i?"active":"")+"' onclick=\"get_notes('"+i+"')\">"+i+"</a></li>"
+          }
+          notespag.innerHTML=notespag.innerHTML+"<li class='page-item "+(da.page==da.pages?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.next+"')\"><span aria-hidden='true'>Next</span></a></li>"
+          if(da.page<da.pages-2) {
+            notespag.innerHTML=notespag.innerHTML+"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.pages+"')\"><span aria-hidden='true'>&raquo;</span></a></li>"
+          }
         }
       }
     }
@@ -234,8 +240,6 @@ if (document.getElementById("write_modal")!=null){
     xmlhttp.send(form)
   }
 }
-
-
 
 // Globals
 let dropInput=document.getElementById("dropInput");

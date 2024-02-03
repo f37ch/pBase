@@ -226,25 +226,20 @@ function elapsed($when)
     <?php } ?>
 
     <?php if (isset($settings["access"][$_SESSION["steamid"]]["notes"])){ ?>
-    <script>document.addEventListener("DOMContentLoaded",function(){get_notes()})</script>
+    <script>window.addEventListener("DOMContentLoaded",function(){get_notes()})</script>
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingThree">
         <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree"><i class="bi bi-newspaper"></i>&nbsp;Редактирование Записей</button>
       </h2>
         <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionDada">
           <div class="accordion-body table-responsive shadow border-light">
-          <div class="mt-1 input-group" id="newsform">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="write_selector">Выберите тип</button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" id="news" onclick="toggleWritedrop(this)">Новость</a></li>
-              <li><a class="dropdown-item" id="help" onclick="toggleWritedrop(this)">Помощь</a></li>
-            </ul>
-            <input type="text" class="form-control shadow-none" id="newstitle" placeholder="title">
-            <input type="text" class="form-control shadow-none" id="newsheadimg" placeholder="image url">
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#write_modal"><i class="bi bi-database-fill-up" ></i> Написать</button>
+          <div class="btn-group d-flex" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-success" id="news" onclick="toggleWritedrop(this)">Написать Новость</button>
+            <button type="button" class="btn btn-success" id="help" onclick="toggleWritedrop(this)">Написать Помощь</button>
           </div>
           <div id="writeralert" class="mb-4"></div>
-          <div id="notes_list" class="d-flex flex-wrap justify-content-around column-gap-3"></div>
+          <div id="notes_list" class="d-grid flex-wrap column-gap-3"></div>
+          <ul class="pagination justify-content-right mt-4 d-none" id="notes_pag"></ul>
       </div>
       </div>
     </div>
@@ -299,8 +294,9 @@ function elapsed($when)
                     $size+=$file->getSize();
                     $cnt++;
                 }
+                $badchrs=['"',"'"];
                 $fm_userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$actualsid';")->fetch_assoc();?>
-                <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:200px; cursor: pointer;" onclick="get_file_list('<?php echo $actualsid; ?>','<?php echo $fm_userdata['name']; ?>')">
+                <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:200px; cursor: pointer;" onclick="get_file_list('<?php echo $actualsid; ?>','<?php echo str_replace($badchrs,'',$fm_userdata['name']); ?>')">
                   <div class="card-body">
                   <div class="row p-1 mb-1">
                     <div class="col">
@@ -318,7 +314,7 @@ function elapsed($when)
         </div>
       <?php } ?>
       </div>
-    <?php } ?> </div>
+    <?php } ?>
     <div class="card mt-4" data-aos-offset="0" data-aos="flip-left" data-aos-delay="100">
       <div class="card-header text-black fw-bold">
         Дополнительная Информация
