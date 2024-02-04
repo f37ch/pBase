@@ -233,7 +233,7 @@ function elapsed($when)
       </h2>
         <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionDada">
           <div class="accordion-body table-responsive shadow border-light pb-1">
-          <div class="btn-group d-flex mb-2" role="group" aria-label="Basic example">
+          <div class="btn-group d-flex mb-2" role="group">
             <button type="button" class="btn btn-success" id="news" onclick="toggleWritedrop(this)">Написать Новость</button>
             <button type="button" class="btn btn-success" id="help" onclick="toggleWritedrop(this)">Написать Помощь</button>
           </div>
