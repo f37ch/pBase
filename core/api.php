@@ -111,7 +111,7 @@ if (isset($_POST["write_update"]))
     $id=$_POST["write_update"];
     $headimg=$_POST['headimg']??NULL;
     $content=base64_encode($_POST["content"]);
-    $title=$_POST["title"];
+    $title=empty($_POST["title"])?"title":$_POST["title"];
     $sql=$database->query("UPDATE notes SET headimg='$headimg',title='$title',content='$content' WHERE id='$id'");
     if (!$sql){
         echo json_encode(array("error"=>"Ошибка: ".mysqli_error($database)));
