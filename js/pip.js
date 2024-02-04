@@ -220,7 +220,7 @@ if (document.getElementById("write_modal")!=null){
         noteList.innerHTML=""
         let da=JSON.parse(xmlhttp.responseText)
         for (var i = 0, row; row = da.data[i]; i++) {
-          noteList.innerHTML=noteList.innerHTML+"<div class='card mb-2 text-black hoverscale' style='height:fit-content; cursor: pointer;overflow: hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'>"+row.title+"</h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div>"
+          noteList.innerHTML=noteList.innerHTML+"<div class='card mb-2 text-black hoverscale' style='height:fit-content;cursor:pointer;overflow:hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'><a href='/"+row.type+".php?id="+row.id+"' style='color:black;width:fit-content;height:fit-content;'>"+row.title+"</a></h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div></div>"
         }
         if(da.pages>1){
           let notespag=document.getElementById("notes_pag")
