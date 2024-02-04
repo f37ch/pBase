@@ -160,7 +160,7 @@ if (document.getElementById("write_modal")!=null){
           document.getElementById("cancel").click();
           if (yes.success){
             get_notes()
-            document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+yes.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+            console.log(yes.success)
           }
       }
       xmlhttp.send(form);
@@ -177,7 +177,7 @@ if (document.getElementById("write_modal")!=null){
     xmlhttp.onload = function() {
       if (this.status == 200) {
         var da=JSON.parse(this.responseText)
-        document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+da.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+        console.log(da.success)
         get_notes()
       }
     }
