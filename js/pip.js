@@ -125,8 +125,8 @@ if (document.getElementById("write_modal")!=null){
       }else{
         document.getElementById("modallbl").innerHTML="ultr4 "+write_selected.id+" wr1t3r 3000"
       }
-      document.getElementById("iinpttl").value="type title"
-      document.getElementById("iinpimg").value="type link to img"
+      document.getElementById("iinpttl").value=""
+      document.getElementById("iinpimg").value=""
       document.getElementById("nremove").classList.add("d-none")
       document.getElementById("publish").innerHTML="Опубликовать"
       tinymce.activeEditor.execCommand("mceNewDocument");
@@ -160,7 +160,7 @@ if (document.getElementById("write_modal")!=null){
           document.getElementById("cancel").click();
           if (yes.success){
             get_notes()
-            document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible mt-4' role='alert'  data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+yes.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+            document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+yes.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
           }
       }
       xmlhttp.send(form);
@@ -177,7 +177,8 @@ if (document.getElementById("write_modal")!=null){
     xmlhttp.onload = function() {
       if (this.status == 200) {
         var da=JSON.parse(this.responseText)
-        document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible mt-4' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+da.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+        document.getElementById("writeralert").innerHTML="<div class='alert alert-success alert-dismissible' role='alert' data-aos='flip-right' data-aos-offset='50' data-aos-delay='100'><i class='bi bi-check2-circle'> </i><strong>Success!</strong> "+da.success+"<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>"
+        get_notes()
       }
     }
     xmlhttp.open("POST","core/api.php")

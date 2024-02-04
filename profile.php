@@ -232,14 +232,14 @@ function elapsed($when)
         <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree"><i class="bi bi-newspaper"></i>&nbsp;Редактирование Записей</button>
       </h2>
         <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionDada">
-          <div class="accordion-body table-responsive shadow border-light">
+          <div class="accordion-body table-responsive shadow border-light pb-1">
           <div class="btn-group d-flex" role="group" aria-label="Basic example">
             <button type="button" class="btn btn-success" id="news" onclick="toggleWritedrop(this)">Написать Новость</button>
             <button type="button" class="btn btn-success" id="help" onclick="toggleWritedrop(this)">Написать Помощь</button>
           </div>
-          <div id="writeralert" class="mb-4"></div>
+          <div id="writeralert" class="mb-2 mt-2"></div>
           <div id="notes_list" class="d-grid flex-wrap column-gap-3"></div>
-          <ul class="pagination justify-content-right mt-4 d-none" id="notes_pag"></ul>
+          <ul class="pagination justify-content-right mt-2 mb-2 d-none" id="notes_pag"></ul>
       </div>
       </div>
     </div>
