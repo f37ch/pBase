@@ -126,7 +126,7 @@ if (isset($_POST["file_list"]))
     $sid=$_POST["sid"]??$_SESSION["steamid"];
     $fileList=array();
     $filesroot=$storageroot.$sid.DIRECTORY_SEPARATOR;
-    foreach (scandir($filesroot) as $file) {
+    foreach (scandir($filesroot,SCANDIR_SORT_DESCENDING) as $file) {
         if ($file!=="."&&$file!=="..") {
             $extension = pathinfo($file,PATHINFO_EXTENSION);
             $fileList[]=array(
