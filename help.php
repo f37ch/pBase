@@ -2,7 +2,7 @@
   include("components/head.php");
   $_GET["page"]="help";
   include("components/header.php");
-  $page=isset($_GET['list']) ? $_GET['list'] : 1;;
+  $page=isset($_GET['list']) ? intval($_GET['list']) : 1;;
   $limit=4;
   $start = ($page-1) * $limit;
   $result=$database->query("SELECT * FROM notes WHERE type='help' ORDER BY id DESC LIMIT $start, $limit")??NULL;
@@ -13,7 +13,7 @@
   $prev = $page>1?$page-1:1;
 	$nxt = $page!=$pages?$page+1:$pages;
   if(isset($_GET["id"])){
-    $id=$_GET["id"];
+    $id=intval($_GET["id"]);
     $data=$database->query("SELECT * FROM notes WHERE type='help' and id='$id'")->fetch_array();
     $userdata=getSteamData($data["steamid"]);
     ?>

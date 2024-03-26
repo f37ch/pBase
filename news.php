@@ -2,7 +2,7 @@
   include("components/head.php");
   $_GET["page"]="news";
   include("components/header.php");
-  $page=isset($_GET["pg"]) ? $_GET["pg"] : 1;;
+  $page=isset($_GET["pg"]) ? intval($_GET["pg"]) : 1;
   $limit=4;
   $start = ($page-1) * $limit;
   $result=$database->query("SELECT * FROM notes WHERE type='news' ORDER BY id DESC LIMIT $start, $limit")??NULL;
@@ -13,7 +13,7 @@
   $prev = $page>1?$page-1:1;
 	$nxt = $page!=$pages?$page+1:$pages;
   if(isset($_GET["id"])){
-    $id=$_GET["id"];
+    $id=intval($_GET["id"]);
     $data=$database->query("SELECT * FROM notes WHERE type='news' and id='$id'")->fetch_array();
     $userdata=getSteamData($data["steamid"]);
     ?>

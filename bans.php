@@ -1,25 +1,21 @@
 <?php include("components/head.php");
 $_GET["page"]="bans";
 include("components/header.php");
-$page=isset($_GET['pg']) ? $_GET['pg'] : 1;;
+$page=isset($_GET['pg'])?intval($_GET['pg']):1;;
 $limit=13;
-$start = ($page-1) * $limit;
-$type=isset($_GET["type"])?"WHERE type='".$_GET["type"]."'":"";
+$start=($page-1)*$limit;
+$type=isset($_GET["type"])?"WHERE type='".$database->real_escape_string($_GET["type"])."'":"";
 $wherend=isset($_GET["type"])?"AND":"WHERE";
-$sid=isset($_GET["sid"])&&$_GET["sid"]!=""?$wherend." (offender_steamid='".$_GET["sid"]."' or admin_steamid='".$_GET["sid"]."')":"";
+$sid=isset($_GET["sid"])&&$_GET["sid"]!=""?$wherend." (offender_steamid='".$database->real_escape_string($_GET["sid"])."' or admin_steamid='".$database->real_escape_string($_GET["sid"])."')":"";
 $result=$database->query("SELECT * FROM bans $type $sid ORDER BY id DESC LIMIT $start, $limit")??NULL;
 $countres=$database->query("SELECT count(id) AS id FROM bans $type $sid")??NULL;
-$fetchedcount = $countres->fetch_all(MYSQLI_ASSOC);
-$total = $fetchedcount[0]['id'];
-$pages = ceil($total/$limit);
-$prev = $page>1?$page-1:1;
-$nxt = $page!=$pages?$page+1:$pages;
+$fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
+$total=$fetchedcount[0]['id'];
+$pages=ceil($total/$limit);
+$prev=$page>1?$page-1:1;
+$nxt=$page!=$pages?$page+1:$pages;
 function plural($n,$a,$b,$c) {
-  switch($n%10==1&&$n%100!=11?0:($n%10>=2&&$n%10<=4&&($n%100<10or$n%100>=20)?1:2)){
-    case 0:default:return $a;
-    case 1:return $b;
-    case 2:return $c;
-  }
+  switch($n%10==1&&$n%100!=11?0:($n%10>=2&&$n%10<=4&&($n%100<10or$n%100>=20)?1:2)){case 0:default:return $a;case 1:return $b;case 2:return $c;}
 }
 function elapsed($created,$expire)
 {
