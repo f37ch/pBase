@@ -110,7 +110,7 @@ if (isset($_POST["file_delete"]))
         die(json_encode(array("error"=>"Access denied.")));
     }
     $sid=$_POST["sid"]??$_SESSION["steamid"];
-    $path=$storageroot.$sid.DIRECTORY_SEPARATOR.$_POST["file_delete"];
+    $path=$storageroot.$sid.DIRECTORY_SEPARATOR.basename($_POST["file_delete"]);
     if (!unlink($path)){
         echo json_encode(array("fm_mod"=>isset($_POST["sid"]),"error"=>"Произошла ошибка удаления файла!"));
     }else{
