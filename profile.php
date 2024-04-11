@@ -87,7 +87,7 @@ function elapsed($when)
         <img class=" col-auto rounded-circle mb-3" style="border: 4px solid #000;"src="<?php echo $_SESSION["avatarfull"] ?>">
       </div> 
   <div class="col-auto">
-    <h1 class="title my-0"><?php echo $_SESSION["name"]?></h1> 
+    <h1 class="title my-0"><?=htmlspecialchars($_SESSION["name"],ENT_QUOTES,"UTF-8")?></h1> 
   <h6 class="title" style="color: rgb(94, 197, 130);"><i class=" mr-1"></i><?=$settings["ranks"][$_SESSION["steamid"]]??"User";?></h6>
   </div> <div class="col-auto">
   <div class="row justify-content-center mt-3">
@@ -300,7 +300,7 @@ function elapsed($when)
                   <div class="row p-1 mb-1">
                     <div class="col">
                       <img class="col-auto rounded-circle mb-3" style="width: 80px;border: 4px solid #000;" src="<?=$fm_userdata["avatarfull"] ?>">
-                      <h4 class="title my-0"><?=$fm_userdata["name"]?></h1> 
+                      <h4 class="title my-0"><?=htmlspecialchars($fm_userdata["name"],ENT_QUOTES,"UTF-8")?></h1> 
                       <h6 class="title" style="color:#5ec582;"><?=$settings["ranks"][$actualsid]??"User";?></h6>
                       <small class="title" style="color:#46B7AA; font-weight: bold;"><?=format_size($size);?> | Файлов: <?=$cnt;?></small>
                     </div>
