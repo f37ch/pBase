@@ -42,7 +42,7 @@
                   <tr>
                     <td class="align-middle text-start" style="width:68%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
                       <a href="https://steamcommunity.com/profiles/<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
-                        <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?php echo $user["name"]?></a>
+                        <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?=htmlspecialchars($user["name"],ENT_QUOTES,"UTF-8")?></a>
                     </td>
                     <td class="align-middle">
                       <h5 class="my-0"><?php echo $row["SUM(credits)"].$currency;?></h5>
@@ -63,7 +63,7 @@
                   <tr>
                     <td class="align-middle text-start" style="width:68%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
                       <a href="https://steamcommunity.com/profiles/<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
-                        <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?php echo $user["name"]?></a>
+                        <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?=htmlspecialchars($user["name"],ENT_QUOTES,"UTF-8")?></a>
                     </td>
                     <td class="align-middle">
                       <h5 class="my-0"><?php echo $row["credits"].$currency;?></h5>

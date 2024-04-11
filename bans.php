@@ -68,21 +68,21 @@ $types=$database->query("SELECT DISTINCT(type) FROM bans")??NULL;
                 <?php $offendersteam=getSteamData($row["offender_steamid"]);?>
                 <?php $adminsteam=getSteamData($row["admin_steamid"]);?>
                 <tr>
-                    <td class="align-middle"><?php echo date('Y-m-d H:i',$row["created"]);?></td>
+                <td class="align-middle"><?php echo date('Y-m-d H:i',$row["created"]);?></td>
                     <td class="align-middle"><?php echo $row["server"];?></td>
                     <td class="align-middle" title="<?php echo $row["type"];?>"><?php echo $settings["bans_typeicons"][$row["type"]];?></td>
                     <td class="align-middle text-start" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-                      <a title="<?php echo $offendersteam["name"];?>" href="https://steamcommunity.com/profiles/<?=$row["offender_steamid"]?>" class="text-black" style="text-decoration: none;"><?php echo $offendersteam["name"];?></a>
+                    <a title="<?=htmlspecialchars($offendersteam["name"],ENT_QUOTES,"UTF-8")?>" href="https://steamcommunity.com/profiles/<?=$row["offender_steamid"]?>" class="text-black" style="text-decoration: none;"><?=htmlspecialchars($offendersteam["name"],ENT_QUOTES,"UTF-8")?></a>
                     </td>
                     <td class="align-middle text-start" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
                         <?php if($adminsteam){?>
-                            <a title="<?php echo $adminsteam["name"];?>" href="https://steamcommunity.com/profiles/<?=$row["admin_steamid"]?>" class="text-black" style="text-decoration: none"><?php echo $adminsteam["name"];?></a>
+                            <a title="<?=htmlspecialchars($adminsteam["name"],ENT_QUOTES,"UTF-8")?>" href="https://steamcommunity.com/profiles/<?=$row["admin_steamid"]?>" class="text-black" style="text-decoration: none"><?=htmlspecialchars($adminsteam["name"],ENT_QUOTES,"UTF-8")?></a>
                         <?php }else{ ?>
                             <i class='bi bi-terminal'></i> Console
                         <?php } ?>
                     </td>
                     <td class="align-middle"><?php echo elapsed($row["created"],$row["expires"]);?></td>
-                    <td class="align-middle text-start" title="<?php echo $row["reason"]??"no reason given";?>" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><?php echo $row["reason"]??"no reason given";?></td>
+                    <td class="align-middle text-start" title="<?php echo $row["reason"]??"no reason given";?>" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><?=htmlspecialchars($row["reason"]??"no reason given",ENT_QUOTES,"UTF-8")?></td>
                 </tr>
             <?php endwhile;?>
     	</tbody>
