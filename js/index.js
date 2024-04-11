@@ -1,4 +1,4 @@
-function makeRequest(method="POST",url="core/rcon.php",data,callback){
+function makeRequest(data,callback,method="POST",url="core/rcon.php"){
     let xmlhttp=new XMLHttpRequest();
     xmlhttp.open(method,url);
     xmlhttp.onload=function() {
@@ -11,7 +11,7 @@ function makeRequest(method="POST",url="core/rcon.php",data,callback){
     xmlhttp.send(form);
 }
 function get_players(sv) {
-    makeRequest(method="POST",url="core/rcon.php",{get_players:sv},function(resp){
+    makeRequest({get_players:sv},function(resp){
         document.getElementById("edamodal").innerHTML="<table class='table table table-bordered table-striped table-custom'><thead><tr><th scope='col'>#</th><th scope='col'>Имя</th><th scope='col'>Время на сервере</th><th scope='col'>Счёт</th></tr></thead><tbody id='sudalol'></tbody></table>"
         document.getElementById("staticBackdropLabel").innerHTML="Список игроков "+sv;
         var myModal=new bootstrap.Modal(document.getElementById("atakda"));
@@ -25,7 +25,7 @@ function get_players(sv) {
 function get_servers() {
     let rootel=document.getElementById("serverList");
     if (!rootel){return};
-    makeRequest(method="POST",url="core/rcon.php",{get_servers},function(resp){
+    makeRequest({get_servers},function(resp){
         for (var i=0,row;row=resp[i]; i++) {
             row.query=row.query??{"map":"timeout","players":"err","playersmax":"err"}
             rootel.innerHTML+="<div class='card mb-3 hoverscale border-0 bggrad text-white' style='border-radius:20px; overflow: hidden;'><h3 class='fw-bold mt-1'>"+row.sv_name+"</h3><h5 style='margin-top: auto;'>карта: "+row.query.map+"</h5><div class='btn-group btn-sm mt-1 input-block-level' role='group'><button type='button' class='btn btn-light border-dark fw-bold bg-white btn-sm' onclick=\"get_players('"+row.sv_name+"')\">Игроки: "+row.query.players+"/"+row.query.playersmax+"</button><a type='button' href='steam://connect/"+row.sv_ip+":"+row.sv_port+"' class='btn btn btn-light border-dark fw-bold bg-white btn-sm'><i class='bi bi-plugin'></i> Подключиться</a><a type='button' class='btn btn btn-light border-dark fw-bold bg-white btn-sm' href='components/donate.php?sv="+row.sv_name+"'><i class='bi bi-bag-heart'></i> Пожертвование</button></div>";
