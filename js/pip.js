@@ -1,34 +1,40 @@
-//Storage
+function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
+  let xmlhttp=new XMLHttpRequest();
+  xmlhttp.open(method,url);
+  xmlhttp.onload=function() {
+      if (this.readyState==4&&this.status==200) {
+        if(callback){callback(this.responseText?JSON.parse(this.responseText):undefined)}
+      }
+  };
+  xmlhttp.upload.onprogress=progress
+  let form=new FormData();
+  for (let key in data){form.append(key,data[key]);}
+  xmlhttp.send(form);
+}
+//----------------------------------------------STORAGE
 document.getElementById("fileform").addEventListener('submit', e => {
   e.preventDefault()
-  let formData = new FormData()
-  formData.append("file_submit","")
-  formData.append("file",document.getElementById("file").files[0])
-  let xmlhttp = new XMLHttpRequest();
-  xmlhttp.onload = () => {
-    try{
-      let yes = JSON.parse(xmlhttp.responseText)
-      if (yes.error){
+  let df=document.getElementById("file").files[0]
+  makeRequest({file_submit:"",file:df},function(resp){
+    if (resp){
+      if (resp.error){
         document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Ошибка!</strong> "+yes.error   +"<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
       }else{
         document.getElementById("alertplace").innerHTML=""
         get_file_list()
       }
-    }catch (e){
+    }else{
       document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Ошибка!</strong> Файл слишком большой.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
     }
     document.getElementById("progress").style.width="0%"
-  }
-  xmlhttp.upload.onprogress = function(event) {
+  },"core/file_manager.php",function(event){
     if (event.lengthComputable)
     {
-        var percentComplete = parseInt((event.loaded / event.total) * 100);
-        console.log("Загрузка: " + percentComplete + "%...")
+        var percentComplete=parseInt((event.loaded/event.total)*100);
+        console.log("Загрузка: "+percentComplete+"%...")
         document.getElementById("progress").style.width=percentComplete+"%"
     }
-  }
-  xmlhttp.open("POST","core/file_manager.php")
-  xmlhttp.send(formData)
+  })
 })
 function formatsize(size){
   if (size<=1000000){
@@ -43,24 +49,17 @@ function formatsize(size){
   return size
 }
 function file_delete(id,file,sid){
-  let xmlhttp = new XMLHttpRequest();
-  let form = new FormData();
-  form.append("file_delete",file);
+  let form={file_delete:file}
   if (sid){
-    form.append("sid",sid);
+    form["sid"]=sid
   }
-  xmlhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      let da=JSON.parse(xmlhttp.responseText)
-      if (da.fm_mod){
+  makeRequest(form,function(resp){
+      if (resp.fm_mod){
         get_file_list(sid)
       }else{
         get_file_list()
       }
-    }
-  }
-  xmlhttp.open("POST","core/file_manager.php")
-  xmlhttp.send(form)
+  },"core/file_manager.php")
 }
 function gen_preview(extension,sid,name){
   if (extension=="jpeg"||extension=="jpg"||extension=="png"||extension=="gif"){
@@ -76,46 +75,35 @@ function gen_preview(extension,sid,name){
   }
 }
 function get_file_list(sid,name){
-  let xmlhttp = new XMLHttpRequest();
-  let form = new FormData();
-  form.append("file_list","");
+  let form={file_list:""}
   if (sid){
-    form.append("sid",sid);
+    form["sid"]=sid
   }
-  xmlhttp.onload = function() {
-    if (this.status == 200) {
-      document.getElementById(sid?"filemb":"filemanager").innerHTML=""
-      let da=JSON.parse(xmlhttp.responseText)
-      if (da.spaceleft){
-        document.getElementById("fldrop").innerHTML=""
-        document.getElementById("stinf").innerHTML=""
-        document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(da.spaceleft)+")"
-        document.getElementById("fldrop").innerHTML="Список файлов ("+da.storagecnt+"/"+da.storagemaxcnt+")"
-        document.getElementById("stinf").innerHTML="Размер хранилища: "+formatsize(da.storagelimit)
-      }
-      for (var i = 0, row; row = da[i]; i++) {
-        let counter=eval(i+1)
-        let fid="file_"+counter
-        document.getElementById(sid?"filemb":"filemanager").innerHTML=document.getElementById(sid?"filemb":"filemanager").innerHTML+"<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,da.sid,row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+da.sid+"/"+row.name+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+da.sid+"/"+row.name+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+(sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
-      }
-      if (da.warn){
-        document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Внимание!</strong> "+da.warn+".<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
-      }
-      if (sid&&name){
-        var myModal = new bootstrap.Modal(document.getElementById("filemanager_modal"));
-        myModal.toggle();
-        document.getElementById("fm_lbl").innerHTML="Moderate "+name+"'s Files"
-      }
+  makeRequest(form,function(resp){
+    document.getElementById(sid?"filemb":"filemanager").innerHTML=""
+    if (resp.spaceleft){
+      document.getElementById("fldrop").innerHTML=""
+      document.getElementById("stinf").innerHTML=""
+      document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(resp.spaceleft)+")"
+      document.getElementById("fldrop").innerHTML="Список файлов ("+resp.storagecnt+"/"+resp.storagemaxcnt+")"
+      document.getElementById("stinf").innerHTML="Размер хранилища: "+formatsize(resp.storagelimit)
     }
-  }
-  xmlhttp.open("POST","core/file_manager.php")
-  xmlhttp.send(form)
+    for (var i=0,row;row=resp[i];i++) {
+      let counter=eval(i+1)
+      let fid="file_"+counter
+      document.getElementById(sid?"filemb":"filemanager").innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,resp.sid,row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+resp.sid+"/"+row.name+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+resp.sid+"/"+row.name+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+(sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
+    }
+    if (resp.warn){
+      document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Внимание!</strong> "+resp.warn+".<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
+    }
+    if (sid&&name){
+      var myModal = new bootstrap.Modal(document.getElementById("filemanager_modal"));
+      myModal.toggle();
+      document.getElementById("fm_lbl").innerHTML="Moderate "+name+"'s Files"
+    }
+  },"core/file_manager.php")
 }
-
-
-
-
-//Notes
+//----------------------------------------------NOTES
 let write_selected=null;
 if (document.getElementById("write_modal")!=null){
   document.getElementById("write_modal").addEventListener("show.bs.modal", e => {
@@ -143,155 +131,93 @@ if (document.getElementById("write_modal")!=null){
     myModal.toggle();
   };
   document.getElementById("publish").addEventListener("click",()=>{
-      let xmlhttp = new XMLHttpRequest();
-      let tinydata=tinymce.get("tiny").getContent();
-      let form = new FormData();
+      let form={};
       if (tinymce.activeEditor.modaledit){
-        form.append("write_update",tinymce.activeEditor.editingid);
+        form["write_update"]=tinymce.activeEditor.editingid
       }else{
-        form.append("write_save",write_selected.id);
+        form["write_save"]=write_selected.id
       }
-      form.append("headimg",document.getElementById("iinpimg").value);
-      form.append("title",document.getElementById("iinpttl").value);
-      form.append("content",tinydata);
-      xmlhttp.open("POST","core/api.php");
-      xmlhttp.onload = function() {
-          let yes = JSON.parse(this.responseText)
+      form["headimg"]=document.getElementById("iinpimg").value
+      form["title"]=document.getElementById("iinpttl").value
+      form["content"]=tinymce.get("tiny").getContent()
+      makeRequest(form,function(resp){
           document.getElementById("cancel").click();
-          if (yes.success){
+          if (resp.success){
             get_notes()
-            console.log(yes.success)
+            console.log(resp.success)
           }
-      }
-      xmlhttp.send(form);
+      })
   });
   document.addEventListener("focusin",function(e){ //fix focus tinymce with bootstrap modal
       if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) { 
         e.stopImmediatePropagation();
       } 
   });
-  function note_rm(id){
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("nrm",id);
-    xmlhttp.onload = function() {
-      if (this.status == 200) {
-        var da=JSON.parse(this.responseText)
-        console.log(da.success)
-        get_notes()
-      }
-    }
-    xmlhttp.open("POST","core/api.php")
-    xmlhttp.send(form)
-  }
   function note_edit(id){
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("get_tinydata",id);
-    xmlhttp.onload = function() {
-      if (this.status == 200) {
-        var da=JSON.parse(this.responseText)
-        tinymce.activeEditor.modaledit=true
-        tinymce.activeEditor.editingid=id
-        document.getElementById("iittl").classList.remove("d-none")
-        document.getElementById("iiimg").classList.remove("d-none")
-        document.getElementById("nremove").classList.remove("d-none")
-        document.getElementById("iinpttl").value=da.title
-        document.getElementById("iinpimg").value=da.headimg
-        document.getElementById("publish").innerHTML="Сохранить"
-        document.getElementById("nremove").onclick=function(){note_rm(id)}
-        
-        var myModal = new bootstrap.Modal(document.getElementById("write_modal"));
-        myModal.toggle();
-        tinymce.activeEditor.execCommand("mceNewDocument");
-        tinymce.activeEditor.execCommand("mceInsertContent",false,decodeURIComponent(escape(atob(da.content))));
-      }
-    }
-    xmlhttp.open("POST","core/api.php")
-    xmlhttp.send(form)
+    makeRequest({get_tinydata:id},function(resp){
+      tinymce.activeEditor.modaledit=true
+      tinymce.activeEditor.editingid=id
+      document.getElementById("iittl").classList.remove("d-none")
+      document.getElementById("iiimg").classList.remove("d-none")
+      document.getElementById("nremove").classList.remove("d-none")
+      document.getElementById("iinpttl").value=resp.title
+      document.getElementById("iinpimg").value=resp.headimg
+      document.getElementById("publish").innerHTML="Сохранить"
+      document.getElementById("nremove").onclick=function(){makeRequest({nrm:id},function(){get_notes()})}
+      var myModal = new bootstrap.Modal(document.getElementById("write_modal"));
+      myModal.toggle();
+      tinymce.activeEditor.execCommand("mceNewDocument");
+      tinymce.activeEditor.execCommand("mceInsertContent",false,decodeURIComponent(escape(atob(resp.content))));
+    })
   }
   function get_notes(np){
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("get_notes",np??1);
-    xmlhttp.onload = function() {
-      if (this.status == 200) {
-        let noteList=document.getElementById("notes_list")
-        noteList.innerHTML=""
-        let da=JSON.parse(xmlhttp.responseText)
-        for (var i = 0, row; row = da.data[i]; i++) {
-          noteList.innerHTML=noteList.innerHTML+"<div class='card mb-2 text-black hoverscale' style='height:fit-content;cursor:pointer;overflow:hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'><a href='/"+row.type+".php?id="+row.id+"' style='color:black;width:fit-content;height:fit-content;'>"+row.title+"</a></h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div></div>"
+    makeRequest({get_notes:np??1},function(resp){
+      let noteList=document.getElementById("notes_list")
+      noteList.innerHTML=""
+      for (var i = 0, row; row = resp.data[i]; i++) {
+        noteList.innerHTML+="<div class='card mb-2 text-black hoverscale' style='height:fit-content;cursor:pointer;overflow:hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'><a href='/"+row.type+".php?id="+row.id+"' style='color:black;width:fit-content;height:fit-content;'>"+row.title+"</a></h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div></div>"
+      }
+      if(resp.pages>1){
+        let notespag=document.getElementById("notes_pag")
+        notespag.classList.remove("d-none")
+        notespag.innerHTML=""
+        notespag.innerHTML+=(resp.page>4?"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes()\"><span aria-hidden='true'>&laquo;</span></a></li>":"")+"<li class='page-item "+(resp.page==1?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.prev+"')\"><span aria-hidden='true'>Prev</span></a></li>"
+        for (let i=1;i<=resp.pages;i++){
+          notespag.innerHTML+="<li class='page-item'><a class='page-link shadow-none text-black "+(resp.page==i?"active":"")+"' onclick=\"get_notes('"+i+"')\">"+i+"</a></li>"
         }
-        if(da.pages>1){
-          let notespag=document.getElementById("notes_pag")
-          notespag.classList.remove("d-none")
-          notespag.innerHTML=""
-          notespag.innerHTML=notespag.innerHTML+(da.page>4?"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes()\"><span aria-hidden='true'>&laquo;</span></a></li>":"")+"<li class='page-item "+(da.page==1?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.prev+"')\"><span aria-hidden='true'>Prev</span></a></li>"
-          for (let i=1;i<=da.pages;i++){
-            notespag.innerHTML=notespag.innerHTML+"<li class='page-item'><a class='page-link shadow-none text-black "+(da.page==i?"active":"")+"' onclick=\"get_notes('"+i+"')\">"+i+"</a></li>"
-          }
-          notespag.innerHTML=notespag.innerHTML+"<li class='page-item "+(da.page==da.pages?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.next+"')\"><span aria-hidden='true'>Next</span></a></li>"
-          if(da.page<da.pages-2) {
-            notespag.innerHTML=notespag.innerHTML+"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+da.pages+"')\"><span aria-hidden='true'>&raquo;</span></a></li>"
-          }
+        notespag.innerHTML+="<li class='page-item "+(resp.page==resp.pages?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.next+"')\"><span aria-hidden='true'>Next</span></a></li>"
+        if(resp.page<resp.pages-2) {
+          notespag.innerHTML+="<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.pages+"')\"><span aria-hidden='true'>&raquo;</span></a></li>"
         }
       }
-    }
-    xmlhttp.open("POST","core/api.php")
-    xmlhttp.send(form)
+    })
   }
 }
-
-// Globals
+//----------------------------------------------GLOBAL SETTINGS
 let dropInput=document.getElementById("dropInput");
 if (dropInput!=null){
   function toggledrop(item) {
-    document.getElementById("optionDrop").innerHTML = item.innerHTML;
+    document.getElementById("optionDrop").innerHTML=item.innerHTML;
     selectedDrop=item;
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("settings_infoget",item.id);
-    xmlhttp.open("POST","core/api.php");
-    xmlhttp.onreadystatechange = function() {
-      if (this.status == 200) {
+    makeRequest({settings_infoget:item.id},function(){
         dropInput.classList.remove("is-invalid");
         dropInput.value=this.responseText.trim();
-      }
-    }
-    xmlhttp.send(form);
+    })
   };
   document.getElementById("saveDrop").addEventListener("click",()=>{
-    if (typeof selectedDrop == 'undefined'){
+    if (typeof selectedDrop=="undefined"){
       dropInput.value="Select option first!";
       dropInput.classList.add("is-invalid");
     }else{
-      let xmlhttp = new XMLHttpRequest();
-      let form = new FormData();
-      form.append("settings_insert",selectedDrop.id);
-      form.append("value",dropInput.value);
-      xmlhttp.open("POST","core/api.php");
-      xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          if (selectedDrop.id=="project_name"){
-            document.getElementById("project_name").innerHTML=dropInput.value
-          }
+      makeRequest({settings_insert:selectedDrop.id,value:dropInput.value},function(){
+        if (selectedDrop.id=="project_name"){
+          document.getElementById("project_name").innerHTML=dropInput.value
         }
-      }
-      xmlhttp.send(form);
+      })
     }
   })
   function toggleswitch(item) {
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("settings_insert",item.id);
-    form.append("value",item.checked);
-    xmlhttp.open("POST","core/api.php");
-    xmlhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-
-      }
-    }
-    xmlhttp.send(form);
+    makeRequest({settings_insert:item.id,value:item.checked})
   };
   let picker=document.getElementById("BGColorInput")
   let picker2=document.getElementById("BGColorInput2")
@@ -312,87 +238,58 @@ if (dropInput!=null){
     }
   })
   document.getElementById("savebg").addEventListener("click",()=>{
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("settings_insert","bg_color");
-    form.append("value",picker.value+", "+picker2.value+", "+picker3.value+", "+picker4.value);
-    xmlhttp.open("POST","core/api.php");
-    xmlhttp.send(form);
+    makeRequest({settings_insert:"bg_color",value:picker.value+", "+picker2.value+", "+picker3.value+", "+picker4.value})
     document.body.style.backgroundImage="linear-gradient(-45deg, "+picker.value+", "+picker2.value+", "+picker3.value+", "+picker4.value+")"
   })
 }
-
-
-
-//Servers
+//----------------------------------------------SERVERS
 if (document.getElementById("srv_form")!=null){
-  document.getElementById("srv_form").addEventListener("submit", (event) => {
+  document.getElementById("srv_form").addEventListener("submit",(event)=>{
     event.preventDefault();
-    let XHR = new XMLHttpRequest();
-    let form = new FormData(document.getElementById("srv_form"));
-    form.append("svsave","");
-    XHR.addEventListener("load", (event) => {
+    let tbl={svsave:""}
+    let form=document.getElementById("srv_form");
+    let elements=form.elements;
+    for (let i=0;i<elements.length;i++) {
+        let element=elements[i];
+        if (element.name) {
+            tbl[element.name]=element.value;
+        }
+    }
+    makeRequest(tbl,function(){
       get_servers()
-    });
-    XHR.open("POST","core/api.php");
-    XHR.send(form);
+    })
   });
   function server_rm(name){
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("svrm",name);
-    xmlhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
+    makeRequest({svrm:name},function(){
         get_servers()
-      }
-    }
-    xmlhttp.open("POST","core/api.php")
-    xmlhttp.send(form)
+    })
   }
   function get_servers(){
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("get_servers","");
-    xmlhttp.onload = function() {
-      if (this.status == 200) {
+    makeRequest({get_servers},function(resp){
         document.getElementById("servertable").innerHTML=""
         if (document.getElementById("rcon_servs")!=null){
           document.getElementById("rcon_servs").innerHTML=""
         }
-        let da=JSON.parse(xmlhttp.responseText)
-        for (var i = 0, row; row = da[i]; i++) {
+        for (var i=0,row;row=resp[i];i++) {
           let counter=eval(i+1)
-          document.getElementById("servertable").innerHTML=document.getElementById("servertable").innerHTML+"<tr><th scope='row'>"+counter+"</  th><td>"+row.sv_name+"</td><td>"+row.sv_ip+"</td><td>"+row.sv_port+"</td><td><button class='btn btn-outline-dark btn-sm' title='Удалить сервер' onclick=\"server_rm('"+row.sv_name+"')\"><i class='bi bi-trash'></i></button></td></td></tr>";
+          document.getElementById("servertable").innerHTML+="<tr><th scope='row'>"+counter+"</  th><td>"+row.sv_name+"</td><td>"+row.sv_ip+"</td><td>"+row.sv_port+"</td><td><button class='btn btn-outline-dark btn-sm' title='Удалить сервер' onclick=\"server_rm('"+row.sv_name+"')\"><i class='bi bi-trash'></i></button></td></td></tr>";
           if (document.getElementById("rcon_servs")!=null){
-            document.getElementById("rcon_servs").innerHTML=document.getElementById("rcon_servs").innerHTML+"<option value="+row.id+">"+row.sv_name +"</option>"
+            document.getElementById("rcon_servs").innerHTML+="<option value="+row.id+">"+row.sv_name +"</option>"
           }
         }
-      }
-    }
-    xmlhttp.open("POST","core/api.php")
-    xmlhttp.send(form)
+      })
   }
 }
-
-
-
-
-
-//Rcon
+//----------------------------------------------RCON
 if (document.getElementById("rcon_submit")!=null){
-  document.getElementById("rcon_submit").addEventListener("click", (event) => {
-    let xmlhttp = new XMLHttpRequest();
-    let form = new FormData();
-    form.append("rcon_submit",document.getElementById("rcon_servs").value);
-    form.append("command",document.getElementById("rcon_string").value);
+  document.getElementById("rcon_submit").addEventListener("click",(event)=>{
     document.getElementById("typer").classList.add("d-none")
-    xmlhttp.onload = function() {
-      let si=JSON.parse(xmlhttp.responseText)
+    let rstring=document.getElementById("rcon_string").value
+    let rserv=document.getElementById("rcon_servs").value
+    makeRequest({rcon_submit:rserv,command:rstring},function(resp){
       document.getElementById("typer").classList.remove("d-none")
-      document.getElementById("rcon_response_place").innerHTML=">"+si.success
-    };
-    xmlhttp.open("POST","core/rcon.php");
-    xmlhttp.send(form);
+      document.getElementById("rcon_response_place").innerHTML=">"+resp.success
+    },"core/rcon.php");
   })
 }
 function nicedate(str){
