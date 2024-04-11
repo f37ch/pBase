@@ -1,6 +1,6 @@
 <header class="mb-auto pb-4">
     <div>
-      <h3 class="mb-0 pn" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
+      <h3 class="mb-0 font_big" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
       <nav class="nav nav-masthead justify-content-center">
         <a class="<?=getPage("home");?>" href="/">Главная</a>
         <?php if (getSetting("enable_news",true)){?>

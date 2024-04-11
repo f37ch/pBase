@@ -15,7 +15,7 @@ if (!isset($_GET["sid"])){ ?>
 </div>
 <?php }else{ ?>
 <div class="container mt-auto mb-auto" data-aos="zoom-out" data-aos-delay="100">
-<h1 class="pn mb-4" data-aos="flip-left" data-aos-delay="200">ПЛАТЁЖНЫЕ СИСТЕМЫ</h1>
+<h1 class="font_big mb-4" data-aos="flip-left" data-aos-delay="200">ПЛАТЁЖНЫЕ СИСТЕМЫ</h1>
     <div class="row col-8 mx-auto d-block">
         <?php if (isset($methods)) {?>
         <?php foreach ($methods as $key=>$method){?>

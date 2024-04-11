@@ -17,7 +17,7 @@
     $data=$database->query("SELECT * FROM notes WHERE type='help' and id='$id'")->fetch_array();
     $userdata=getSteamData($data["steamid"]);
     ?>
-      <h1 class="pn" data-aos="flip-right" data-aos-delay="200"><?=$data["title"]?></h1>
+      <h1 class="font_smol" data-aos="flip-right" data-aos-delay="200"><?=$data["title"]?></h1>
       <div data-aos="zoom-in" data-aos-delay="100">
       <hr>
       <img class="mb-4" src="<?=$data["headimg"]?>">
@@ -33,7 +33,7 @@
 <div class="image-box">
   <a href="?id=<?=$row['id'];?>"><img src="<?=$row["headimg"];?>" class="card-img" style="object-fit: cover; height: 17vh;">
   </div>
-  <h1 class="text-white pn position-absolute top-50 start-50 translate-middle" style="width:100%;background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
+  <h1 class="text-white font_smol position-absolute top-50 start-50 translate-middle" style="width:100%;background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
   </a>
 </div>
 <?php endwhile ?>

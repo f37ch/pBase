@@ -81,15 +81,19 @@ body {
   border-bottom-color: #fff;
 }
 @font-face{
-  font-family:Ampero-Italic;
-  src:url(/fonts/Ampero-BoldItalic.ttf);
+  font-family:OpenSans-BoldItalic;
+  src:url(/fonts/OpenSans-ExtraBoldItalic.ttf);
 }
-.pn {
-  font-family: Ampero-Italic,sans-serif;
+@font-face{
+  font-family:OpenSans-Bold;
+  src:url(/fonts/OpenSans-ExtraBold.ttf);
+}
+.font_big {
+  font-family: OpenSans-BoldItalic,sans-serif;
   font-size:2.5em;
 }
-.ib {
-  font-family: Ampero-Italic,sans-serif;
+.font_smol {
+  font-family: OpenSans-BoldItalic,sans-serif;
   font-size:2em;
 }
 .hoverscale{transition:.25s}

@@ -27,7 +27,7 @@
       <div class="carousel-item <?php echo $counter==1?"active":"eba";?>">
       <div class="image-box">
         <a href="/news.php?id=<?=$row['id'];?>"><img src="<?=$row["headimg"];?>" class="d-block w-100" alt="..." style="object-fit: cover; height: 42vh;">
-          <h1 class="text-white pn position-absolute top-50 start-50 translate-middle" style="width:100%; background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
+          <h1 class="text-white font_smol position-absolute top-50 start-50 translate-middle" style="width:100%; background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
         </a>
       </div>
       </div>
@@ -37,7 +37,7 @@
     </div>
   <?php if (getSetting("enable_serverlist",true)){?>
     <div id="serverList" data-aos="fade-up" data-aos-offset="0" data-aos-delay="300">
-      <h2 class="pn mt-3 mb-3" data-aos="zoom-in" data-aos-delay="100">НАШИ СЕРВЕРЫ</h2>
+      <h2 class="font_smol mt-3 mb-3" data-aos="zoom-in" data-aos-delay="100">НАШИ СЕРВЕРЫ</h2>
     </div>
   <?php }?>
   <script src="js/index.min.js"></script>

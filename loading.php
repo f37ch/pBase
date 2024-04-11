@@ -1,5 +1,5 @@
 <?php include("components/head.php") ?>
-<h3 class="mb-3 pn" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
+<h3 class="mb-3 font_big" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
 <div data-aos="zoom-in" data-aos-delay="100" class="card mt-auto mb-auto border-0 bggrad text-white" style="border-radius:20px; overflow: hidden; height: auto;">
   <div class="d-flex mt-1 p-2" style="overflow: hidden;height:15vw;">
     <img id="gm_img" class="rounded-4 mb-1" style="height:100%;aspect-ratio:1/1;" src="https://i.imgur.com/HKIws2U.png">
@@ -26,7 +26,7 @@
   <div class="carousel-item <?php echo $counter==1?"active":"eba";?>">
   <div class="image-box">
     <a href="/news.php?id=<?=$row['id'];?>"><img src="<?=$row["headimg"];?>" class="d-block w-100" alt="..." style="object-fit: cover; height: 22vh;">
-      <h1 class="text-white pn position-absolute top-50 start-50 translate-middle" style="width:100%; background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
+      <h1 class="text-white font_smol position-absolute top-50 start-50 translate-middle" style="width:100%; background-color:rgba(0,0,0,.5);cursor:pointer;"><?=$row["title"];?></h1>
     </a>
   </div>
   </div>
