@@ -8,10 +8,10 @@ if (isset($_GET["check"])){
 	include_once("../../core/db.php");
 	require_once("../../core/qiwi_billpayments/BillPayments.php");
 	require_once("../../core/qiwi_billpayments/BillPaymentsException.php");
-	$amount = round($_GET["amount"]);
-	$svid = $_GET["svid"];
+	$amount = intval($_GET["amount"]);
+	$svid = intval($_GET["svid"]);
 	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
-	$steamid = $_GET["steamid"];
+	$steamid = $database->real_escape_string($_GET["steamid"]);
 	$description= "Пожертвование от ".$_GET['steamid']." на сумму ".$amount." RUB. Для сервера ".$server["sv_name"].".";
 	$billPayments = new Qiwi\Api\BillPayments(QIWI_SECRET);
 	$params = [

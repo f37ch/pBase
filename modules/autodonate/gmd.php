@@ -2,10 +2,12 @@
 $methods["gmd"]=array("img"=>"https://i.imgur.com/KRvcJt1.png");
 if (isset($_GET["check"])){
 	include_once("../../core/db.php");
-	$amount=round($_GET["amount"]);
-	$steamid=$_GET["steamid"];
-    $svid=$_GET["svid"]==1?1424:1785;//your project ids
-	$projectSecret=$_GET["svid"]==1?"key1":"key2";//your project secret keys
+	$amount=intval($_GET["amount"]);// "1.50"
+	$svid=intval($_GET["svid"]);
+	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
+	$steamid=$database->real_escape_string($_GET["steamid"]);
+    $svid=$server["sv_name"]=="Cinema"?1424:1785;//your project ids from gmd panel
+	$projectSecret=$svid==1424?"cinemakey":"rpkey";//your project secret keys
 	$params=[
         "sid"=>$steamid,
         "sum"=>$amount
