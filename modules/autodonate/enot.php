@@ -9,7 +9,7 @@ if (isset($_GET["check"])){
     $svid=intval($_GET["svid"]);
 	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
     $steamid=$database->real_escape_string($_GET["steamid"]);
-    $description="Покупка внутриигровой валюты от ".$_GET['steamid']." на сумму ".$amount." RUB. Для сервера ".$server["sv_name"].".";
+    $description="Покупка внутриигровой валюты от ".$steamid." на сумму ".$amount." RUB. Для сервера ".$server["sv_name"].".";
     $params=[
         "shop_id"=>$enot_shopid,
         "amount"=>$amount,
