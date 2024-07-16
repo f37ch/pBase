@@ -40,11 +40,23 @@ function calc_percent($val,$percent)
 {
 	return $val*($percent/100); 
 }
-function filter_filename($filename){
-    $filename=preg_replace("/[^a-zA-Z0-9.]/","",$filename);
+function filter_filename($filename) {
+    // Allow letters, numbers, dots, and Cyrillic characters
+    $filename=preg_replace("/[^a-zA-Z0-9.а-яА-ЯёЁ]/u","",$filename);
+
+    // Remove leading dots and hyphens
     $filename=ltrim($filename,".-");
+
+    // Extract the extension
     $ext=pathinfo($filename,PATHINFO_EXTENSION);
-    $filename=mb_strcut(pathinfo($filename,PATHINFO_FILENAME),0,50-($ext?strlen($ext)+1:0),mb_detect_encoding($filename)).($ext?".".$ext:"");//filename only 50 bite max.
+
+    // Truncate filename to 50 bytes (accounting for multibyte characters)
+    $encoding=mb_detect_encoding($filename);
+    $filename=mb_strcut(pathinfo($filename,PATHINFO_FILENAME),0,50-($ext ? strlen($ext)+1 : 0),$encoding);
+
+    // Re-add the extension if it exists
+    $filename=$filename.($ext ? ".".$ext : "");
+
     return $filename;
 }
 if (!Cache::get("storage_check")){
