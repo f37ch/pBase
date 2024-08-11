@@ -2,7 +2,7 @@
 $methods["gmd"]=array("img"=>"https://i.imgur.com/KRvcJt1.png");
 if (isset($_GET["check"])){
 	include_once("../../core/db.php");
-	$amount=intval($_GET["amount"]);// "1.50"
+	$amount=max(50,min(10000,intval($_GET["amount"])));// "1.50", max 10k, else error
 	$svid=intval($_GET["svid"]);
 	$server=$database->query("SELECT * FROM servers WHERE id='$svid';")->fetch_assoc();
 	$steamid=$database->real_escape_string($_GET["steamid"]);
