@@ -79,37 +79,47 @@ function fetchdata($sid){
     }
     return json_decode($json, true);
 }
-function getSteamData($sid){
+function getSteamData($sid,$forsenew=false){
     if (!$sid) return false;
-
-    $trybd=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
-    if ($trybd) {
-        return $trybd;
-    } else {
-        $data=fetchdata($sid);
-
-        // Fallback значения
-        $fallback_name="User";
-        $fallback_avatar="https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg";
-
-        if (!$data||empty($data["response"]["players"][0])) {
-            $upd_personanm=$GLOBALS["database"]->real_escape_string($fallback_name);
-            $upd_avatar=$GLOBALS["database"]->real_escape_string($fallback_avatar);
-        } else {
-            $player=$data["response"]["players"][0];
-            $upd_personanm=$GLOBALS["database"]->real_escape_string($player["personaname"]);
-            $upd_avatar=$GLOBALS["database"]->real_escape_string($player["avatarfull"]);
+    
+    if (!$forsenew){
+        $trybd=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
+        if ($trybd){
+            return $trybd;
         }
-        $GLOBALS["database"]->query("INSERT INTO users (steamid, name, avatarfull) VALUES ('$sid','$upd_personanm','$upd_avatar')");
-        return array("name"=>$upd_personanm,"avatarfull"=>$upd_avatar);
+    }
+
+    $data=fetchdata($sid);
+    // Fallback значения
+    $fallback_name="User";
+    $fallback_avatar="https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg";
+
+    if (!$data||empty($data["response"]["players"][0])) {
+        $upd_personanm=$GLOBALS["database"]->real_escape_string($fallback_name);
+        $upd_avatar=$GLOBALS["database"]->real_escape_string($fallback_avatar);
+    } else {
+        $player=$data["response"]["players"][0];
+        $upd_personanm=$GLOBALS["database"]->real_escape_string($player["personaname"]);
+        $upd_avatar=$GLOBALS["database"]->real_escape_string($player["avatarfull"]);
+    }
+    $GLOBALS["database"]->query("INSERT INTO users (steamid, name, avatarfull) VALUES ('$sid','$upd_personanm','$upd_avatar') ON DUPLICATE KEY UPDATE name='$upd_personanm', avatarfull='$upd_avatar'");
+    return array("name"=>$upd_personanm,"avatarfull"=>$upd_avatar);
+}
+function toCommunityID($id) {
+    if (preg_match("/^STEAM_/",$id)) {
+        $parts = explode(":",$id);
+        return bcadd(bcadd(bcmul($parts[2],"2"),"76561197960265728"),$parts[1]);
+    } elseif (is_numeric($id) && strlen($id) < 16) {
+        return bcadd($id,"76561197960265728");
+    } else {
+        return $id;
     }
 }
 if (!isset($_SESSION["db_updated"])&&isset($_SESSION["steamid"])){//cache steam data and update online status each 20 sec
-	$data = fetchdata($_SESSION["steamid"]);
-	$upd_personanm = $GLOBALS["database"]->real_escape_string($data["response"]["players"][0]["personaname"]);
-    $upd_avatar = $GLOBALS["database"]->real_escape_string($data["response"]["players"][0]["avatarfull"]);
+	$data=getSteamData($_SESSION["steamid"],true);
+	$upd_personanm=$GLOBALS["database"]->real_escape_string($data["name"]);
+    $upd_avatar=$GLOBALS["database"]->real_escape_string($data["avatarfull"]);
 	$upd_sid=$_SESSION["steamid"];
-	$database->query("INSERT INTO users (steamid,name,avatarfull,registered,last_online) VALUES ('$upd_sid','$upd_personanm','$upd_avatar',UNIX_TIMESTAMP(NOW()),UNIX_TIMESTAMP(NOW())) ON DUPLICATE KEY UPDATE avatarfull='$upd_avatar',name='$upd_personanm',last_online=UNIX_TIMESTAMP(NOW())");
     $_SESSION["db_updated"]=time();
     $_SESSION["avatarfull"]=$upd_avatar;
     $_SESSION["name"]=$upd_personanm;
