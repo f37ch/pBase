@@ -76,27 +76,46 @@ if (isset($_POST["get_players"]))
     	};
 	}
 }
-if (isset($_POST["get_servers"]))
-{	
-	$cached=Cache::get("svStatus");
-	if ($cached){
-		echo json_encode($cached);
-	}else{
-    	$response=$database->query("SELECT * FROM servers");
-    	if (!mysqli_num_rows($response)){
-    	    echo "";
-    	}else{
-			$cnt = 0;
-			$data=array();
-			while ($row=$response->fetch_assoc()) {
-				$data[$cnt]=$row;
-				$data[$cnt]["query"]=queryServer($row["sv_ip"],$row["sv_port"]);
-				$cnt++;
-			}
-			Cache::put("svStatus",$data);
-    	    echo json_encode($data)??"";
-    	};
-	}
+if (isset($_POST["get_single_server"])) {
+    $sv_name=$_POST["get_single_server"];
+
+    $cached=Cache::get("svStatus");
+    if ($cached && is_array($cached)) {
+        foreach ($cached as $row) {
+            if ($row["sv_name"]===$sv_name){
+                echo json_encode($row);
+                exit;
+            }
+        }
+    }
+    // Если нет в кэше — получаем из базы и делаем RCON
+    $stmt=$database->prepare("SELECT * FROM servers WHERE sv_name = ?");
+    $stmt->bind_param("s",$sv_name);
+    $stmt->execute();
+    $result=$stmt->get_result();
+    if ($row=$result->fetch_assoc()) {
+        $row["query"]=queryServer($row["sv_ip"],$row["sv_port"]);
+        if (is_array($cached)){
+            $found=false;
+            foreach ($cached as &$cached_row) {
+                if ($cached_row["sv_name"]===$sv_name){
+                    $cached_row=$row;
+                    $found=true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $cached[]=$row;
+            }
+            Cache::put("svStatus",$cached);
+        } else {
+            Cache::put("svStatus",[$row]);
+        }
+        echo json_encode($row);
+    } else {
+        echo json_encode(null);
+    }
+    exit;
 }
 if (isset($_POST["rcon_submit"]))
 {
