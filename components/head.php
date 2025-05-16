@@ -31,6 +31,15 @@
         }
     };
   }
+  function asset_version($path) 
+  {
+    $fullPath=$_SERVER["DOCUMENT_ROOT"].$path;
+    if (file_exists($fullPath)){
+        return $path."?v=".filemtime($fullPath);
+    } else {
+        return $path;
+    }
+  }
 ?>
 <!DOCTYPE HTML>
 <html lang="ru" class="h-100">
@@ -40,10 +49,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="Octaver">
-  <link href="../css/bootstrap_icons/bootstrap-icons.css" rel="stylesheet" >
-  <link href="../css/bootstrap.css" rel="stylesheet">
-  <link href="../css/aos.css" rel="stylesheet">
-  <link href="../css/pbase.min.css" rel="stylesheet">
+  <link href="<?=asset_version("/css/bootstrap_icons/bootstrap-icons.css")?>" rel="stylesheet" >
+  <link href="<?=asset_version("/css/bootstrap.css")?>" rel="stylesheet">
+  <link href="<?=asset_version("/css/aos.css")?>" rel="stylesheet">
+  <link href="<?=asset_version("/css/pbase.min.css")?>"  rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="<?=getSetting("favicon",false)??"../favicon.ico"?>">
 </head>
 

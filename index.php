@@ -40,5 +40,5 @@
       <h2 class="font_smol mt-3 mb-3" data-aos="zoom-in" data-aos-delay="100">НАШИ СЕРВЕРЫ</h2>
     </div>
   <?php }?>
-  <script src="js/index.min.js"></script>
+  <script src="<?=asset_version("/js/index.min.js")?>"></script>
 <?php include("components/footer.php") ?>

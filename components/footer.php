@@ -4,8 +4,8 @@
         
       </footer>
     </div>
-    <script src="../js/bootstrap.bundle.min.js"></script>
-    <script src="../js/aos.js"></script>
+    <script src="<?=asset_version("/js/bootstrap.bundle.min.js")?>"></script>
+    <script src="<?=asset_version("/js/aos.js")?>"></script>
     <script type="text/javascript">
       AOS.init();
       //window.onscroll=function(){AOS.refresh()};

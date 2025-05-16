@@ -74,8 +74,8 @@
       fadeIn();
     },1000);
   }
-  setInterval(updateText, 8000);
+  setInterval(updateText,8000);
   updateText();
 </script>
-<script src="js/aos.js"></script>
+<script src="<?=asset_version("/js/aos.js")?>"></script>
 <?php include("components/footer.php") ?>

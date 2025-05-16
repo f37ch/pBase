@@ -32,7 +32,7 @@ if (!isset($_GET["sid"])){ ?>
     </a>!-->
 </div>
 <?php } ?>
-<script src="../js/aos.js"></script>
+<script src="<?=asset_version("/js/aos.js")?>"></script>
 <script type="text/javascript">
   AOS.init();
 </script>
