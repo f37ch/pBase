@@ -1,3 +1,4 @@
+let availableSpace=null;
 function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
   let xmlhttp=new XMLHttpRequest();
   xmlhttp.open(method,url);
@@ -15,6 +16,11 @@ function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
 document.getElementById("fileform").addEventListener("submit",e=>{
   e.preventDefault()
   let df=document.getElementById("file").files[0]
+  if (!df) return;
+  if (availableSpace!==null&&df.size>availableSpace) {
+    document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Ошибка!</strong> Файл слишком большой.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
+    return;
+  }
   makeRequest({file_submit:"",file:df},function(resp){
     if (resp){
       if (resp.error){
@@ -82,6 +88,7 @@ function get_file_list(sid,name){
   makeRequest(form,function(resp){
     document.getElementById(sid?"filemb":"filemanager").innerHTML=""
     if (resp.spaceleft){
+      availableSpace=parseInt(resp.spaceleft);
       document.getElementById("fldrop").innerHTML=""
       document.getElementById("stinf").innerHTML=""
       document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(resp.spaceleft)+")"
