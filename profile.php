@@ -323,7 +323,7 @@ function elapsed($when)
         <p class="fw-bold text-uppercase">АКТИВ НА СЕРВЕРЕ: <span id="servertime"><?=$userdata["last_played"]?elapsed($userdata["last_played"]):"НИКОГДА";?></span></p>
       </div>
     </div>
-  <script src="<?=asset_version("js/pip.min.js")?>"></script>
+  <script src="<?=asset_version("/js/pip.min.js")?>"></script>
 <?php }else{ ?>
     <h1 class="text-danger" data-aos="zoom-in" data-aos-delay="100">ОШИБКА</h1>
     <p class="lead" data-aos="fade-down" data-aos-delay="400"><?=$_GET["error"];?></p>

@@ -12,13 +12,13 @@ function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
   xmlhttp.send(form);
 }
 //----------------------------------------------STORAGE
-document.getElementById("fileform").addEventListener('submit', e => {
+document.getElementById("fileform").addEventListener("submit",e=>{
   e.preventDefault()
   let df=document.getElementById("file").files[0]
   makeRequest({file_submit:"",file:df},function(resp){
     if (resp){
       if (resp.error){
-        document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Ошибка!</strong> "+e.error   +"<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
+        document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Ошибка!</strong> "+e.error+"<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
       }else{
         document.getElementById("alertplace").innerHTML=""
         get_file_list()
