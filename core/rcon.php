@@ -93,7 +93,7 @@ if (isset($_POST["get_single_server"])) {
     $stmt->bind_param("s",$sv_name);
     $stmt->execute();
     $result=$stmt->get_result();
-    if ($row=$result->fetch_assoc()) {
+    if ($row=$result->fetch_assoc()){
         $row["query"]=queryServer($row["sv_ip"],$row["sv_port"]);
         if (is_array($cached)){
             $found=false;
@@ -131,7 +131,8 @@ if (isset($_POST["rcon_submit"]))
         echo json_encode(array("error"=>"Error: Server not found."));
     }else{
 		$sv=$response->fetch_array(MYSQLI_ASSOC);
-		$rcon=Rcon($sv["sv_ip"],$sv["sv_port"],$command);
+		$ip=$sv["sv_ip"]==$settings["public_ip"]?"127.0.0.1":$sv["sv_ip"];
+		$rcon=Rcon($ip,$sv["sv_port"],$command);
         echo json_encode(array("success"=>$rcon));
     };
 }
