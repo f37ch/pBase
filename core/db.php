@@ -73,34 +73,35 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
 $database=InitDB($settings["db"]["host"].":".$settings["db"]["port"],$settings["db"]["username"],$settings["db"]["password"],$settings["db"]["database"]);
 //all auth stuff is down here
 function fetchdata($sid){
-    $json = @file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=".$GLOBALS['settings']['steam_api_key']."&steamids=".$sid); 
-    if (!$json) {
+    $json=@file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=".$GLOBALS["settings"]["steam_api_key"]."&steamids=".$sid); 
+    if (!$json){
         return null;
     }
-    return json_decode($json, true);
+    return json_decode($json,true);
 }
 function getSteamData($sid,$forsenew=false){
     if (!$sid) return false;
-    
+
+    $existing=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
+
     if (!$forsenew){
-        $trybd=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
-        if ($trybd){
-            return $trybd;
+        if ($existing){
+            return $existing;
         }
     }
-
+    
     $data=fetchdata($sid);
-    // Fallback значения
-    $fallback_name="User";
-    $fallback_avatar="https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg";
-
-    if (!$data||empty($data["response"]["players"][0])) {
-        $upd_personanm=$GLOBALS["database"]->real_escape_string($fallback_name);
-        $upd_avatar=$GLOBALS["database"]->real_escape_string($fallback_avatar);
-    } else {
+    if ($data&&!empty($data["response"]["players"][0])) {
         $player=$data["response"]["players"][0];
         $upd_personanm=$GLOBALS["database"]->real_escape_string($player["personaname"]);
         $upd_avatar=$GLOBALS["database"]->real_escape_string($player["avatarfull"]);
+    } elseif(!$existing){
+        $fallback_name="User";
+        $fallback_avatar="https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg";
+        $upd_personanm=$GLOBALS["database"]->real_escape_string($fallback_name);
+        $upd_avatar=$GLOBALS["database"]->real_escape_string($fallback_avatar);
+    } else {
+        return $existing;
     }
     $GLOBALS["database"]->query("INSERT INTO users (steamid, name, avatarfull) VALUES ('$sid','$upd_personanm','$upd_avatar') ON DUPLICATE KEY UPDATE name='$upd_personanm', avatarfull='$upd_avatar'");
     return array("name"=>$upd_personanm,"avatarfull"=>$upd_avatar);
