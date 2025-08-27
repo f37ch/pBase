@@ -1,4 +1,76 @@
 <?php include("components/head.php") ?>
+<?php
+function getRandomScreenshot() {
+    $appid=4000;
+    $profiles=$GLOBALS["settings"]["loading_ssp"];
+
+    $cacheFile=__DIR__."/cache/screens.json";
+    $cacheTime=14400;//cache in sec
+
+    if (file_exists($cacheFile)&&(time()-filemtime($cacheFile)<$cacheTime)){
+        $screens=json_decode(file_get_contents($cacheFile),true);
+    } else {
+        $screens=[];
+        foreach ($profiles as $profile){
+            $url="https://steamcommunity.com/id/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=imagewall";
+            $html=@file_get_contents($url);
+            if (!$html) continue;
+
+            preg_match_all('/https:\/\/images\.steamusercontent\.com\/ugc\/[^\s"\']+/i',$html,$matches);
+            $links=array_unique($matches[0]);
+
+            $cleaned=array_map(function($link) {
+                $qpos=strpos($link,"?");
+                if ($qpos !== false) {
+                    $link=substr($link,0,$qpos);
+                }
+                return $link;
+            },$links);
+
+            $screens=array_merge($screens,$cleaned);
+        }
+
+        if (!$screens)$screens=[];
+
+        if (!is_dir(__DIR__."/cache")){
+            mkdir(__DIR__."/cache",0777,true);
+        }
+        file_put_contents($cacheFile,json_encode($screens));
+    }
+
+    if (empty($screens)){
+        return null;
+    }
+
+    return $screens[array_rand($screens)];
+}
+
+$bg=getRandomScreenshot()??"https://images.steamusercontent.com/ugc/13711625815229732525/CD32312DF74BBED44554D74F1D1C29DAAE5D37B6/"; // fallback
+?>
+<style>
+  body {
+  margin: 0;
+  position: relative;
+  z-index: 0;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("<?=$bg?>");
+  background-size: cover;
+  background-position: center;
+  filter: blur(4px);
+  z-index: -2;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: -1;
+}
+</style>
 <h3 class="mb-3 font_big" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
 <div data-aos="zoom-in" data-aos-delay="100" class="card mt-auto mb-auto border-0 bggrad text-white" style="border-radius:20px; overflow: hidden; height: auto;">
   <div class="d-flex mt-1 p-2" style="overflow: hidden;height:15vw;">
@@ -8,7 +80,7 @@
       <h5 id="mapinf">err</h5>
       <h5 id="playercnt">err</h5>
     </div>
-  </div> 
+  </div>
 </div>
 <h6 id="words" class="fw-bold mb-auto" style="opacity: 0;transition: opacity 1s ease;"></h6>
 <?php $result=$database->query("SELECT * FROM notes WHERE type='news' ORDER BY id DESC LIMIT 3")??NULL;?>
