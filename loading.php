@@ -45,7 +45,18 @@ function getRandomScreenshot() {
     return $screens[array_rand($screens)];
 }
 
-$bg=getRandomScreenshot()??"https://images.steamusercontent.com/ugc/13711625815229732525/CD32312DF74BBED44554D74F1D1C29DAAE5D37B6/"; // fallback
+function getRandomLocalBackground(){
+  $dir=__DIR__."/img/loading";
+  if (!is_dir($dir)) return null;
+  $files=array_values(array_filter(scandir($dir),function($f) use ($dir){
+      return is_file($dir."/".$f);
+  }));
+  if (!$files||count($files)===0) return null;
+  $file=$files[array_rand($files)];
+  return str_replace(__DIR__,"",$dir."/".$file);
+}
+
+$bg=getRandomScreenshot()??getRandomLocalBackground(); // fallback
 ?>
 <style>
   body {
