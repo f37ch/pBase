@@ -80,14 +80,14 @@ function gen_preview(extension,sid,name){
     return "<i style='color: #46B7AA;' class='h1 bi bi-file-earmark-text-fill'></i>"
   }
 }
-function get_file_list(sid,name){
+function get_file_list(sid,name,skip_render){
   let form={file_list:""}
   if (sid){
     form["sid"]=sid
   }
   makeRequest(form,function(resp){
     document.getElementById(sid?"filemb":"filemanager").innerHTML=""
-    if (resp.spaceleft){
+    if (resp.spaceleft) {
       availableSpace=parseInt(resp.spaceleft);
       document.getElementById("fldrop").innerHTML=""
       document.getElementById("stinf").innerHTML=""
@@ -95,10 +95,14 @@ function get_file_list(sid,name){
       document.getElementById("fldrop").innerHTML="Список файлов ("+resp.storagecnt+"/"+resp.storagemaxcnt+")"
       document.getElementById("stinf").innerHTML="Размер хранилища: "+formatsize(resp.storagelimit)
     }
-    for (var i=0,row;row=resp[i];i++) {
-      let counter=eval(i+1)
-      let fid="file_"+counter
-      document.getElementById(sid?"filemb":"filemanager").innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,resp.sid,row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+resp.sid+"/"+row.name+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+resp.sid+"/"+row.name+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+(sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
+    window._fileListCache={sid:sid,files:[],resp:resp};
+    for (var i=0,row;row=resp[i];i++){
+      window._fileListCache.files.push(row);
+      if (!skip_render) {
+        let counter=eval(i+1)
+        let fid="file_"+counter
+        document.getElementById(sid?"filemb":"filemanager").innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,resp.sid,row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+resp.sid+"/"+row.name+"'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+resp.sid+"/"+row.name+ "' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+ (sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
+      }
     }
     if (resp.warn){
       document.getElementById("alertplace").innerHTML="<div class='alert alert-danger alert-dismissible' role='alert'   data-aos='flip-right' data-aos-delay='100'><i class='bi bi-exclamation-triangle'> </i><strong>Внимание!</strong> "+resp.warn+".<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>"
@@ -108,7 +112,20 @@ function get_file_list(sid,name){
       myModal.toggle();
       document.getElementById("fm_lbl").innerHTML="Moderate "+name+"'s Files"
     }
-  },"core/file_manager.php")
+  }, "core/file_manager.php")
+}
+function render_file_list_from_cache() {
+  if (!window._fileListCache||!window._fileListCache.files) return;
+  let sid=window._fileListCache.sid;
+  let resp=window._fileListCache.resp;
+  let files=window._fileListCache.files;
+  let container=document.getElementById(sid?"filemb":"filemanager");
+  container.innerHTML="";
+  for (var i=0,row;row=files[i];i++) {
+    let counter=eval(i+1)
+    let fid="file_"+counter
+    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:20px; width:200px; height:auto; cursor: pointer;overflow: hidden;'><div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+gen_preview(row.extension,resp.sid, row.name)+"<h6 class='title'>"+row.name+"</h6><h6 class='title' style='color:#46B7AA;'>Размер: "+row.size+"</h6></div></div></div><div class='btn-group'><button class='btn btn-outline-dark btn-sm border-start-0 border-bottom-0' title='Скопировать ссылку' onclick=\"navigator.clipboard.writeText(location.protocol+'//'+location.hostname+encodeURI('/storage/"+resp.sid + "/" + row.name + "'))\"><i class='bi bi-share'></i></button><a title='Загрузить файл' class='btn btn-outline-dark btn-sm border-bottom-0' href='/storage/"+resp.sid+"/"+row.name+"' download><i class='bi bi-cloud-arrow-down'></i></a><button class='btn btn-outline-dark btn-sm border-end-0 border-bottom-0' title='Удалить файл' onclick=\"file_delete('"+fid+"','"+row.name+(sid?"','"+sid:"")+"')\"><i class='bi bi-trash'></i></button></div>"
+  }
 }
 //----------------------------------------------NOTES
 let write_selected=null;

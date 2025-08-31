@@ -137,7 +137,14 @@ function elapsed($when)
     </div>
   </div>
   </div>
-  <script>document.addEventListener("DOMContentLoaded",function(){get_file_list()})</script>
+  <script>
+    document.addEventListener("DOMContentLoaded",function() {
+      get_file_list(undefined,undefined,true);
+    });
+    document.getElementById("flush-collapseOne").addEventListener("show.bs.collapse",function(){
+      render_file_list_from_cache();
+    });
+  </script>
   </div>
 </div>
 <?php if (isset($settings["access"][$_SESSION["steamid"]])){ ?>
