@@ -320,3 +320,31 @@ function nicedate(str){
   str=new Date(str)
   return str.toString().replace(/^[^\s]+\s([^\s]+)\s([^\s]+)\s([^\s]+)\s([^\s]+)\s.*$/ig,'$3-'+(str.getMonth()+1)+'-$2 $4').slice(0,-3);
 }
+//----------------------------------------------STORAGE MODERATION CARDS
+function format_size_js(size) {
+  const mod=1024;
+  const units=["B","KB","MB","GB","TB","PB"];
+  let i=0;
+  while (size>mod&&i<units.length-1){
+    size/=mod;
+    i++;
+  }
+  return Math.round(size*100)/100+" "+units[i];
+}
+window._storageCardsCache=null;
+function fetchStorageCardsCache(){
+  makeRequest({get_storage_cards:""},function(resp){
+    if (!Array.isArray(resp)) return;
+    window._storageCardsCache=resp;
+  });
+}
+function renderStorageCards() {
+  const resp=window._storageCardsCache;
+  if (!Array.isArray(resp)) return;
+  const container=document.getElementById("storage_moderation_cards");
+  if (!container) return;
+  container.innerHTML="";
+  resp.forEach(function(row) {
+    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:25px; width:200px; cursor: pointer;' onclick=\"get_file_list('"+row.steamid+"','"+row.name+"')\">"+"<div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+"<img class='col-auto rounded-circle mb-3' style='width: 80px;border: 4px solid #000;' src='"+row.avatarfull+"'>"+"<h4 class='title my-0'>"+row.name+"</h4>"+"<h6 class='title' style='color:#5ec582;'>"+row.rank+"</h6>"+"<small class='title' style='color:#46B7AA; font-weight: bold;'>"+format_size_js(row.size)+" | Файлов: "+row.cnt+"</small>"+"</div></div></div></div>";
+  });
+}

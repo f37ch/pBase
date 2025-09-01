@@ -203,4 +203,35 @@ if (isset($_POST["svsave"]))
     $port=$_POST["port"];
     $response=$database->query("INSERT INTO servers (sv_name,sv_ip,sv_port) VALUES ('$name','$ip','$port') ON DUPLICATE KEY UPDATE sv_name = '$name', sv_ip = '$ip', sv_port = '$port';");
 }
+// Storage moderation cards
+if (isset($_POST["get_storage_cards"])){
+    if (!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])) {
+        http_response_code(403);
+        die(json_encode(array("error"=>"Access denied.")));
+    }
+    $result=[];
+    $dirs=glob("..".DIRECTORY_SEPARATOR."storage".DIRECTORY_SEPARATOR."*",GLOB_ONLYDIR+GLOB_NOSORT);
+    foreach($dirs as $dir){
+        $actualsid=basename($dir);
+        if ($actualsid==$_SESSION["steamid"]) {continue;}
+        $size=0;
+        $cnt=0;
+        foreach(new FilesystemIterator($dir) as $file){
+            $size+=$file->getSize();
+            $cnt++;
+        }
+        $fm_userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$actualsid';")->fetch_assoc();
+        $badchrs=['"',"'"];
+        $result[]=[
+            "steamid"=>$actualsid,
+            "name"=>str_replace($badchrs,'',$fm_userdata['name']),
+            "avatarfull"=>$fm_userdata["avatarfull"],
+            "rank"=>$settings["ranks"][$actualsid]??"User",
+            "size"=>$size,
+            "cnt"=>$cnt
+        ];
+    }
+    echo json_encode($result);
+    exit;
+}
 ?>

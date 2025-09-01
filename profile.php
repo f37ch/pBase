@@ -280,43 +280,18 @@ function elapsed($when)
           <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive"><i class="bi bi-folder-check"></i></i>&nbsp;Модерация Хранилища</button>
         </h2>
         <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionDada">
-          <div class="accordion-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3">
-          <?php
-              function format_size($size) {
-                $mod=1024;
-                $units=explode(" ","B KB MB GB TB PB");
-                for ($i=0;$size>$mod;$i++) {
-                    $size/=$mod;
-                }
-                return round($size,2)." ".$units[$i];
-              }
-              $dirs=glob("storage".DIRECTORY_SEPARATOR."*",GLOB_ONLYDIR+GLOB_NOSORT);
-              foreach($dirs as $dir){
-                $actualsid=basename($dir);
-                if ($actualsid==$_SESSION["steamid"]){continue;}
-                $size=0;
-                $cnt=0;
-                foreach(new FilesystemIterator($dir) as $file){
-                    $size+=$file->getSize();
-                    $cnt++;
-                }
-                $badchrs=['"',"'"];
-                $fm_userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$actualsid';")->fetch_assoc();?>
-                <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:200px; cursor: pointer;" onclick="get_file_list('<?php echo $actualsid; ?>','<?php echo str_replace($badchrs,'',$fm_userdata['name']); ?>')">
-                  <div class="card-body">
-                  <div class="row p-1 mb-1">
-                    <div class="col">
-                      <img class="col-auto rounded-circle mb-3" style="width: 80px;border: 4px solid #000;" src="<?=$fm_userdata["avatarfull"] ?>">
-                      <h4 class="title my-0"><?=htmlspecialchars($fm_userdata["name"],ENT_QUOTES,"UTF-8")?></h1> 
-                      <h6 class="title" style="color:#5ec582;"><?=$settings["ranks"][$actualsid]??"User";?></h6>
-                      <small class="title" style="color:#46B7AA; font-weight: bold;"><?=format_size($size);?> | Файлов: <?=$cnt;?></small>
-                    </div>
-                    </div>
-                  </div>
-                </div>
-              <?php } ?>
-            </div>
+          <div class="accordion-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3" id="storage_moderation_cards">
+            <!-- users cards goes here -->
           </div>
+        </div>
+        <script>
+        document.addEventListener("DOMContentLoaded",function(){
+          fetchStorageCardsCache();
+        });
+        document.getElementById("collapseFive").addEventListener("show.bs.collapse",function(){
+          renderStorageCards();
+        });
+        </script>
         </div>
       <?php } ?>
       </div>
