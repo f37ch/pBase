@@ -11,7 +11,7 @@ function getRandomScreenshot($ids){
         $screens=json_decode(file_get_contents($cacheFile),true);
     } else {
         $profile=$profiles[array_rand($profiles)];
-        $url="https://steamcommunity.com/id/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
+        $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
         $html=@file_get_contents($url);
         $screens=[];
 
@@ -21,7 +21,7 @@ function getRandomScreenshot($ids){
 
             if (!empty($ids)) {
                 $postdata=http_build_query([
-                    "itemcount" =>count($ids),
+                    "itemcount"=>count($ids),
                 ]);
                 foreach ($ids as $i=>$id){
                     $postdata.="&publishedfileids[".$i."]=".urlencode($id);
