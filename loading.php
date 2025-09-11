@@ -1,62 +1,68 @@
 <?php include("components/head.php") ?>
 <?php
-function getRandomScreenshot() {
+function getRandomScreenshot($ids){
     $appid=4000;
-    $profiles=$GLOBALS["settings"]["loading_ssp"];
+    $profiles=array_filter(array_map("trim",explode(";",$ids)));
 
     $cacheFile=__DIR__."/cache/screens.json";
-    $cacheTime=14400;//cache in sec
+    $cacheTime=14400; // cache in sec
 
     if (file_exists($cacheFile)&&(time()-filemtime($cacheFile)<$cacheTime)){
         $screens=json_decode(file_get_contents($cacheFile),true);
     } else {
+        $profile=$profiles[array_rand($profiles)];
+        $url="https://steamcommunity.com/id/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
+        $html=@file_get_contents($url);
         $screens=[];
-        foreach ($profiles as $profile){
-            $url="https://steamcommunity.com/id/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=imagewall";
-            $html=@file_get_contents($url);
-            if (!$html) continue;
 
-            preg_match_all('/https:\/\/images\.steamusercontent\.com\/ugc\/[^\s"\']+/i',$html,$matches);
-            $links=array_unique($matches[0]);
+        if ($html){
+            preg_match_all('/filedetails\/\?id=(\d+)/',$html,$matches);
+            $ids=array_unique($matches[1]);
 
-            $cleaned=array_map(function($link) {
-                $qpos=strpos($link,"?");
-                if ($qpos !== false) {
-                    $link=substr($link,0,$qpos);
+            if (!empty($ids)) {
+                $postdata=http_build_query([
+                    "itemcount" =>count($ids),
+                ]);
+                foreach ($ids as $i=>$id){
+                    $postdata.="&publishedfileids[".$i."]=".urlencode($id);
                 }
-                return $link;
-            },$links);
 
-            $screens=array_merge($screens,$cleaned);
+                $opts=[
+                    "http"=>[
+                        "method"=>"POST",
+                        "header"=>"Content-Type: application/x-www-form-urlencoded\r\n",
+                        "content"=>$postdata
+                    ]
+                ];
+                $context=stream_context_create($opts);
+                $result=file_get_contents("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",false,$context);
+
+                if ($result){
+                    $json=json_decode($result,true);
+                    if (isset($json["response"]["publishedfiledetails"])) {
+                        foreach ($json["response"]["publishedfiledetails"] as $detail){
+                            if (!empty($detail["file_url"])) {
+                                $screens[]=$detail["file_url"];
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        if (!$screens)$screens=[];
 
-        if (!is_dir(__DIR__."/cache")){
-            mkdir(__DIR__."/cache",0777,true);
-        }
-        file_put_contents($cacheFile,json_encode($screens));
+      file_put_contents($cacheFile,json_encode($screens));
     }
 
     if (empty($screens)){
-        return null;
+        return "https://i.imgur.com/ppIOe5T.gif";
     }
 
     return $screens[array_rand($screens)];
 }
 
-function getRandomLocalBackground(){
-  $dir=__DIR__."/img/loading";
-  if (!is_dir($dir)) return null;
-  $files=array_values(array_filter(scandir($dir),function($f) use ($dir){
-      return is_file($dir."/".$f);
-  }));
-  if (!$files||count($files)===0) return null;
-  $file=$files[array_rand($files)];
-  return str_replace(__DIR__,"",$dir."/".$file);
-}
-
-$bg=getRandomScreenshot()??getRandomLocalBackground(); // fallback
+$stbg=getSetting("loadscr_img",false);
+$bg=filter_var($stbg,FILTER_VALIDATE_URL)?$stbg:getRandomScreenshot($stbg); // fallback
 ?>
 <style>
   body {
@@ -68,7 +74,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url("<?=$bg?>");
+  background-image: url("<?=$bg?>"), url("https://i.imgur.com/ppIOe5T.gif");
   background-size: cover;
   background-position: center;
   filter: blur(4px);

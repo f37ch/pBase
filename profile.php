@@ -191,6 +191,7 @@ function elapsed($when)
                 <li><a class="dropdown-item" id="goal_text" onclick="toggledrop(this)">Текст месячной цели</a></li>
                 <li><a class="dropdown-item" id="donate_currency" onclick="toggledrop(this)">Валюта пожертвования</a></li>
                 <li><a class="dropdown-item" id="tos" onclick="toggledrop(this)">Ссылка на TOS</a></li>
+                <li><a class="dropdown-item" id="loadscr_img" onclick="toggledrop(this)">Загрузочный экран (sids/url)</a></li>
               </ul>
               <input type="text" class="form-control shadow-none outline-dark" id="dropInput" aria-label="text input">
               <button class="btn btn-outline-secondary" id="saveDrop" type="button"><i class="bi bi-database-fill-up"></i> Сохранить</button>

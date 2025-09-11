@@ -47,12 +47,6 @@
 	        "Проверка на наличие нужных для комфортной игры аддонов...",
 	        "Внимательно изучите правила сервера дабы избежать недопониманий и споров с администрацией."
         ],
-        "loading_ssp"=>[
-            "kioshka",
-            "octaver",
-            "max2478524",
-            "DepreSaiLAge"
-        ],
         "loading_volume"=>2,//music volume, where 100 is max.
         "public_ip"=>"145.555.245.345",//useful for local rcon requests
         "dev_mode"=>true,
