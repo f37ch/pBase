@@ -8,48 +8,60 @@ function getRandomScreenshot($ids){
     $cacheTime=14400; // cache in sec
 
     if (file_exists($cacheFile)&&(time()-filemtime($cacheFile)<$cacheTime)){
-        $screens=json_decode(file_get_contents($cacheFile),true);
+      $screens=json_decode(file_get_contents($cacheFile),true);
     } else {
-        $profile=$profiles[array_rand($profiles)];
-        $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
-        $html=@file_get_contents($url);
-        $screens=[];
+      $profile=$profiles[array_rand($profiles)];
+      $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
+      $html=@file_get_contents($url);
+      $maxPage=1;
+      if ($html){
+          if (preg_match_all('/<a class="pagingPageLink" href="[^"]*p=(\d+)/i',$html,$matches)){
+              $numbers=array_map("intval",$matches[1]);
+              if (!empty($numbers)){
+                  $maxPage=max($numbers);
+              }
+          }
+      }
+      $randomPage=rand(1,max(1,$maxPage));
 
-        if ($html){
-            preg_match_all('/filedetails\/\?id=(\d+)/',$html,$matches);
-            $ids=array_unique($matches[1]);
+      $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid&p=$randomPage";
+      $html=@file_get_contents($url);
+      $screens=[];
 
-            if (!empty($ids)) {
-                $postdata=http_build_query([
-                    "itemcount"=>count($ids),
-                ]);
-                foreach ($ids as $i=>$id){
-                    $postdata.="&publishedfileids[".$i."]=".urlencode($id);
-                }
+      if ($html){
+          preg_match_all('/filedetails\/\?id=(\d+)/',$html,$matches);
+          $ids=array_unique($matches[1]);
 
-                $opts=[
-                    "http"=>[
-                        "method"=>"POST",
-                        "header"=>"Content-Type: application/x-www-form-urlencoded\r\n",
-                        "content"=>$postdata
-                    ]
-                ];
-                $context=stream_context_create($opts);
-                $result=file_get_contents("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",false,$context);
+          if (!empty($ids)) {
+              $postdata=http_build_query([
+                  "itemcount"=>count($ids),
+              ]);
+              foreach ($ids as $i=>$id){
+                  $postdata.="&publishedfileids[".$i."]=".urlencode($id);
+              }
 
-                if ($result){
-                    $json=json_decode($result,true);
-                    if (isset($json["response"]["publishedfiledetails"])) {
-                        foreach ($json["response"]["publishedfiledetails"] as $detail){
-                            if (!empty($detail["file_url"])) {
-                                $screens[]=$detail["file_url"];
-                            }
-                        }
-                    }
-                }
-            }
-        }
+              $opts=[
+                  "http"=>[
+                      "method"=>"POST",
+                      "header"=>"Content-Type: application/x-www-form-urlencoded\r\n",
+                      "content"=>$postdata
+                  ]
+              ];
+              $context=stream_context_create($opts);
+              $result=file_get_contents("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",false,$context);
 
+              if ($result){
+                  $json=json_decode($result,true);
+                  if (isset($json["response"]["publishedfiledetails"])) {
+                      foreach ($json["response"]["publishedfiledetails"] as $detail){
+                          if (!empty($detail["file_url"])) {
+                              $screens[]=$detail["file_url"];
+                          }
+                      }
+                  }
+              }
+          }
+      }
 
       file_put_contents($cacheFile,json_encode($screens));
     }
