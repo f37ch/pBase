@@ -163,7 +163,7 @@ if (isset($_POST["settings_infoget"]))
     $id=$_POST["settings_infoget"];
     $response=$database->query("SELECT value FROM global_settings WHERE name = '$id';");
     if (mysqli_num_rows($response)){
-        echo $response->fetch_array()[0]??"";
+        echo json_encode($response->fetch_array()[0]??"");
     };
 }
 if(isset($_POST["settings_insert"])){

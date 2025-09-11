@@ -223,9 +223,9 @@ if (dropInput!=null){
   function toggledrop(item) {
     document.getElementById("optionDrop").innerHTML=item.innerHTML;
     selectedDrop=item;
-    makeRequest({settings_infoget:item.id},function(){
+    makeRequest({settings_infoget:item.id},function(resp){
         dropInput.classList.remove("is-invalid");
-        dropInput.value=this.responseText.trim();
+        dropInput.value=resp.trim();
     })
   };
   document.getElementById("saveDrop").addEventListener("click",()=>{
