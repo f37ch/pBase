@@ -141,7 +141,6 @@ img {
 max-width: 100%!important;
 }
 
-
 .rcon_r {
   white-space: nowrap;
   overflow: auto;
@@ -151,27 +150,19 @@ max-width: 100%!important;
 }
 .typed-out {
   overflow: hidden;
-  border-right: 0.25em solid orange;
-  white-space: nowrap;
+  white-space: break-spaces;
   font-size: 1.2rem;
   color: rgb(0, 185, 0);
-  animation: typing 1.2s steps(20, end) forwards, blinking 0.75s infinite;
-  width: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: typing 1.2s forwards;
 }
 @keyframes typing {
   from {
-    width: 0;
+    transform: scaleY(0);
   }
   to {
-    width: 100%;
-  }
-}
-@keyframes blinking {
-  from {
-    border-color: transparent;
-  }
-  to {
-    border-color: orange;
+    transform: scaleY(1);
   }
 }
 .stuser:hover{background-color:#EAEAEA;transition: 0.2s;};
