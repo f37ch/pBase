@@ -312,7 +312,7 @@ if (document.getElementById("rcon_submit")!=null){
     let rserv=document.getElementById("rcon_servs").value
     makeRequest({rcon_submit:rserv,command:rstring},function(resp){
       document.getElementById("typer").classList.remove("d-none")
-      document.getElementById("rcon_response_place").innerHTML=">"+resp.success
+      document.getElementById("rcon_response_place").innerHTML=">"+(resp?resp.success:"exeption...")
     },"core/rcon.php");
   })
 }
