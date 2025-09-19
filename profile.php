@@ -190,6 +190,10 @@ function elapsed($when)
               <label class="form-check-label" for="enable_banlist">Раздел банов</label>
             </div>
             <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="enable_players" onclick="toggleswitch(this)" <?php echo getSetting("enable_players",true)?"checked":"";?>>
+              <label class="form-check-label" for="enable_players">Раздел игроков</label>
+            </div>
+            <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="enable_serverlist" onclick="toggleswitch(this)" <?php echo getSetting("enable_serverlist",true)?"checked":"";?>>
               <label class="form-check-label" for="enable_serverlist">Отображать сервера</label>
             </div>

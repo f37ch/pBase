@@ -2,6 +2,10 @@
   include("components/head.php");
   $_GET["page"]="help";
   include("components/header.php");
+  if (!getSetting("enable_help",true)) {
+    header("Location: /");
+    exit;
+  }
   $page=isset($_GET['list']) ? intval($_GET['list']) : 1;;
   $limit=4;
   $start = ($page-1) * $limit;

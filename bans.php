@@ -1,7 +1,11 @@
 <?php include("components/head.php");
 $_GET["page"]="bans";
 include("components/header.php");
-$page=isset($_GET['pg'])?intval($_GET['pg']):1;;
+if (!getSetting("enable_bans",true)) {
+  header("Location: /");
+  exit;
+}
+$page=isset($_GET["pg"])?intval($_GET["pg"]):1;;
 $limit=13;
 $start=($page-1)*$limit;
 $type=isset($_GET["type"])?"WHERE type='".$database->real_escape_string($_GET["type"])."'":"";

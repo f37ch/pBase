@@ -165,4 +165,13 @@ max-width: 100%!important;
     transform: scaleY(1);
   }
 }
+@keyframes pulse-red {
+  0%   { background-color: #000; color: #e04e4eff; }
+  50%  { background-color: #e04e4eff; color: #000; }
+  100% { background-color: #000; color: #e04e4eff; }
+}
+.pulse-red {
+  animation: pulse-red 3.5s infinite;
+  transition: background-color 0.5s, color 0.5s;
+}
 .stuser:hover{background-color:#EAEAEA;transition: 0.2s;};

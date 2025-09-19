@@ -2,6 +2,10 @@
   include("components/head.php");
   $_GET["page"]="news";
   include("components/header.php");
+  if (!getSetting("enable_news",true)) {
+    header("Location: /");
+    exit;
+  }
   $page=isset($_GET["pg"]) ? intval($_GET["pg"]) : 1;
   $limit=4;
   $start = ($page-1) * $limit;

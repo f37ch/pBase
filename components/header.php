@@ -9,6 +9,9 @@
         <?php if (getSetting("enable_help",true)){?>
           <a class="<?=getPage("help");?>" href="/help.php">Помощь</a>
         <?php }?>
+        <?php if (getSetting("enable_players",true)){?>
+          <a class="<?=getPage("players");?>" href="/players.php">Игроки</a>
+        <?php }?>
         <?php if (getSetting("enable_banlist",true)){?>
           <a class="<?=getPage("bans");?>" href="/bans.php">Баны</a>
         <?php }?>
