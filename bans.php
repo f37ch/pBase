@@ -1,7 +1,7 @@
 <?php include("components/head.php");
 $_GET["page"]="bans";
 include("components/header.php");
-if (!getSetting("enable_bans",true)) {
+if (!getSetting("enable_banlist",true)) {
   header("Location: /");
   exit;
 }
