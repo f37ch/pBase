@@ -9,13 +9,19 @@ $page=isset($_GET["pg"])?intval($_GET["pg"]):1;
 $limit=12;
 $start=($page-1)*$limit;
 $stypes=["Имя"=>"name","Последняя игра"=>"last_played","Регистрация"=>"registered","Последний онлайн"=>"last_online"];
-$sort_column="last_played"; // default sort column
-if (isset($_GET["type"])&&in_array($_GET["type"],$stypes)) {
-    $sort_column=$database->real_escape_string($_GET["type"]);
+$allowed_columns=array_values($stypes);
+$sort_column="last_played";
+if (isset($_GET["type"]) && in_array($_GET["type"],$allowed_columns,true)){
+    $sort_column=$_GET["type"];
 }
 $where="";
-if (isset($_GET["sid"])&&$_GET["sid"]!="") {
-    $where="WHERE steamid='".$database->real_escape_string($_GET["sid"])."'";
+if (isset($_GET["search"])&&$_GET["search"]!==""){
+  $search=$database->real_escape_string($_GET["search"]);
+  if (preg_match('/^7656\d{13}$/',$search)){
+      $where="WHERE steamid = '$search'";
+  } else {
+      $where="WHERE name LIKE '%$search%'";
+  }
 }
 $result=$database->query("SELECT * FROM users $where ORDER BY $sort_column DESC LIMIT $start, $limit")??NULL;
 $countres=$database->query("SELECT count(steamid) AS cnt FROM users $where") ?? NULL;
@@ -54,7 +60,7 @@ href=new URL(location);
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div class="input-group" data-aos="flip-right" data-aos-delay="100" style="width: 100%;">
     <span class="input-group-text" id="da"><i class="bi bi-steam"></i></span>
-    <input type="number" onchange="href.searchParams.delete('pg');href.searchParams.set('sid',this.value); location = href.toString()" class="form-control shadow-none" placeholder="steamid64" value="<?php echo $_GET["sid"]??""?>" aria-describedby="da" >
+    <input type="text" onchange="href.searchParams.delete('pg');href.searchParams.set('search',this.value); location = href.toString()" class="form-control shadow-none" placeholder="steamid64/ник" value="<?php echo $_GET["search"]??""?>" aria-describedby="da" >
     <select class="form-select shadow-none" name="svid" title="select type" style="width: 20px" onchange="href.searchParams.delete('pg');href.searchParams.set('type',this.value); location = href.toString()">
       <?php foreach ($stypes as $label => $type):?>
         <option value="<?php echo $type; ?>" <?php
