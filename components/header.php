@@ -9,6 +9,9 @@
         <?php if (getSetting("enable_help",true)){?>
           <a class="<?=getPage("help");?>" href="/help.php">Помощь</a>
         <?php }?>
+        <?php if (getSetting("enable_forum",true)){?>
+          <a class="<?=getPage("forum");?>" href="/forum.php">Игроки</a>
+        <?php }?>
         <?php if (getSetting("enable_players",true)){?>
           <a class="<?=getPage("players");?>" href="/players.php">Игроки</a>
         <?php }?>

@@ -13,7 +13,7 @@ function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
   xmlhttp.send(form);
 }
 //----------------------------------------------STORAGE
-document.getElementById("fileform").addEventListener("submit",e=>{
+document.getElementById("fileform")&&document.getElementById("fileform").addEventListener("submit",e=>{
   e.preventDefault()
   let df=document.getElementById("file").files[0]
   if (!df) return;
@@ -90,10 +90,8 @@ function get_file_list(sid,name,skip_render){
     if (resp.spaceleft) {
       availableSpace=parseInt(resp.spaceleft);
       document.getElementById("fldrop").innerHTML=""
-      document.getElementById("stinf").innerHTML=""
       document.getElementById("aviable").innerHTML="(Доступно: "+formatsize(resp.spaceleft)+")"
       document.getElementById("fldrop").innerHTML="Список файлов ("+resp.storagecnt+"/"+resp.storagemaxcnt+")"
-      document.getElementById("stinf").innerHTML="Размер хранилища: "+formatsize(resp.storagelimit)
     }
     window._fileListCache={sid:sid,files:[],resp:resp};
     for (var i=0,row;row=resp[i];i++){

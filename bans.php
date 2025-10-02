@@ -18,10 +18,7 @@ $total=$fetchedcount[0]['id'];
 $pages=ceil($total/$limit);
 $prev=$page>1?$page-1:1;
 $nxt=$page!=$pages?$page+1:$pages;
-function plural($n,$a,$b,$c) {
-  switch($n%10==1&&$n%100!=11?0:($n%10>=2&&$n%10<=4&&($n%100<10or$n%100>=20)?1:2)){case 0:default:return $a;case 1:return $b;case 2:return $c;}
-}
-function elapsed($created,$expire)
+function elapsedb($created,$expire)
 {
     $rtime=$expire-$created;
     if ($rtime<1){return "навсегда";}
@@ -85,7 +82,7 @@ $types=$database->query("SELECT DISTINCT(type) FROM bans")??NULL;
                             <i class='bi bi-terminal'></i> Console
                         <?php } ?>
                     </td>
-                    <td class="align-middle"><?php echo elapsed($row["created"],$row["expires"]);?></td>
+                    <td class="align-middle"><?php echo elapsedb($row["created"],$row["expires"]);?></td>
                     <td class="align-middle text-start" title="<?php echo $row["reason"]??"no reason given";?>" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><?=htmlspecialchars($row["reason"]??"no reason given",ENT_QUOTES,"UTF-8")?></td>
                 </tr>
             <?php endwhile;?>

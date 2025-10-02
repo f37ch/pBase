@@ -117,7 +117,7 @@ if (isset($_POST["file_submit"]))
 }
 if (isset($_POST["file_delete"]))
 {
-    if (isset($_POST["sid"])&&!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){
+    if (isset($_POST["sid"])&&!hasAccess("storagemoderate")){
         http_response_code(403);
         die(json_encode(array("error"=>"Access denied.")));
     }
@@ -131,7 +131,7 @@ if (isset($_POST["file_delete"]))
 }
 if (isset($_POST["file_list"]))
 {
-    if (isset($_POST["sid"])&&!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])){
+    if (isset($_POST["sid"])&&!hasAccess("storagemoderate")){
         http_response_code(403);
         die(json_encode(array("error"=>"Access denied.")));
     }

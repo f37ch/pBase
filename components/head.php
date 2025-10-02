@@ -40,6 +40,41 @@
         return $path;
     }
   }
+  function formatsize($size){
+      if ($size<=1000000){
+          $size=number_format($size/1000,2)." KB";
+      }elseif($size<=1000000000) {
+          $size=number_format($size/1000000,2)." MB";
+      }elseif ($size<=1000000000000){
+          $size=number_format($size/1000000000,2)." GB";
+      }else{
+          $size=number_format($size/1000000000000,2)." TB";
+      }
+      return $size;
+  }
+  function plural($n,$a,$b,$c){
+    switch($n%10==1&&$n%100!=11?0:($n%10>=2&&$n%10<=4&&($n%100<10 or $n%100>=20)?1:2)){
+      case 0:default:return $a;
+      case 1:return $b;
+      case 2:return $c;
+    }
+  }
+  function elapsed($when)
+  {
+    $rtime=time()-$when;
+    if ($rtime<=1){return "только что";}
+    $a=array(365*24*60*60=>"год",30*24*60*60=>"месяц",24*60*60=>"день",60*60=>"час",60 =>"минута",1=>"секунда");
+    $a_da=array("год"=>["год","года","лет"],"месяц"=>["месяц","месяца","месяцев"],"день"=>["день","дня","дней"],"час"=>["час","часа","часов"],"минута"=>["минута","минуты","мин"],"секунда"=>["секунда","секунды","секунд"]);
+    foreach ($a as $si=>$str)
+    {
+      $d=$rtime/$si;
+      if ($d>1)
+      {
+        $r=round($d);
+        return $r." ".plural($r,$a_da[$str][0],$a_da[$str][1],$a_da[$str][2])." назад";
+      }
+  }
+}
 ?>
 <!DOCTYPE HTML>
 <html lang="ru" class="h-100">

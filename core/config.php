@@ -4,11 +4,14 @@
         "rcon"=>"",//rcon password to interact with your servers
         "api_key"=>"",//api key to make secure api calls from your servers to synch bans for exemple.
         "tinymce_apikey"=>"",//text editor api. Get at https://www.tiny.cloud/
-        "access"=>[
-            "76561198106529373" => ["global"=>1,"rcon"=>2,"notes"=>3,"servers"=>4,"storagemoderate"=>5],//replace to your steamid64
+        "access_manual"=>[//instantly sets access to specific group by sid
+            "76561198106529373"=>1,//replace to your steamid64
         ],
-        "ranks"=>[
-            "76561198106529373" => "Horse",
+        "ugroups"=>[
+            1 => ["name"=>"Owner","color"=>"#5EC582","global_settings"=>true,"notes"=>true,"rcon"=>true,"servers"=>true,"storagemoderate"=>true,"forum_admin"=>true,"user_management"=>true],
+            2 => ["name"=>"Head Admin","color"=>"#C55E6E","global_settings"=>true,"notes"=>true,"rcon"=>true,"servers"=>true,"storagemoderate"=>true,"forum_admin"=>true],
+            3 => ["name"=>"Admin","color"=>"#C5B65E","global_settings"=>false,"notes"=>false,"rcon"=>false,"servers"=>false,"storagemoderate"=>true,"forum_admin"=>true],
+            4 => ["name"=>"Moderator","color"=>"#52D5EC","global_settings"=>false,"notes"=>false,"rcon"=>false,"servers"=>false,"storagemoderate"=>false,"forum_admin"=>true],
         ],
         "db"=>[//database settings
             "host" => "localhost",

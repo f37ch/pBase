@@ -2,6 +2,19 @@
 require_once("db.php");
 require_once("steamauth/steamauth.php");
 
+//Synch bans and activity
+if (isset($_GET["synch_user"]))
+{
+    if ($settings["api_key"]!=$_GET["api_key"]){
+        http_response_code(403);
+		die(json_encode(array("error"=>"Access denied.")));
+    }
+    $sid=$_GET["synch_user"];
+    getSteamData($sid);
+    $database->query("UPDATE users SET last_played=UNIX_TIMESTAMP(NOW()) where steamid='$sid'");
+    echo json_encode(array("success"=>"User synched successfully."));
+}
+
 //Get donations data
 if (isset($_GET["donations"]))
 {
@@ -27,19 +40,6 @@ if (isset($_GET["donations"]))
         $cnt++;
     }
     echo json_encode($table);
-}
-
-//Synch bans and activity
-if (isset($_GET["synch_user"]))
-{
-    if ($settings["api_key"]!=$_GET["api_key"]){
-        http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-    }
-    $sid=$_GET["synch_user"];
-    getSteamData($sid);
-    $database->query("UPDATE users SET last_played=UNIX_TIMESTAMP(NOW()) where steamid='$sid'");
-    echo json_encode(array("success"=>"User synched successfully."));
 }
 
 if (isset($_GET["synch_ban"]))
@@ -74,10 +74,11 @@ if (isset($_GET["synch_ban"]))
 //Notes
 if (isset($_POST["get_tinydata"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["notes"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("notes")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $id=$_POST["get_tinydata"];
     $response=$database->query("SELECT * FROM notes WHERE id='$id'");
     if (mysqli_num_rows($response)){
@@ -86,10 +87,11 @@ if (isset($_POST["get_tinydata"]))
 }
 if (isset($_POST["write_save"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["notes"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("notes")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $type=$_POST["write_save"];
     $headimg=$_POST['headimg']??NULL;
     $content=base64_encode($_POST["content"]);
@@ -104,10 +106,11 @@ if (isset($_POST["write_save"]))
 }
 if (isset($_POST["write_update"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["notes"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("notes")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $id=$_POST["write_update"];
     $headimg=$_POST['headimg']??NULL;
     $content=base64_encode($_POST["content"]);
@@ -121,10 +124,11 @@ if (isset($_POST["write_update"]))
 }
 if (isset($_POST["get_notes"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["notes"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("notes")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $page=is_numeric($_POST["get_notes"])?$_POST["get_notes"]:1;
     $limit=5;
     $start=($page-1)*$limit;
@@ -140,10 +144,11 @@ if (isset($_POST["get_notes"]))
     };
 }
 if(isset($_POST["nrm"])){
-    if (!isset($settings["access"][$_SESSION["steamid"]]["notes"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("notes")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $id=$_POST["nrm"];
     $sql=$database->query("DELETE FROM notes WHERE id='$id'");
     if (!$sql){
@@ -156,10 +161,11 @@ if(isset($_POST["nrm"])){
 //Globals
 if (isset($_POST["settings_infoget"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["global"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("global")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $id=$_POST["settings_infoget"];
     $response=$database->query("SELECT value FROM global_settings WHERE name = '$id';");
     if (mysqli_num_rows($response)){
@@ -167,10 +173,11 @@ if (isset($_POST["settings_infoget"]))
     };
 }
 if(isset($_POST["settings_insert"])){
-    if (!isset($settings["access"][$_SESSION["steamid"]]["global"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("global")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $name=$_POST["settings_insert"];
     $value=$_POST["value"];
     $response=$database->query("INSERT INTO global_settings (name,value) VALUES ('$name','$value') ON DUPLICATE KEY UPDATE value = '$value';");
@@ -185,19 +192,21 @@ if (isset($_POST["get_servers"]))
     };
 }
 if(isset($_POST["svrm"])){
-    if (!isset($settings["access"][$_SESSION["steamid"]]["servers"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("servers")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $name=$_POST["svrm"];
     $sql=$database->query("DELETE FROM servers WHERE sv_name='$name'");
 }
 if (isset($_POST["svsave"]))
 {
-    if (!isset($settings["access"][$_SESSION["steamid"]]["servers"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+    if (!hasAccess("servers")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $name=$_POST["name"];
     $ip=$_POST["ip"];
     $port=$_POST["port"];
@@ -205,9 +214,10 @@ if (isset($_POST["svsave"]))
 }
 // Storage moderation cards
 if (isset($_POST["get_storage_cards"])){
-    if (!isset($settings["access"][$_SESSION["steamid"]]["storagemoderate"])) {
+    if (!hasAccess("storagemoderate")){
         http_response_code(403);
-        die(json_encode(array("error"=>"Access denied.")));
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
     }
     $result=[];
     $dirs=glob("..".DIRECTORY_SEPARATOR."storage".DIRECTORY_SEPARATOR."*",GLOB_ONLYDIR+GLOB_NOSORT);
@@ -232,6 +242,155 @@ if (isset($_POST["get_storage_cards"])){
         ];
     }
     echo json_encode($result);
+    exit;
+}
+// User management
+if (isset($_POST["user_management"])){
+    if (!hasAccess("user_management")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
+    $mtype=$_POST["user_management"];
+    if ($mtype=="setrank"){
+        $sid=$_POST["steamid"];
+        $id=$_POST["id"];
+        $id=$id===""?"NULL":(int)$id;
+        $response=$database->query("UPDATE users SET ugroup=$id WHERE steamid='$sid'");
+    }
+    if (!$response){
+        http_response_code(500);
+        echo json_encode(["error"=>"Ошибка: ".$database->error]);
+    } else {
+        header("Location: ".($_SERVER["HTTP_REFERER"]));
+    }
+}
+// Forum
+if (isset($_POST["forum"])){
+    
+    $action=$_POST["forum"];
+
+    if($action==="new_thread"){
+        $subcat_id = intval($_POST["subcat_id"]??0);
+        $topic     = trim($_POST["topic"]??"");
+        $content   = trim($_POST["content"]??"");
+        $sid       = $_SESSION["steamid"];
+
+        $res=$database->query("SELECT timestamp FROM forum_threads WHERE sid='$sid' ORDER BY timestamp DESC LIMIT 1");
+        if($res && $row=$res->fetch_assoc()){
+            if(time()-$row["timestamp"]<600){
+                echo json_encode(["success"=>false,"error"=>"Вы можете создавать новый тред не чаще чем раз в 10 минут."]);
+                exit;
+            }
+        }
+
+        $database->query("INSERT INTO forum_threads (subcat_id, sid, topic, timestamp, last_posted) VALUES ($subcat_id, '$sid', '".$database->real_escape_string($topic)."', UNIX_TIMESTAMP(), UNIX_TIMESTAMP())");
+        $thread_id=$database->insert_id;
+        $database->query("INSERT INTO forum_posts (thread_id, sid, content, timestamp) VALUES ($thread_id, '$sid', '".$database->real_escape_string($content)."', UNIX_TIMESTAMP())");
+
+        echo json_encode(["success"=>true]);
+        exit;
+    }elseif ($action==="get_threads"){
+        $subcat_id=intval($_POST["subcat_id"]??0);
+        $page=max(intval($_POST["page"]??1),1);
+        $perPage=5;
+        $offset=($page-1)*$perPage;
+
+        $cntQ=$database->query("SELECT COUNT(*) as cnt FROM forum_threads WHERE subcat_id = $subcat_id");
+        $cnt=$cntQ->fetch_assoc()["cnt"]??0;
+        $pages=ceil($cnt/$perPage);
+        $threadsQ = $database->query("
+            SELECT t.id, t.topic,
+                   FROM_UNIXTIME(t.timestamp,'%d.%m.%Y') AS created,
+                   u.name AS author_name,
+                   u.avatarfull AS author_avatar,
+                   u.steamid AS author_steamid,
+                   (SELECT COUNT(*)-1 FROM forum_posts p WHERE p.thread_id = t.id) AS replies
+            FROM forum_threads t
+            JOIN users u ON u.steamid = t.sid
+            WHERE t.subcat_id = $subcat_id
+            ORDER BY t.last_posted DESC
+            LIMIT $offset, $perPage
+        ");
+
+        $data=[];
+        while ($row=$threadsQ->fetch_assoc()) {
+            $data[]=$row;
+        }
+
+        echo json_encode([
+            "success"=>true,
+            "data"=>$data,
+            "page"=>$page,
+            "pages"=>$pages,
+            "prev"=>max(1,$page-1),
+            "next"=>min($pages,$page+1)
+        ]);
+        exit;
+    }elseif ($action==="new_post") {
+        $thread_id=intval($_POST["thread_id"]??0);
+        $content=trim($_POST["content"]??"");
+        $sid=$_SESSION["steamid"];
+    
+        $checkQ=$database->query("SELECT id FROM forum_threads WHERE id = $thread_id");
+        if ($checkQ->num_rows===0) {
+            echo json_encode(["error"=>"Тред не найден"]); exit;
+        }
+    
+        $database->query("
+            INSERT INTO forum_posts (thread_id, sid, content, timestamp) 
+            VALUES ($thread_id, '$sid', '".$database->real_escape_string($content)."', UNIX_TIMESTAMP())
+        ");
+    
+        $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
+    
+        echo json_encode(["success" => true]);
+        exit;
+    }
+}
+if (isset($_POST["forum_admin"])){
+    if (!hasAccess("forum_admin")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
+    $action=$_POST["forum_admin"];
+    $response=false;
+    if($action==="new_cat"){
+        $name=$database->real_escape_string($_POST["name"]);
+        $prior=(int)$_POST["prior"];
+        $response=$database->query("INSERT INTO forum_cats (name,prior) VALUES ('$name','$prior')");
+    }elseif($action==="new_subcat") {
+        $name=$database->real_escape_string($_POST["name"]);
+        $prior=(int)$_POST["prior"];
+        $cat_id=(int)$_POST["cat_id"];
+        $icon=$database->real_escape_string($_POST["icon"]);
+        $response=$database->query("INSERT INTO forum_subcats (name,prior,icon,cat_id) VALUES ('$name','$prior','$icon','$cat_id')");
+    }elseif($action==="delete_cat") {
+        $id=(int)$_POST["id"];
+        $response=$database->query("DELETE FROM forum_cats WHERE id='$id'");
+    }elseif($action==="delete_subcat"){
+        $id=(int)$_POST["id"];
+        $response=$database->query("DELETE FROM forum_subcats WHERE id='$id'");
+    }elseif($action==="edit_cat"){
+        $id=(int)$_POST["id"];
+        $name=$database->real_escape_string($_POST["name"]);
+        $prior=(int)$_POST["prior"];
+        $response=$database->query("UPDATE forum_cats SET name='$name',prior='$prior' WHERE id='$id'");
+    }elseif($action==="edit_subcat"){
+        $id=(int)$_POST["id"];
+        $name=$database->real_escape_string($_POST["name"]);
+        $cat_id=(int)$_POST["cat_id"];
+        $prior=(int)$_POST["prior"];
+        $icon=$database->real_escape_string($_POST["icon"]);
+        $response=$database->query("UPDATE forum_subcats SET name='$name',prior='$prior',cat_id='$cat_id',icon='$icon' WHERE id='$id'");
+    }
+    if (!$response){
+        http_response_code(500);
+        echo json_encode(["error"=>"Ошибка: ".$database->error]);
+    } else {
+        echo json_encode(["success"=>true]);
+    }
     exit;
 }
 ?>

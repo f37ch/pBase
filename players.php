@@ -30,29 +30,6 @@ $total=$fetchedcount[0]["cnt"];
 $pages=ceil($total/$limit);
 $prev=$page>1?$page-1:1;
 $nxt=$page!=$pages?$page+1:$pages;
-function plural($n,$a,$b,$c){
-  switch($n%10==1&&$n%100!=11?0:($n%10>=2&&$n%10<=4&&($n%100<10or$n%100>=20)?1:2)){
-    case 0:default:return $a;
-    case 1:return $b;
-    case 2:return $c;
-  }
-}
-function elapsed($when)
-{
-  $rtime=time()-$when;
-  if ($rtime<=1){return "только что";}
-  $a=array(365*24*60*60=>"год",30*24*60*60=>"месяц",24*60*60=>"день",60*60=>"час",60 =>"минута",1=>"секунда");
-  $a_da=array("год"=>["год","года","лет"],"месяц"=>["месяц","месяца","месяцев"],"день"=>["день","дня","дней"],"час"=>["час","часа","часов"],"минута"=>["минута","минуты","минут"],"секунда"=>["секунда","секунды","секунд"]);
-  foreach ($a as $si=>$str)
-  {
-    $d=$rtime/$si;
-    if ($d>1)
-    {
-      $r=round($d);
-      return $r." ".plural($r,$a_da[$str][0],$a_da[$str][1],$a_da[$str][2])." назад";
-    }
-  }
-}
 ?>
 <script>
 href=new URL(location);
@@ -61,7 +38,7 @@ href=new URL(location);
   <div class="input-group" data-aos="flip-right" data-aos-delay="100" style="width: 100%;">
     <span class="input-group-text" id="da"><i class="bi bi-steam"></i></span>
     <input type="text" onchange="href.searchParams.delete('pg');href.searchParams.set('search',this.value); location = href.toString()" class="form-control shadow-none" placeholder="steamid64/ник" value="<?php echo $_GET["search"]??""?>" aria-describedby="da" >
-    <select class="form-select shadow-none" name="svid" title="select type" style="width: 20px" onchange="href.searchParams.delete('pg');href.searchParams.set('type',this.value); location = href.toString()">
+    <select class="form-select shadow-none" name="svid" title="сортировка" style="width: 20px" onchange="href.searchParams.delete('pg');href.searchParams.set('type',this.value); location = href.toString()">
       <?php foreach ($stypes as $label => $type):?>
         <option value="<?php echo $type; ?>" <?php
             if ((isset($_GET["type"])&&$_GET["type"]==$type)||(!isset($_GET["type"])&&$type=="last_played")) echo "selected";
@@ -80,14 +57,14 @@ while ($row=$result->fetch_assoc()):?>
         <div class="card-body">
             <div class="row p-1 mb-1">
                 <div class="col text-center">
-                    <img class="col-auto rounded-circle mb-3" style="border: 4px solid #000;" src="<?=htmlspecialchars($row["avatarfull"]??"",ENT_QUOTES,"UTF-8")?>" onclick="window.open('https://steamcommunity.com/profiles/<?=$row["steamid"]?>','_blank')"> <!-- width: 80px; adjust in style?-->
+                    <img class="col-auto rounded-circle mb-3" style="border: 4px solid #000;" src="<?=htmlspecialchars($row["avatarfull"]??"",ENT_QUOTES,"UTF-8")?>" onclick="location.href='/profile.php?id=<?=$row['steamid']?>'"><!-- width: 80px; adjust in style?-->
                     <h4 class='title my-0'><?=htmlspecialchars($row["name"]??"Unknown",ENT_QUOTES,"UTF-8")?></h4>
 
                     <button type="button" class="btn btn-sm btn-outline-secondary mt-2" style="font-weight: bold; width:100%" onclick="navigator.clipboard.writeText('<?=$row["steamid"]?>'); this.innerHTML='<i class=&quot;bi bi-steam&quot;></i> Скопировано!'; setTimeout(()=>{this.innerHTML='<i class=&quot;bi bi-steam&quot;></i> Копировать sid64';},1200);"><i class="bi bi-steam"></i> Копировать sid64</button>
                     
                     <?php if ($stype==="registered"):?>
                         <small class="title" style="color:#46B7AA; font-weight: bold;">
-                            Зарегистрирован: <?=$row["registered"]?date("Y-m-d",$row["registered"]):"Никогда"?>
+                            Регистрация: <?=$row["registered"]?date("Y-m-d",$row["registered"]):"Никогда"?>
                         </small>
                     <?php elseif ($stype==="last_online"):?>
                         <small class="title" style="color:#46B7AA; font-weight: bold;">

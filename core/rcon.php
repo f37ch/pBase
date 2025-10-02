@@ -119,10 +119,11 @@ if (isset($_POST["get_single_server"])) {
 }
 if (isset($_POST["rcon_submit"]))
 {
-	if (!isset($settings["access"][$_SESSION["steamid"]]["rcon"])){
-		http_response_code(403);
-		die(json_encode(array("error"=>"Access denied.")));
-	}
+	if (!hasAccess("rcon")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
     $svid=$_POST["rcon_submit"];
 	$command=$_POST["command"];
 	$response=$database->query("SELECT * FROM servers WHERE id='$svid'");
