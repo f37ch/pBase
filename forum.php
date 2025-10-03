@@ -210,7 +210,6 @@ foreach ($subcats as $subcat):
                t.topic AS last_post_topic,
                u.name AS author_name,
                u.avatarfull AS author_avatar,
-               u.ugroup AS author_rank,
                p.timestamp AS last_time
         FROM forum_threads t
         JOIN forum_posts p ON p.id = (
@@ -234,7 +233,6 @@ foreach ($subcats as $subcat):
         WHERE t.subcat_id = {$subcat["id"]}
     ");
     $count=$countQ->fetch_assoc()["cnt"]??0;
-    $rankcol=$last["author_rank"]?$GLOBALS["settings"]["ugroups"][$last["author_rank"]]["color"]:"rgba(71, 71, 71, 1)";
 ?>
     <div class="d-flex align-items-center mb-2 <?php if ($index<$total){echo "subcat-container";}; ?>" id="subcat-<?=$subcat["id"]?>">
         <?php if (!empty($subcat["icon"])): ?>
@@ -339,11 +337,10 @@ endforeach; // cats?>
                   </div>
                   <div class="card-footer post-footer">
                     <div class="d-flex flex-wrap">
-                      <div class="d-flex align-self-center m-auto m-lg-0 me-lg-2">
-
-                            <!-- reactions here !-->
-
-                      </div>
+                          <!-- reactions here !-->
+                          <?php if (hasAccess("forum_admin")){ ?>
+                            <button class="btn btn-danger btn-sm" style="margin-left:auto;" data-action="<?=$counter==1?"delete_thread":"delete_post"?>"  id="delete_post" data-id="<?=$counter==1?$thread_id:$post["id"]?>" type="button" title="Удалить пост">Удалить<?=$counter==1?" Тред":""?></button>
+                          <?php }; ?>
                     </div>
                   </div>
                 </div>
@@ -357,8 +354,8 @@ endforeach; // cats?>
             <span id="editor" style="border:unset;"></span>
           </div>
           <div class="card-footer d-flex justify-content-end gap-2">
-            <button type="button" id="clear" class="btn btn-danger text-end" onclick="window.quill.setContents()">Очистить Поле</button>
-            <button type="button" id="publish" class="btn btn-success text-end">Ответить</button>
+            <button type="button" id="clear" class="btn btn-danger btn-sm text-end" onclick="window.quill.setContents()">Очистить Поле</button>
+            <button type="button" id="publish" class="btn btn-success btn-sm text-end">Ответить</button>
           </div>
         </div>
         <?php }else{ ?>

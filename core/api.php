@@ -272,14 +272,28 @@ if (isset($_POST["forum"])){
 
     if($action==="new_thread"){
         $subcat_id = intval($_POST["subcat_id"]??0);
-        $topic     = trim($_POST["topic"]??"");
-        $content   = trim($_POST["content"]??"");
+        $topic     = $_POST["topic"]??"";
+        $content   = $_POST["content"]??"";
         $sid       = $_SESSION["steamid"];
+
+        if (!$sid){
+            http_response_code(403);
+            echo json_encode(["error"=>"Access denied."]);
+            exit;
+        }
+
+        if (strlen(trim(str_replace("\n","",$content)))<60||strlen(trim(mb_convert_encoding($topic,"ISO-8859-1","UTF-8")))<1) {
+            echo json_encode(["error"=>"Тема либо содержание поста слишком коротки."]);
+            exit;
+        }else if (strlen(mb_convert_encoding($content,"ISO-8859-1","UTF-8"))>40000||strlen(mb_convert_encoding($topic,"ISO-8859-1","UTF-8"))>28){
+			echo json_encode(["error"=>"Тема либо содержание поста слишком длинные."]);
+            exit;
+        }
 
         $res=$database->query("SELECT timestamp FROM forum_threads WHERE sid='$sid' ORDER BY timestamp DESC LIMIT 1");
         if($res && $row=$res->fetch_assoc()){
             if(time()-$row["timestamp"]<600){
-                echo json_encode(["success"=>false,"error"=>"Вы можете создавать новый тред не чаще чем раз в 10 минут."]);
+                echo json_encode(["error"=>"Вы можете создавать новый тред не чаще чем раз в 10 минут."]);
                 exit;
             }
         }
@@ -329,8 +343,24 @@ if (isset($_POST["forum"])){
         exit;
     }elseif ($action==="new_post") {
         $thread_id=intval($_POST["thread_id"]??0);
-        $content=trim($_POST["content"]??"");
+        $content=$_POST["content"]??"";
         $sid=$_SESSION["steamid"];
+
+        if (strlen(trim(str_replace("\n","",$content)))<26) {
+            echo json_encode(["error"=>"Содержание поста слишком короткое."]);
+            exit;
+        }else if (strlen(mb_convert_encoding($content,"ISO-8859-1","UTF-8"))>40000){
+			echo json_encode(["error"=>"Содержание поста слишком длинное."]);
+            exit;
+        }
+
+        $res=$database->query("SELECT timestamp FROM forum_posts WHERE sid='$sid' ORDER BY timestamp DESC LIMIT 1");
+        if($res && $row=$res->fetch_assoc()){
+            if(time()-$row["timestamp"]<60){
+                echo json_encode(["error"=>"Вы можете создавать новый пост не чаще чем раз в минуту."]);
+                exit;
+            }
+        }
     
         $checkQ=$database->query("SELECT id FROM forum_threads WHERE id = $thread_id");
         if ($checkQ->num_rows===0) {
@@ -344,7 +374,7 @@ if (isset($_POST["forum"])){
     
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
     
-        echo json_encode(["success" => true]);
+        echo json_encode(["success"=>true]);
         exit;
     }
 }
@@ -372,6 +402,12 @@ if (isset($_POST["forum_admin"])){
     }elseif($action==="delete_subcat"){
         $id=(int)$_POST["id"];
         $response=$database->query("DELETE FROM forum_subcats WHERE id='$id'");
+    }elseif($action==="delete_post"){
+        $id=(int)$_POST["id"];
+        $response=$database->query("DELETE FROM forum_posts WHERE id='$id'");
+    }elseif($action==="delete_thread"){
+        $id=(int)$_POST["id"];
+        $response=$database->query("DELETE FROM forum_threads WHERE id='$id'");
     }elseif($action==="edit_cat"){
         $id=(int)$_POST["id"];
         $name=$database->real_escape_string($_POST["name"]);

@@ -85,8 +85,6 @@ document.addEventListener("DOMContentLoaded",function(){
             const icon=subcatIcon?subcatIcon.value.trim():"";
             const cat_sub=catFsub?catFsub.value:"";
 
-            if (!name) {alert("Введите название"); return;}
-
             const fd=new FormData();
             fd.append("forum_admin",action);
             fd.append("name",name);
@@ -224,9 +222,6 @@ document.addEventListener("DOMContentLoaded",function(){
             const title=document.getElementById("iinpttl").value.trim();
             const delta=quill.getContents();
             const content=JSON.stringify(delta);
-
-            if (title.length<3) {alert("Введите тему (минимум 3 символа)"); return;}
-            if (content.length<10) {alert("Содержимое слишком короткое"); return;}
 
             const fd=new FormData();
             fd.append("forum","new_thread");

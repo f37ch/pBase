@@ -18,9 +18,8 @@ document.addEventListener("DOMContentLoaded",function(){
                         image: function() {
                             const range=this.quill.getSelection();
                             const value=prompt("Введите ссылку на картинку.");
-                            if (value){
-                                const safeValue=value.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
-                                this.quill.insertEmbed(range?range.index:0,"image",safeValue,Quill.sources.USER);
+                            if (value&&value!=""){
+                                this.quill.insertEmbed(range?range.index:0,"image",value,Quill.sources.USER);
                             }
                         }
                     }
@@ -46,11 +45,6 @@ document.addEventListener("DOMContentLoaded",function(){
             const content=JSON.stringify(window.quill.getContents());
             const threadId=new URLSearchParams(window.location.search).get("thread");
 
-            if (!content||!threadId) {
-                alert("Ошибка: нет текста или треда");
-                return;
-            }
-
             fetch("core/api.php",{
                 method:"POST",
                 body: new URLSearchParams({
@@ -72,4 +66,39 @@ document.addEventListener("DOMContentLoaded",function(){
             });
         });
     }
+
+    document.querySelectorAll("button#delete_post").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const id=this.dataset.id;
+            const action=this.dataset.action;
+            if (!id||!action) return;
+
+            const confirmMsg=action==="delete_thread"?"Вы уверены, что хотите удалить весь тред?":"Вы уверены, что хотите удалить этот пост?";
+            if (!confirm(confirmMsg)) return;
+
+            fetch("core/api.php",{
+                method:"POST",
+                body: new URLSearchParams({
+                    forum_admin:action,
+                    id: id
+                })
+            })
+            .then(res=>res.json())
+            .then(data => {
+                if (data.success) {
+                    if (action==="delete_post") {
+                        const postEl=document.querySelector(`#post-${id}`);
+                        if (postEl) postEl.remove();
+                    } else if (action==="delete_thread") {
+                        window.location.href="/forum.php";
+                    }
+                } else {
+                    alert("Ошибка: "+(data.error||"Неизвестная ошибка"));
+                }
+            })
+            .catch(err=>{
+                alert("Ошибка запроса");
+            });
+        });
+    });
 });
