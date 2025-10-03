@@ -267,6 +267,7 @@ document.addEventListener("DOMContentLoaded",function(){
 
         threadList.innerHTML="";
         for (const thread of resp.data) {
+            console.log(thread.pinned)
             threadList.innerHTML += `
                 <div class="d-flex align-items-center mb-2" style="margin-left:1rem;">
                     <a href="/profile.php?id=${thread.author_steamid}" title="${thread.author_name}" class="text-decoration-none text-body-secondary">
@@ -277,7 +278,7 @@ document.addEventListener("DOMContentLoaded",function(){
                     <div class="p-2 fs-6">
                         <div class="text-start">
                         <a href="?thread=${thread.id}" class="text-decoration-none text-body-secondary">
-                                <span class="mb-0">${thread.topic}</span>
+                                <span class="mb-0">${thread.topic} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
                             </div>
                             <div class="text-start">
                                 <span style="color:#178649ff;">${thread.created} • </span>

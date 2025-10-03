@@ -98,7 +98,7 @@ if (isset($_GET["id"])){
       </div> 
   <div class="col-auto">
     <h1 class="title my-0"><?=htmlspecialchars($userdata["name"],ENT_QUOTES,"UTF-8")?></h1>
-  <h5 class="title" style="color: <?=getRankArray($userdata["steamid"])["color"]??"rgba(71,71,71,1)";?>;"><i class=" mr-1"></i><?=getRankArray($userdata["steamid"])["name"]??"User";?></h5>
+  <h5 class="title" style="color: <?=getRankArray($userdata["steamid"])["color"]??"rgba(71, 71, 71, 1)";?>;"><i class=" mr-1"></i><?=getRankArray($userdata["steamid"])["name"]??"User";?></h5>
   </div> <div class="col-auto">
   <div class="row justify-content-center mt-3">
     <div class="col-auto"><div class="input-group mb-3">
@@ -194,7 +194,7 @@ if (isset($_GET["id"])){
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="enable_forum" onclick="toggleswitch(this)" <?php echo getSetting("enable_forum",true)?"checked":"";?>>
-              <label class="form-check-label" for="enable_forum">Отображать форум</label>
+              <label class="form-check-label" for="enable_forum">Форум</label>
             </div>
 
             <div class="mt-3 input-group input-group-sm">

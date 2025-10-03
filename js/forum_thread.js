@@ -67,14 +67,14 @@ document.addEventListener("DOMContentLoaded",function(){
         });
     }
 
-    document.querySelectorAll("button#delete_post").forEach(function(btn) {
+    document.querySelectorAll(".thread-btn").forEach(function(btn){
         btn.addEventListener("click", function() {
             const id=this.dataset.id;
             const action=this.dataset.action;
             if (!id||!action) return;
 
-            const confirmMsg=action==="delete_thread"?"Вы уверены, что хотите удалить весь тред?":"Вы уверены, что хотите удалить этот пост?";
-            if (!confirm(confirmMsg)) return;
+            if (action==="delete_post"&&!confirm("Удалить пост?")) return;
+            if (action==="delete_thread"&&!confirm("Удалить весь тред?")) return;
 
             fetch("core/api.php",{
                 method:"POST",
@@ -91,6 +91,12 @@ document.addEventListener("DOMContentLoaded",function(){
                         if (postEl) postEl.remove();
                     } else if (action==="delete_thread") {
                         window.location.href="/forum.php";
+                    } else if (action==="pin_thread") {
+                        //this.textContent=this.textContent.includes("Закрепить")?"Открепить":"Закрепить";
+                        window.location.reload();
+                    } else if (action==="lock_thread") {
+                        //this.textContent=this.textContent.includes("Закрыть")?"Открыть":"Закрыть";
+                        window.location.reload();
                     }
                 } else {
                     alert("Ошибка: "+(data.error||"Неизвестная ошибка"));

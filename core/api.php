@@ -161,7 +161,7 @@ if(isset($_POST["nrm"])){
 //Globals
 if (isset($_POST["settings_infoget"]))
 {
-    if (!hasAccess("global")){
+    if (!hasAccess("global_settings")){
         http_response_code(403);
         echo json_encode(["error"=>"Access denied."]);
         exit;
@@ -173,7 +173,7 @@ if (isset($_POST["settings_infoget"]))
     };
 }
 if(isset($_POST["settings_insert"])){
-    if (!hasAccess("global")){
+    if (!hasAccess("global_settings")){
         http_response_code(403);
         echo json_encode(["error"=>"Access denied."]);
         exit;
@@ -270,11 +270,11 @@ if (isset($_POST["forum"])){
     
     $action=$_POST["forum"];
 
-    if($action==="new_thread"){
-        $subcat_id = intval($_POST["subcat_id"]??0);
-        $topic     = $_POST["topic"]??"";
-        $content   = $_POST["content"]??"";
-        $sid       = $_SESSION["steamid"];
+    if($action==="new_thread"){        
+        $subcat_id=intval($_POST["subcat_id"]??0);
+        $topic=$_POST["topic"]??"";
+        $content=$_POST["content"]??"";
+        $sid=$_SESSION["steamid"];
 
         if (!$sid){
             http_response_code(403);
@@ -282,10 +282,10 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        if (strlen(trim(str_replace("\n","",$content)))<60||strlen(trim(mb_convert_encoding($topic,"ISO-8859-1","UTF-8")))<1) {
+        if (mb_strlen(trim(str_replace("\n","",$content)),"UTF-8")<60||mb_strlen(trim($topic,"UTF-8"))<1) {
             echo json_encode(["error"=>"Тема либо содержание поста слишком коротки."]);
             exit;
-        }else if (strlen(mb_convert_encoding($content,"ISO-8859-1","UTF-8"))>40000||strlen(mb_convert_encoding($topic,"ISO-8859-1","UTF-8"))>28){
+        }else if (mb_strlen($content,"UTF-8")>40000||mb_strlen(trim($topic,"UTF-8"))>28){
 			echo json_encode(["error"=>"Тема либо содержание поста слишком длинные."]);
             exit;
         }
@@ -319,11 +319,12 @@ if (isset($_POST["forum"])){
                    u.name AS author_name,
                    u.avatarfull AS author_avatar,
                    u.steamid AS author_steamid,
-                   (SELECT COUNT(*)-1 FROM forum_posts p WHERE p.thread_id = t.id) AS replies
+                   (SELECT COUNT(*)-1 FROM forum_posts p WHERE p.thread_id = t.id) AS replies,
+                   t.pinned
             FROM forum_threads t
             JOIN users u ON u.steamid = t.sid
             WHERE t.subcat_id = $subcat_id
-            ORDER BY t.last_posted DESC
+            ORDER BY t.pinned DESC, t.last_posted DESC
             LIMIT $offset, $perPage
         ");
 
@@ -346,10 +347,10 @@ if (isset($_POST["forum"])){
         $content=$_POST["content"]??"";
         $sid=$_SESSION["steamid"];
 
-        if (strlen(trim(str_replace("\n","",$content)))<26) {
+        if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
             echo json_encode(["error"=>"Содержание поста слишком короткое."]);
             exit;
-        }else if (strlen(mb_convert_encoding($content,"ISO-8859-1","UTF-8"))>40000){
+        }else if (mb_strlen($content,"UTF-8")>40000){
 			echo json_encode(["error"=>"Содержание поста слишком длинное."]);
             exit;
         }
@@ -362,9 +363,11 @@ if (isset($_POST["forum"])){
             }
         }
     
-        $checkQ=$database->query("SELECT id FROM forum_threads WHERE id = $thread_id");
+        $checkQ=$database->query("SELECT id,locked FROM forum_threads WHERE id = $thread_id");
         if ($checkQ->num_rows===0) {
             echo json_encode(["error"=>"Тред не найден"]); exit;
+        }elseif($checkQ->fetch_assoc()["locked"]==1){
+           echo json_encode(["error"=>"Тред закрыт для далнейших постов."]); exit; 
         }
     
         $database->query("
@@ -374,7 +377,7 @@ if (isset($_POST["forum"])){
     
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
     
-        echo json_encode(["success"=>true]);
+        echo json_encode(["success" => true]);
         exit;
     }
 }
@@ -408,6 +411,16 @@ if (isset($_POST["forum_admin"])){
     }elseif($action==="delete_thread"){
         $id=(int)$_POST["id"];
         $response=$database->query("DELETE FROM forum_threads WHERE id='$id'");
+    }elseif($action==="pin_thread"){
+        $id=(int)$_POST["id"];
+        $row=$database->query("SELECT pinned FROM forum_threads WHERE id='$id' LIMIT 1")->fetch_assoc();
+        $pinned=$row["pinned"]==1?"NULL":1;
+        $response=$database->query("UPDATE forum_threads SET pinned=$pinned WHERE id='$id'");
+    }elseif($action==="lock_thread"){
+        $id=(int)$_POST["id"];
+        $row=$database->query("SELECT locked FROM forum_threads WHERE id='$id' LIMIT 1")->fetch_assoc();
+        $locked=$row["locked"]==1?"NULL":1;
+        $response=$database->query("UPDATE forum_threads SET locked=$locked WHERE id='$id'");
     }elseif($action==="edit_cat"){
         $id=(int)$_POST["id"];
         $name=$database->real_escape_string($_POST["name"]);

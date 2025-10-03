@@ -12,7 +12,9 @@ if (isset($_GET["thread"])){//get thread
         SELECT 
             t.id, 
             t.topic, 
-            t.timestamp, 
+            t.timestamp,
+            t.pinned,
+            t.locked,
             u.name AS author_name, 
             u.avatarfull, 
             u.ugroup,
@@ -327,7 +329,7 @@ endforeach; // cats?>
                           <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
                           <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
                         </div>
-                      <h4 class="ms-auto p-2">#<?=$counter?></h4>
+                      <h4 class="ms-auto p-2"><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
                     </div>    
                   </div>
                   <div class="card-body pt-2 p-0">
@@ -337,10 +339,19 @@ endforeach; // cats?>
                   </div>
                   <div class="card-footer post-footer">
                     <div class="d-flex flex-wrap">
-                          <!-- reactions here !-->
-                          <?php if (hasAccess("forum_admin")){ ?>
-                            <button class="btn btn-danger btn-sm" style="margin-left:auto;" data-action="<?=$counter==1?"delete_thread":"delete_post"?>"  id="delete_post" data-id="<?=$counter==1?$thread_id:$post["id"]?>" type="button" title="Удалить пост">Удалить<?=$counter==1?" Тред":""?></button>
-                          <?php }; ?>
+                      <div class="d-flex gap-1" style="margin-left:auto;">
+                      <?php if (hasAccess("forum_admin")){ if ($counter==1){ ?>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" data-id="<?=$thread_id?>">
+                            <?=$thread["pinned"]?"Открепить":"Закрепить"?>
+                          </button>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="lock_thread" data-id="<?=$thread_id?>">
+                            <?=$thread["locked"]?"Открыть":"Закрыть"?>
+                          </button>
+                      <?php } ?>
+                          <button class="btn btn-danger btn-sm thread-btn" data-action="<?=$counter==1?"delete_thread":"delete_post"?>" data-id="<?=$counter==1?$thread_id:$post["id"]?>">Удалить<?=$counter==1?" Тред":""?>
+                          </button>
+                      <?php } ?>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -350,13 +361,20 @@ endforeach; // cats?>
         } // while?>
         <?php if (isset($_SESSION["steamid"])){ ?>
         <div class="card mb-3">
-          <div class="card-body p-0">
+          <?php if ($thread["locked"]){ ?>
+          <div class="card-body col-red p-1">
+            <h3>Тред Был Закрыт</h3>
+            <h2><i class="bi bi-lock"></i></h2>
+          </div>
+          <?php }else{ ?>
+            <div class="card-body p-0">
             <span id="editor" style="border:unset;"></span>
           </div>
           <div class="card-footer d-flex justify-content-end gap-2">
             <button type="button" id="clear" class="btn btn-danger btn-sm text-end" onclick="window.quill.setContents()">Очистить Поле</button>
             <button type="button" id="publish" class="btn btn-success btn-sm text-end">Ответить</button>
           </div>
+          <?php } ?>
         </div>
         <?php }else{ ?>
           <a href="?login" class="btn btn-light fw-bold w-100 mb-3" type="button">Войдите Чтобы Написать Ответ</a>
