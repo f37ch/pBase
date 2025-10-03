@@ -292,8 +292,20 @@ endforeach; // cats?>
         <h1 class="text-danger" data-aos="zoom-in" data-aos-delay="100">ОШИБКА</h1>
         <p class="lead" data-aos="fade-down" data-aos-delay="400">Тред не найден!</p>
     <?php } else {//thread
+        $limit=8;
+        
+        $countQ=$database->query("SELECT COUNT(*) as cnt FROM forum_posts WHERE thread_id = {$thread_id}");
+        $total=$countQ->fetch_assoc()["cnt"]??0;
+        $pages=ceil($total/$limit);
 
-        $postsQ = $database->query("
+        $page=isset($_GET["pg"])?intval($_GET["pg"]):1;
+        $page=max(1,min($page,$pages));
+        $start=($page-1)*$limit;
+
+        $prev=$page>1?$page-1:1;
+        $next=$page<$pages?$page+1:$pages;
+
+        $postsQ=$database->query("
             SELECT 
                 p.id, 
                 p.sid, 
@@ -307,6 +319,7 @@ endforeach; // cats?>
             JOIN users u ON u.steamid = p.sid
             WHERE p.thread_id = {$thread_id}
             ORDER BY p.timestamp ASC
+            LIMIT {$start}, {$limit}
         ");
         ?>
         <?php
@@ -359,6 +372,35 @@ endforeach; // cats?>
             </div>
             <?php
         } // while?>
+        <?php if ($pages>1) { ?>
+          <ul class="pagination justify-content-right mt-3">
+              <?php if($page>4) { ?>
+                <li class="page-item">
+                  <a class="page-link text-black shadow-none" href="?thread=<?=$thread_id?>&pg=1">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+              <?php } ?>
+              <li class="page-item <?=$page==1?"disabled":""?>">
+                <a class="page-link text-black shadow-none" href="?thread=<?=$thread_id?>&pg=<?=$prev?>">Prev</a>
+              </li>
+              <?php for ($i=max(1,$page-3); $i<=min($pages,$page+3); $i++) { ?>
+                <li class="page-item">
+                  <a class="page-link text-black shadow-none <?=$page==$i?"active":""?> <?=$page."---".$i?>" href="?thread=<?=$thread_id?>&pg=<?=$i?>"><?=$i?></a>
+                </li>
+              <?php } ?>
+              <li class="page-item <?=$page==$pages?"disabled":""?>">
+                <a class="page-link text-black shadow-none" href="?thread=<?=$thread_id?>&pg=<?=$next?>">Next</a>
+              </li>
+              <?php if($page<$pages-2){ ?>
+                <li class="page-item">
+                  <a class="page-link text-black shadow-none" href="?thread=<?=$thread_id?>&pg=<?=$pages;?>">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              <?php } ?>
+          </ul>
+        <?php } ?>
         <?php if (isset($_SESSION["steamid"])){ ?>
         <div class="card mb-3">
           <?php if ($thread["locked"]){ ?>

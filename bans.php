@@ -5,17 +5,22 @@ if (!getSetting("enable_banlist",true)) {
   header("Location: /");
   exit;
 }
-$page=isset($_GET["pg"])?intval($_GET["pg"]):1;;
-$limit=13;
-$start=($page-1)*$limit;
 $type=isset($_GET["type"])?"WHERE type='".$database->real_escape_string($_GET["type"])."'":"";
 $wherend=isset($_GET["type"])?"AND":"WHERE";
 $sid=isset($_GET["sid"])&&$_GET["sid"]!=""?$wherend." (offender_steamid='".$database->real_escape_string($_GET["sid"])."' or admin_steamid='".$database->real_escape_string($_GET["sid"])."')":"";
-$result=$database->query("SELECT * FROM bans $type $sid ORDER BY id DESC LIMIT $start, $limit")??NULL;
+
+$limit=13;
+
 $countres=$database->query("SELECT count(id) AS id FROM bans $type $sid")??NULL;
 $fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
 $total=$fetchedcount[0]['id'];
 $pages=ceil($total/$limit);
+
+$page=isset($_GET["pg"])?intval($_GET["pg"]):1;
+$page=max(1,min($page,$pages));
+$start=($page-1)*$limit;
+
+$result=$database->query("SELECT * FROM bans $type $sid ORDER BY id DESC LIMIT $start, $limit")??NULL;
 $prev=$page>1?$page-1:1;
 $nxt=$page!=$pages?$page+1:$pages;
 function elapsedb($created,$expire)

@@ -267,7 +267,6 @@ document.addEventListener("DOMContentLoaded",function(){
 
         threadList.innerHTML="";
         for (const thread of resp.data) {
-            console.log(thread.pinned)
             threadList.innerHTML += `
                 <div class="d-flex align-items-center mb-2" style="margin-left:1rem;">
                     <a href="/profile.php?id=${thread.author_steamid}" title="${thread.author_name}" class="text-decoration-none text-body-secondary">

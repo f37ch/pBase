@@ -6,16 +6,21 @@
     header("Location: /");
     exit;
   }
-  $page=isset($_GET['list']) ? intval($_GET['list']) : 1;;
+
   $limit=4;
-  $start = ($page-1) * $limit;
-  $result=$database->query("SELECT * FROM notes WHERE type='help' ORDER BY id DESC LIMIT $start, $limit")??NULL;
+ 
   $countres=$database->query("SELECT count(id) AS id FROM notes WHERE type='help'")??NULL;
-  $fetchedcount = $countres->fetch_all(MYSQLI_ASSOC);
-  $total = $fetchedcount[0]['id'];
-  $pages = ceil($total/$limit);
-  $prev = $page>1?$page-1:1;
-	$nxt = $page!=$pages?$page+1:$pages;
+  $fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
+  $total=$fetchedcount[0]['id'];
+  $pages=ceil($total/$limit);
+
+  $page=isset($_GET["pg"])?intval($_GET["pg"]):1;
+  $page=max(1,min($page,$pages));
+  $start=($page-1)*$limit;
+
+  $result=$database->query("SELECT * FROM notes WHERE type='help' ORDER BY id DESC LIMIT $start, $limit")??NULL;
+  $prev=$page>1?$page-1:1;
+	$nxt=$page!=$pages?$page+1:$pages;
   if(isset($_GET["id"])){
     $id=intval($_GET["id"]);
     $data=$database->query("SELECT * FROM notes WHERE type='help' and id='$id'")->fetch_array();
@@ -45,27 +50,27 @@
 <ul class="pagination justify-content-right mt-4" data-aos-offset="0" data-aos="fade-up" data-aos-delay="200">
   <?php if($page>4) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="help.php?list=1">
+      <a class="page-link text-black shadow-none" href="help.php?pg=1">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
   <?php } ?>
   <li class="page-item <?= $page==1?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="help.php?list=<?= $prev; ?>">
+    <a class="page-link text-black shadow-none" href="help.php?pg=<?= $prev; ?>">
       <span aria-hidden="true">Prev</span>
     </a>
   </li>
   <?php for($i = max(1,$page-3); $i < min($pages+1,$page+3); $i++) { ?>
-		<li class="page-item"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" href="help.php?list=<?= $i; ?>"><?= $i; ?></a></li>
+		<li class="page-item"><a class="page-link shadow-none text-black <?= $page==$i?"active":""; ?>" href="help.php?pg=<?= $i; ?>"><?= $i; ?></a></li>
 	<?php }; ?>
   <li class="page-item <?= $page==$pages?"disabled":""; ?>">
-    <a class="page-link text-black shadow-none" href="help.php?list=<?= $nxt; ?>">
+    <a class="page-link text-black shadow-none" href="help.php?pg=<?= $nxt; ?>">
       <span aria-hidden="true">Next</span>
     </a>
   </li>
   <?php if($page<$pages-2) { ?>
     <li class="page-item">
-      <a class="page-link text-black shadow-none" href="help.php?list=<?=$pages;?>">
+      <a class="page-link text-black shadow-none" href="help.php?pg=<?=$pages;?>">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>
