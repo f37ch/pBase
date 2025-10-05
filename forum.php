@@ -28,6 +28,17 @@ if (isset($_GET["thread"])){//get thread
         LIMIT 1
     ");
     $thread=$threadQ->fetch_assoc();
+}elseif(isset($_GET["search"])){
+    $search=mb_substr(trim($_GET["search"]??""),0,255);
+    $search_escaped=$database->real_escape_string($search);
+    $countQ=$database->query("
+        SELECT COUNT(*) AS cnt
+        FROM forum_posts p
+        JOIN users u ON u.steamid = p.sid
+        WHERE p.content LIKE '%{$search_escaped}%'
+           OR u.name LIKE '%{$search_escaped}%'
+           OR p.sid LIKE '%{$search_escaped}%'
+    ");
 }else{//get cats
     $catsQ=$database->query("
         SELECT id, name, prior
@@ -69,10 +80,16 @@ if (isset($_GET["thread"])){//get thread
 <?php if (!isset($_GET["thread"])||(isset($_GET["thread"])&&$thread)){?>
 <nav class="card mb-4 text-black"  data-aos="flip-right" data-aos-delay="100">
     <div class="card-body d-flex justify-content-between" style="padding: .5rem;">
-        <h6 class="text-start mb-0 flex-grow-1 text-truncate" style="line-height:unset; max-width:calc(100%-100px);"><?=isset($_GET["thread"])?($thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"]):"Главная";?></h6>
-       
+        <h6 class="text-start mb-0 flex-grow-1 text-truncate" style="line-height:unset; max-width:calc(100%-100px);">
+          <?php if (isset($_GET["thread"])){
+            echo $thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"];
+          }elseif(isset($search)){
+            echo "Поиск по запросу «".htmlspecialchars($search)."»";
+          }else{
+            echo "Главная";}?>
+        </h6>
         <div class="d-flex justify-content-around column-gap-3">
-          <?php if (!isset($_GET["thread"])&&hasAccess("forum_admin")){ ?>
+          <?php if (!isset($_GET["thread"])&&!isset($search)&&hasAccess("forum_admin")){ ?>
             <i class="bi bi-plus-square text-end" data-bs-toggle="collapse" href="#admCollapse" role="button" aria-expanded="false" aria-controls="admCollapse" title="Добавить"></i>
           <?php }; ?>
           <i class="bi bi-search text-end" data-bs-toggle="collapse" href="#searchCollapse" role="button" aria-expanded="false" aria-controls="searchCollapse" title="Поиск"></i>
@@ -113,19 +130,138 @@ if (isset($_GET["thread"])){//get thread
       <div class="card text-black">
         <div class="card-body justify-content-between" style="padding: .5rem;">
           <div class="input-group input-group-sm">
-            <input type="text" class="form-control shadow-none" placeholder="sid64/ключевое слово">
-            <button class="btn btn-outline-secondary" type="button">Поиск</button>
+            <input type="text" class="form-control shadow-none" id="searchInput" placeholder="sid64 / ключевое слово" value="<?=htmlspecialchars($_GET["search"]??"")?>">
+            <button class="btn btn-outline-secondary" type="button" onclick="location.href='?search='+encodeURIComponent(document.getElementById('searchInput').value)">Поиск</button>
           </div>
         </div>
       </div>
     </div>
 </nav>
-<?php }; ?>
+<?php } if (isset($search)){
+$limit=8;
+$total=$countQ->fetch_assoc()["cnt"]??0;
 
+$pages=max(1,ceil($total/$limit));
+$page=isset($_GET["pg"])?max(1,intval($_GET["pg"])):1;
+if ($page>$pages) {$page=$pages;}
+$start=($page-1)*$limit;
 
-
-
-<?php if (!isset($_GET["thread"])){ ?>
+$resultsQ=$database->query("
+    SELECT 
+        p.id AS post_id,
+        p.content,
+        p.timestamp,
+        t.id AS thread_id,
+        u.name AS author_name,
+        u.avatarfull,
+        u.ugroup,
+        u.steamid
+    FROM forum_posts p
+    JOIN forum_threads t ON t.id = p.thread_id
+    JOIN users u ON u.steamid = p.sid
+    WHERE p.content LIKE '%{$search_escaped}%'
+       OR u.name LIKE '%{$search_escaped}%'
+       OR p.sid LIKE '%{$search_escaped}%'
+    ORDER BY p.timestamp DESC
+    LIMIT {$start}, {$limit}
+");  
+if ($total==0){?>
+        <p class="lead" data-aos="fade-down" data-aos-delay="400">По вашему запросу ничего не найдено.</p>
+    <?php }else{
+    $counter=0;
+    while ($post=$resultsQ->fetch_assoc()){
+    $rankname=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["name"]:"User";
+    $rankcol=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["color"]:"rgba(71,71,71,1)";
+    $counter++;
+    $posQ=$database->query("
+        SELECT COUNT(*) AS pos
+        FROM forum_posts
+        WHERE thread_id = {$post["thread_id"]}
+          AND timestamp <= {$post["timestamp"]}
+    ");
+    $postNumber=$posQ->fetch_assoc()["pos"]??1;
+    $postPage=ceil($postNumber/$limit);
+    
+?>
+  <div id="post-<?=$post["post_id"]?>" class="card mb-3">
+        <div class="d-flex">
+          <div class="d-flex flex-grow-1 flex-column" style="overflow: auto;">
+        <div class="card-header" style="padding: .5rem;">
+          <div class="text-start d-flex align-items-center">
+            <a href="/profile.php?id=<?=$post["sid"]?>" class="text-decoration-none text-black">
+              <img class="col-auto rounded-circle" style="border: 4px solid rgba(71,71,71,1); width:5rem; min-width:5rem;" src="<?=$post["avatarfull"]?>">
+            </a>
+            <div class="p-2 text-truncate">
+              <h5 class="mb-0 text-truncate"><?=$post["author_name"]?></h5>
+              <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
+              <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
+            </div>
+            <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="?thread=<?=$post["thread_id"]?>&pg=<?=$postPage?>#post-<?=$post["post_id"]?>">
+                <h4><?=$post["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+            </a>
+          </div>    
+        </div>
+        <div class="card-body pt-2 p-0">
+        
+          <span class="post-content" style="border:unset;" data-delta="<?=htmlspecialchars($post["content"],ENT_QUOTES,"UTF-8")?>"></span>
+        </div>
+        <div class="card-footer post-footer">
+          <div class="d-flex flex-wrap">
+            <a class="btn btn-sm btn-success ms-auto" href="?thread=<?=$post["thread_id"]?>#post-<?=$post["post_id"]?>">
+              Перейти к посту
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php }?>
+      <script>
+        document.querySelectorAll(".post-content").forEach(function(el){
+            const delta=JSON.parse(el.dataset.delta);
+            const quill=new Quill(el,{
+                readOnly:true,
+                theme:"snow",
+                modules:{toolbar:false,syntax:true}
+            });
+            quill.setContents(delta);
+        });
+      </script>
+      <?php if ($pages>1){
+          $prev=max(1,$page-1);
+          $next=min($pages,$page+1);
+          ?>
+          <ul class="pagination justify-content-right mt-3">
+            <?php if($page>4) { ?>
+              <li class="page-item">
+                <a class="page-link text-black shadow-none" href="?search=<?=urlencode($search)?>&pg=1">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            <?php } ?>
+            <li class="page-item <?=$page==1?"disabled":""?>">
+              <a class="page-link text-black shadow-none" href="?search=<?=urlencode($search)?>&pg=<?=$prev?>">Prev</a>
+            </li>
+            <?php for ($i=max(1,$page-3); $i<=min($pages,$page+3); $i++) { ?>
+              <li class="page-item">
+                <a class="page-link text-black shadow-none <?=$page==$i?"active":""?>" href="?search=<?=urlencode($search)?>&pg=<?=$i?>"><?=$i?></a>
+              </li>
+            <?php } ?>
+            <li class="page-item <?=$page==$pages?"disabled":""?>">
+              <a class="page-link text-black shadow-none" href="?search=<?=urlencode($search)?>&pg=<?=$next?>">Next</a>
+            </li>
+            <?php if($page<$pages-2){ ?>
+              <li class="page-item">
+                <a class="page-link text-black shadow-none" href="?search=<?=urlencode($search)?>&pg=<?=$pages?>">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            <?php } ?>
+          </ul>
+          <?php
+      }
+  }
+}elseif(!isset($_GET["thread"])){ ?>
 <div class="modal fade text-black" id="write_modal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel"  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
@@ -342,7 +478,9 @@ endforeach; // cats?>
                           <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
                           <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
                         </div>
-                      <h4 class="ms-auto p-2"><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+                      <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="#post-<?=$post["id"]?>">
+                        <h4><?=$post["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+                      </a>
                     </div>    
                   </div>
                   <div class="card-body pt-2 p-0">
