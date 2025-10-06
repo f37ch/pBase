@@ -383,7 +383,7 @@ if (isset($_POST["forum"])){
     
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
     
-        echo json_encode(["success" => true]);
+        echo json_encode(["success"=>true]);
         exit;
     }elseif ($action==="reaction"){
         $post_id=intval($_POST["post_id"]??0);
@@ -393,6 +393,18 @@ if (isset($_POST["forum"])){
         if (!$sid){
             http_response_code(403);
             echo json_encode(["error"=>"Войдите чтобы оставлять реакции."]);
+            exit;
+        }
+
+        $postQ=$database->query("SELECT sid FROM forum_posts WHERE id=$post_id");
+        if (!$postQ||$postQ->num_rows===0) {
+            echo json_encode(["error"=>"Пост не найден."]);
+            exit;
+        }
+
+        $postOwner=$postQ->fetch_assoc()["sid"];
+        if ($postOwner===$sid) {
+            echo json_encode(["error"=>"Реакции самому себе запрещены."]);
             exit;
         }
 

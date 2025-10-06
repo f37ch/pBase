@@ -616,5 +616,4 @@ endforeach; // cats?>
     <?php } // if thread
 }?>
 
-
 <?php include("components/footer.php") ?>
