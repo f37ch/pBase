@@ -73,6 +73,29 @@ if (isset($_GET["thread"])){//get thread
   padding:.5rem;
   min-height:6rem;
 }
+#smiles {
+  display: flex;
+  align-items: center;
+}
+.reaction {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  user-select: none;
+}
+.reaction:hover {
+  transform: scale(1.3);
+  filter: brightness(1.2);
+}
+.reaction .emoji {
+  font-size: 20px;
+}
+.reaction .count {
+  margin-left: 4px;
+  font-size: 14px;
+  color: #555;
+}
 </style>
 
 <script src="<?=asset_version("/js/highlight.min.js")?>"></script>
@@ -441,6 +464,8 @@ endforeach; // cats?>
         $prev=$page>1?$page-1:1;
         $next=$page<$pages?$page+1:$pages;
 
+        $sid=$_SESSION["steamid"]??"";
+
         $postsQ=$database->query("
             SELECT 
                 p.id, 
@@ -450,13 +475,22 @@ endforeach; // cats?>
                 u.name, 
                 u.avatarfull, 
                 u.ugroup,
-                (SELECT COUNT(*) FROM forum_posts WHERE sid = p.sid) AS user_posts
+                (SELECT COUNT(*) FROM forum_posts WHERE sid = p.sid) AS user_posts,
+
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'like') AS `like`,
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'love') AS love,
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'funny') AS funny,
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'wow') AS wow,
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'sad') AS sad,
+
+                (SELECT reaction_type FROM forum_reactions r WHERE r.post_id = p.id AND r.steamid = '$sid' LIMIT 1) AS my_reaction
             FROM forum_posts p
             JOIN users u ON u.steamid = p.sid
             WHERE p.thread_id = {$thread_id}
             ORDER BY p.timestamp ASC
             LIMIT {$start}, {$limit}
         ");
+
         ?>
         <?php
         $counter=0;
@@ -479,7 +513,7 @@ endforeach; // cats?>
                           <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
                         </div>
                       <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="#post-<?=$post["id"]?>">
-                        <h4><?=$post["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+                        <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
                       </a>
                     </div>    
                   </div>
@@ -490,6 +524,25 @@ endforeach; // cats?>
                   </div>
                   <div class="card-footer post-footer">
                     <div class="d-flex flex-wrap">
+                      <div class="d-flex gap-2 reactions">
+                        <?php
+                        $emojiList=[
+                            "like"=>"👍",
+                            "love"=>"❤️",
+                            "funny"=>"😂",
+                            "wow"=>"😮",
+                            "sad"=>"😢"
+                        ];
+                        foreach ($emojiList as $type=>$emoji){
+                            $count=$post[$type]??0;
+                            echo "
+                            <div class='reaction' data-pid='{$post["id"]}' data-type='{$type}'>
+                                <span class='emoji'>{$emoji}</span>
+                                ".($count>0?"<span class='count'>{$count}</span>":"<span class='count' style='display:none;'></span>")."
+                            </div>";
+                        }
+                        ?>
+                      </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
                       <?php if (hasAccess("forum_admin")){ if ($counter==1){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" data-id="<?=$thread_id?>">

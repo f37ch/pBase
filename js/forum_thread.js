@@ -107,4 +107,44 @@ document.addEventListener("DOMContentLoaded",function(){
             });
         });
     });
+
+    document.querySelectorAll(".reactions .reaction").forEach(reaction=>{
+        reaction.addEventListener("click",function(){
+            const postId=this.dataset.pid;
+            const type=this.dataset.type;
+        
+            fetch("core/api.php", {
+                method:"POST",
+                body: new URLSearchParams({
+                    forum:"reaction",
+                    post_id:postId,
+                    type:type
+                })
+            })
+            .then(r=>r.json())
+            .then(data => {
+                if (data.success){
+                    const countEl=this.querySelector(".count");
+                
+                    const count=data.count||0;
+                
+                    if (data.added) {
+                        this.classList.add("reacted");
+                    } else if (data.removed) {
+                        this.classList.remove("reacted");
+                    }
+                    if (count > 0) {
+                        countEl.style.display="inline";
+                        countEl.textContent=count;
+                    } else {
+                        countEl.style.display="none";
+                    }
+                } else {
+                    alert(data.error||"Ошибка реакции");
+                }
+            })
+            .catch(()=>alert("Ошибка запроса реакции"));
+        });
+    });
+
 });

@@ -342,10 +342,16 @@ if (isset($_POST["forum"])){
             "next"=>min($pages,$page+1)
         ]);
         exit;
-    }elseif ($action==="new_post") {
+    }elseif ($action==="new_post"){
         $thread_id=intval($_POST["thread_id"]??0);
         $content=$_POST["content"]??"";
         $sid=$_SESSION["steamid"];
+
+        if (!$sid){
+            http_response_code(403);
+            echo json_encode(["error"=>"Access denied."]);
+            exit;
+        }
 
         if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
             echo json_encode(["error"=>"Содержание поста слишком короткое."]);
@@ -378,6 +384,47 @@ if (isset($_POST["forum"])){
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
     
         echo json_encode(["success" => true]);
+        exit;
+    }elseif ($action==="reaction"){
+        $post_id=intval($_POST["post_id"]??0);
+        $type=$_POST["type"]??"";
+        $sid=$_SESSION["steamid"];
+
+        if (!$sid){
+            http_response_code(403);
+            echo json_encode(["error"=>"Войдите чтобы оставлять реакции."]);
+            exit;
+        }
+
+        $allowed=["like","love","funny","wow","sad"];
+
+        if (!in_array($type,$allowed,true)){
+            http_response_code(400);
+            echo json_encode(["error"=>"Invalid reaction type"]);
+            exit;
+        }
+
+        $checkQ=$database->query("SELECT id FROM forum_reactions WHERE post_id=$post_id AND steamid='$sid' AND reaction_type='$type'");
+        if ($checkQ->num_rows>0){
+            $database->query("DELETE FROM forum_reactions WHERE post_id=$post_id AND steamid='$sid' AND reaction_type='$type'");
+            $removed=true;
+            $added=false;
+        } else {
+            $database->query("INSERT INTO forum_reactions (post_id, steamid, reaction_type, timestamp) VALUES ($post_id, '$sid', '$type', UNIX_TIMESTAMP())");
+            $added=true;
+            $removed=false;
+        }
+
+        $cntQ=$database->query("SELECT COUNT(*) as cnt FROM forum_reactions WHERE post_id=$post_id AND reaction_type='".$database->real_escape_string($type)."'");
+        $count=$cntQ->fetch_assoc()["cnt"]??0;
+
+        echo json_encode([
+            "success"=>true,
+            "added"=>$added,
+            "removed"=>$removed,
+            "count"=>$count
+        ]);
+
         exit;
     }
 }

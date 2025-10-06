@@ -111,6 +111,19 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
         CONSTRAINT fk_fp_fp FOREIGN KEY (isreplyto) REFERENCES forum_posts(id) ON DELETE SET NULL,
         CONSTRAINT fk_fp_ft FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT fk_fp_usr FOREIGN KEY (sid) REFERENCES users(steamid)
+    )ENGINE=InnoDB;",
+
+    "CREATE TABLE IF NOT EXISTS forum_reactions (
+        id INT NOT NULL AUTO_INCREMENT,
+        post_id INT DEFAULT NULL,
+        steamid BIGINT(20) NOT NULL,
+        reaction_type VARCHAR(20) NOT NULL,
+        timestamp INT(11) NOT NULL,
+        PRIMARY KEY (id),
+        KEY fk_fr_post (post_id),
+        KEY fk_fr_user (steamid),
+        CONSTRAINT fk_fr_post FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT fk_fr_user FOREIGN KEY (steamid) REFERENCES users(steamid) ON DELETE CASCADE ON UPDATE CASCADE
     )ENGINE=InnoDB;"
     ];
 
