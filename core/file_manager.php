@@ -79,6 +79,10 @@ if (!Cache::get("storage_check")){
 if (isset($_POST["file_submit"]))
 {
     $sid=$_SESSION["steamid"];
+    if(getUserGroup()==5){
+        echo json_encode(["error"=>"Вы были забанены."]);
+        return;
+    }
     $resultsv=$GLOBALS["database"]->query("SELECT * FROM servers;");
     while ($row=$resultsv->fetch_assoc()){
         $sv_name=$row["sv_name"];

@@ -12,6 +12,7 @@
             2 => ["name"=>"Head Admin","color"=>"#C55E6E","global_settings"=>true,"notes"=>true,"rcon"=>true,"servers"=>true,"storagemoderate"=>true,"forum_admin"=>true],
             3 => ["name"=>"Admin","color"=>"#C5B65E","global_settings"=>false,"notes"=>false,"rcon"=>false,"servers"=>false,"storagemoderate"=>true,"forum_admin"=>true],
             4 => ["name"=>"Moderator","color"=>"#52D5EC","global_settings"=>false,"notes"=>false,"rcon"=>false,"servers"=>false,"storagemoderate"=>false,"forum_admin"=>true],
+            5 => ["name"=>"Banned","color"=>"#868686ff"],
         ],
         "db"=>[//database settings
             "host" => "localhost",

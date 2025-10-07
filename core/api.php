@@ -351,6 +351,10 @@ if (isset($_POST["forum"])){
             http_response_code(403);
             echo json_encode(["error"=>"Access denied."]);
             exit;
+        }elseif(getUserGroup()==5){
+            http_response_code(403);
+            echo json_encode(["error"=>"Вы были забанены."]);
+            exit;
         }
 
         if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
@@ -393,6 +397,10 @@ if (isset($_POST["forum"])){
         if (!$sid){
             http_response_code(403);
             echo json_encode(["error"=>"Войдите чтобы оставлять реакции."]);
+            exit;
+        }elseif(getUserGroup()==5){
+            http_response_code(403);
+            echo json_encode(["error"=>"Вы были забанены."]);
             exit;
         }
 
