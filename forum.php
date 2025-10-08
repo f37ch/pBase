@@ -52,8 +52,8 @@ if (isset($_GET["thread"])){//get thread
 }
 ?>
 
-<link href="<?=asset_version("/css/quill.snow.css")?>" rel="stylesheet" >
-<link href="<?=asset_version("/css/atom-one-dark.min.css")?>" rel="stylesheet" >
+<link href="<?=asset_version("/css/quill.snow.css")?>" rel="stylesheet">
+<link href="<?=asset_version("/css/atom-one-dark.min.css")?>" rel="stylesheet">
 <style>
 .subcat-container {
     padding-bottom:.5rem;

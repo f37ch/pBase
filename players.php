@@ -45,7 +45,7 @@ href=new URL(location);
         ?>><?php echo $label; ?></option>
       <?php endforeach;?>
     </select>
-    <span class="btn btn-secondary fw-bold bg-white pulse-red"><i class="bi bi-person-circle"></i> Всего игроков: <?=$total?></span>
+    <span class="btn btn-secondary fw-bold bg-white pulse-green"><i class="bi bi-person-circle"></i> Всего игроков: <?=$total?></span>
   </div>
 </div>
 <div class="row d-flex flex-wrap justify-content-around column-gap-1 d-flex">
@@ -53,7 +53,7 @@ href=new URL(location);
 $result->data_seek(0);
 $stype=$_GET["type"]??null;
 while ($row=$result->fetch_assoc()):?>
-    <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:250px; cursor: pointer; display:inline-block;">
+    <div class="card mb-4 text-black hoverscale stuser" style="border-radius:25px; width:18em; cursor: pointer; display:inline-block;">
         <div class="card-body">
             <div class="row p-1 mb-1">
                 <div class="col text-center">

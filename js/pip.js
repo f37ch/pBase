@@ -127,6 +127,7 @@ function render_file_list_from_cache() {
 }
 //----------------------------------------------NOTES
 let write_selected=null;
+let notes_curpage=1;
 if (document.getElementById("write_modal")!=null){
   document.getElementById("write_modal").addEventListener("show.bs.modal", e => {
     if (!tinymce.activeEditor.modaledit){
@@ -165,8 +166,7 @@ if (document.getElementById("write_modal")!=null){
       makeRequest(form,function(resp){
           document.getElementById("cancel").click();
           if (resp.success){
-            get_notes()
-            console.log(resp.success)
+            get_notes(notes_curpage)
           }
       })
   });
@@ -185,7 +185,7 @@ if (document.getElementById("write_modal")!=null){
       document.getElementById("iinpttl").value=resp.title
       document.getElementById("iinpimg").value=resp.headimg
       document.getElementById("publish").innerHTML="Сохранить"
-      document.getElementById("nremove").onclick=function(){makeRequest({nrm:id},function(){get_notes()})}
+      document.getElementById("nremove").onclick=function(){makeRequest({nrm:id},function(){get_notes(notes_curpage)})}
       var myModal = new bootstrap.Modal(document.getElementById("write_modal"));
       myModal.toggle();
       tinymce.activeEditor.execCommand("mceNewDocument");
@@ -194,6 +194,7 @@ if (document.getElementById("write_modal")!=null){
   }
   function get_notes(np){
     makeRequest({get_notes:np??1},function(resp){
+      notes_curpage=np??1;
       let noteList=document.getElementById("notes_list")
       noteList.innerHTML=""
       for (var i = 0, row; row = resp.data[i]; i++) {
