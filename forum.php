@@ -445,7 +445,7 @@ foreach ($subcats as $subcat):
 </div>
 <?php
 endforeach; // cats?>
-<script src="<?=asset_version("/js/forum_main.js")?>"></script>
+<script src="<?=asset_version("/js/forum_main.min.js")?>"></script>
 <?php }else{
     if (!$thread){ ?>
         <h1 class="text-danger" data-aos="zoom-in" data-aos-delay="100">ОШИБКА</h1>
@@ -612,7 +612,7 @@ endforeach; // cats?>
         <?php }else{ ?>
           <a href="?login" class="btn btn-light fw-bold w-100 mb-3" type="button">Войдите Чтобы Написать Ответ</a>
         <?php } ?>
-        <script src="<?=asset_version("/js/forum_thread.js")?>"></script>
+        <script src="<?=asset_version("/js/forum_thread.min.js")?>"></script>
     <?php } // if thread
 }?>
 
