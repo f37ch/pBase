@@ -7,7 +7,6 @@ if (isset($_GET["id"])){
     }
     $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
     $_GET["page"]="profile_".$sid;
-    unset($sid);
     if (!$userdata){
       $_GET["error"]="Неверный ID!";
       $_GET["page"]="error";
@@ -16,8 +15,7 @@ if (isset($_GET["id"])){
     $_GET["page"]="profile";
     $sid=$_SESSION["steamid"];
     $userdata=$GLOBALS["database"]->query("SELECT * FROM users WHERE steamid='$sid';")->fetch_assoc();
-    unset($sid);
-  }else{
+}else{
     $_GET["page"]="profile";
     $_GET["error"]="Требуется вход!";
 }
@@ -346,6 +344,22 @@ if (isset($_GET["id"])){
       </div>
     </div>
     <?php } ?>
+    <div class="card mt-4">
+      <div class="card-header text-black fw-bold">
+        Активность на Форуме
+      </div>
+      <?php
+        $total_posts_q=$GLOBALS["database"]->query("SELECT COUNT(*) AS total FROM forum_posts WHERE sid = '$sid'");
+        $total_posts=$total_posts_q->fetch_assoc()["total"]??0;
+
+        $total_reactions_q=$GLOBALS["database"]->query("SELECT COUNT(fr.id) AS total FROM forum_reactions fr INNER JOIN forum_posts fp ON fp.id = fr.post_id WHERE fp.sid = '$sid'");
+        $total_reactions=$total_reactions_q->fetch_assoc()["total"]??0;
+      ?>
+      <div class="card-body shadow border-light d-flex flex-wrap justify-content-around column-gap-3">
+        <a class="text-decoration-none text-black" href="forum.php?search=<?=$sid?>"><p class="fw-bold text-uppercase">ВСЕГО ПОСТОВ: <?=$total_posts?></p></a>
+        <p class="fw-bold text-uppercase">ПОЛУЧЕНО РЕАКЦИЙ: <span id="servertime"><?=$total_reactions?></span></p>
+      </div>
+    </div>
     <div class="card mt-4">
       <div class="card-header text-black fw-bold">
         Дополнительная Информация

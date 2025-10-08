@@ -220,7 +220,7 @@ if ($total==0){?>
               <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
             </div>
             <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="?thread=<?=$post["thread_id"]?>&pg=<?=$postPage?>#post-<?=$post["post_id"]?>">
-                <h4><?=$post["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+                <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter+($page>1?$limit*($page-1):0)?></h4>
             </a>
           </div>    
         </div>
@@ -513,7 +513,7 @@ endforeach; // cats?>
                           <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
                         </div>
                       <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="#post-<?=$post["id"]?>">
-                        <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter?></h4>
+                        <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter+($page>1?$limit*($page-1):0)?></h4>
                       </a>
                     </div>    
                   </div>

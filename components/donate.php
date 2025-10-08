@@ -29,7 +29,7 @@
       <input type="number" name="amount" class="form-control shadow-none" value="5" min="5" required> </input>
       <span class="input-group-text"><?php echo $currency?></span>
     </form>
-  </div<>
+  </div>
   <div style="overflow-x: hidden;" class="mt-4">
     <div class="row d-flex flex-wrap">
       <div class="col-12 col-md-6" data-aos="fade-right" data-aos-delay="100">
@@ -41,7 +41,7 @@
                 <?php $user=getSteamData($row["steamid"]);?>
                   <tr>
                     <td class="align-middle text-start" style="width:68%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-                      <a href="https://steamcommunity.com/profiles/<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
+                      <a href="/profile.php?id=<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
                         <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?=htmlspecialchars($user["name"],ENT_QUOTES,"UTF-8")?></a>
                     </td>
                     <td class="align-middle">
@@ -62,7 +62,7 @@
                   <?php $user=getSteamData($row["steamid"]);?>
                   <tr>
                     <td class="align-middle text-start" style="width:68%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-                      <a href="https://steamcommunity.com/profiles/<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
+                      <a href="/profile.php?id=<?=$row["steamid"]?>" class="d-inline-block fs-4 text-black" style="text-decoration: none;">
                         <img src="<?php echo $user["avatarfull"]?>" style="width:41px;height:41px; border-radius:50%;"> <?=htmlspecialchars($user["name"],ENT_QUOTES,"UTF-8")?></a>
                     </td>
                     <td class="align-middle">
