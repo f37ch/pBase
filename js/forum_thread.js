@@ -39,29 +39,52 @@ document.addEventListener("DOMContentLoaded",function(){
         quill.setContents(delta);
     });
 
+    const clearBtn=document.getElementById("clear");
+    if (clearBtn) {
+        clearBtn.addEventListener("click",()=>{
+            window.quill.setContents();
+            window.editingPostId=null;
+            clearBtn.innerText="Очистить поле";
+            publishBtn.innerText="Ответить";
+        });
+    }
+
     const publishBtn=document.getElementById("publish");
-    if (publishBtn){
+    if (publishBtn) {
         publishBtn.addEventListener("click",()=>{
             const content=JSON.stringify(window.quill.getContents());
             const threadId=new URLSearchParams(window.location.search).get("thread");
 
-            fetch("core/api.php",{
-                method:"POST",
-                body: new URLSearchParams({
+            let formData;
+            if (window.editingPostId) {
+                formData=new URLSearchParams({
+                    forum:"edit_post",
+                    post_id:window.editingPostId,
+                    content:content
+                });
+            } else {
+                formData=new URLSearchParams({
                     forum:"new_post",
                     thread_id:threadId,
                     content:content
-                })
+                });
+            }
+            fetch("core/api.php",{
+                method:"POST",
+                body:formData
             })
             .then(r=>r.json())
             .then(data=>{
+                window.editingPostId=null;
+                publishBtn.innerText="Ответить"
                 if (data.success){
                     location.reload();
                 } else {
                     alert(data.error||"Ошибка при публикации");
                 }
             })
-            .catch(err => {
+            .catch(err=>{
+                window.editingPostId=null;
                 alert("Не удалось отправить пост");
             });
         });
@@ -72,6 +95,23 @@ document.addEventListener("DOMContentLoaded",function(){
             const id=this.dataset.id;
             const action=this.dataset.action;
             if (!id||!action) return;
+
+            if (action==="edit_post") {
+                const postEl=document.querySelector(`#post-${id} .post-content`);
+                if (!postEl){
+                    alert("Не удалось найти содержимое поста");
+                    return;
+                }
+
+                const delta=JSON.parse(postEl.dataset.delta);
+                window.quill.setContents(delta);
+                window.editingPostId=id;
+                document.querySelector("#editor").scrollIntoView({behavior: "smooth"});
+                publishBtn.innerText="Сохранить"
+                clearBtn.innerText="Отменить редактирование"
+
+                return;
+            }
 
             if (action==="delete_post"&&!confirm("Удалить пост?")) return;
             if (action==="delete_thread"&&!confirm("Удалить весь тред?")) return;

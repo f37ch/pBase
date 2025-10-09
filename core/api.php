@@ -389,6 +389,56 @@ if (isset($_POST["forum"])){
     
         echo json_encode(["success"=>true]);
         exit;
+    }elseif ($action==="edit_post") {
+        $post_id=intval($_POST["post_id"]??0);
+        $content=$_POST["content"]??"";
+        $sid=$_SESSION["steamid"];
+
+        if (!$sid) {
+            http_response_code(403);
+            echo json_encode(["error"=>"Access denied."]);
+            exit;
+        } elseif (getUserGroup()==5) {
+            http_response_code(403);
+            echo json_encode(["error"=>"Вы были забанены."]);
+            exit;
+        }
+
+        if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
+            echo json_encode(["error"=>"Содержание поста слишком короткое."]);
+            exit;
+        }elseif(mb_strlen($content,"UTF-8")>40000){
+            echo json_encode(["error"=>"Содержание поста слишком длинное."]);
+            exit;
+        }
+
+        $checkQ=$database->query("SELECT sid, thread_id FROM forum_posts WHERE id = $post_id LIMIT 1");
+        if ($checkQ->num_rows===0) {
+            echo json_encode(["error"=>"Пост не найден."]);
+            exit;
+        }
+
+        $postData=$checkQ->fetch_assoc();
+        $author_sid=$postData["sid"];
+        $thread_id=intval($postData["thread_id"]);
+
+        if ($author_sid!==$sid&&!hasAccess("forum_admin")) {
+            http_response_code(403);
+            echo json_encode(["error"=>"У вас нет прав для редактирования этого поста."]);
+            exit;
+        }
+
+        $threadQ=$database->query("SELECT locked FROM forum_threads WHERE id = $thread_id");
+        if ($threadQ && $threadQ->num_rows>0 && $threadQ->fetch_assoc()["locked"]==1 && !hasAccess("forum_admin")) {
+            echo json_encode(["error"=>"Тред закрыт для редактирования постов."]);
+            exit;
+        }
+
+        $escapedContent=$database->real_escape_string($content);
+        $database->query("UPDATE forum_posts SET content = '$escapedContent', edited = UNIX_TIMESTAMP() WHERE id = $post_id");
+
+        echo json_encode(["success"=>true]);
+        exit;
     }elseif ($action==="reaction"){
         $post_id=intval($_POST["post_id"]??0);
         $type=$_POST["type"]??"";

@@ -469,7 +469,8 @@ endforeach; // cats?>
         $postsQ=$database->query("
             SELECT 
                 p.id, 
-                p.sid, 
+                p.sid,
+                p.edited,
                 p.content, 
                 p.timestamp, 
                 u.name, 
@@ -498,6 +499,7 @@ endforeach; // cats?>
             $rankname=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["name"]:"User";
             $rankcol=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["color"]:"rgba(71, 71, 71, 1)";
             $counter++;
+            $viscnt=$counter+($page>1?$limit*($page-1):0);
             ?>
             <div id="post-<?=$post["id"]?>" class="card mb-3">
               <div class="d-flex">
@@ -510,10 +512,10 @@ endforeach; // cats?>
                         <div class="p-2 text-truncate">
                           <h5 class="mb-0 text-truncate"><?=$post["name"]?></h5>
                           <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
-                          <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
+                          <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"]).($post["edited"]?"<span title='Изменено ".date("Y-m-d H:i:s",$post["edited"])."' style='color: #7c7c7cff;'> • <i class='bi bi-pencil'></i> ".elapsed($post["edited"])."</span>":"")?></div>
                         </div>
                       <a class="text-decoration-none ms-auto p-2 text-black" title="Ссылка на пост" href="#post-<?=$post["id"]?>">
-                        <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$counter+($page>1?$limit*($page-1):0)?></h4>
+                        <h4><?=$thread["pinned"]?"<i class='bi bi-pin-angle-fill'></i> ":""?>#<?=$viscnt?></h4>
                       </a>
                     </div>    
                   </div>
@@ -544,6 +546,9 @@ endforeach; // cats?>
                         ?>
                       </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
+                      <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" data-id="<?=$post["id"]?>">Изменить</button>
+                      <?php } ?>
                       <?php if (hasAccess("forum_admin")){ if ($counter==1){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" data-id="<?=$thread_id?>">
                             <?=$thread["pinned"]?"Открепить":"Закрепить"?>
@@ -552,7 +557,7 @@ endforeach; // cats?>
                             <?=$thread["locked"]?"Открыть":"Закрыть"?>
                           </button>
                       <?php } ?>
-                          <button class="btn btn-danger btn-sm thread-btn" data-action="<?=$counter==1?"delete_thread":"delete_post"?>" data-id="<?=$counter==1?$thread_id:$post["id"]?>">Удалить<?=$counter==1?" Тред":""?>
+                          <button class="btn btn-danger btn-sm thread-btn" data-action="<?=$viscnt==1?"delete_thread":"delete_post"?>" data-id="<?=$viscnt==1?$thread_id:$post["id"]?>">Удалить<?=$$viscnt==1?" Тред":""?>
                           </button>
                       <?php } ?>
                       </div>
@@ -604,7 +609,7 @@ endforeach; // cats?>
             <span id="editor" style="border:unset;"></span>
           </div>
           <div class="card-footer d-flex justify-content-end gap-2">
-            <button type="button" id="clear" class="btn btn-danger btn-sm text-end" onclick="window.quill.setContents()">Очистить Поле</button>
+            <button type="button" id="clear" class="btn btn-danger btn-sm text-end">Очистить Поле</button>
             <button type="button" id="publish" class="btn btn-success btn-sm text-end">Ответить</button>
           </div>
           <?php } ?>
