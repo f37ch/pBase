@@ -547,17 +547,18 @@ endforeach; // cats?>
                       </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
                       <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
-                          <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" data-id="<?=$post["id"]?>">Изменить</button>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" title="Изменить" data-id="<?=$post["id"]?>"><i class="bi bi-pencil"></i></button>
                       <?php } ?>
                       <?php if (hasAccess("forum_admin")){ if ($counter==1){ ?>
-                          <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" data-id="<?=$thread_id?>">
-                            <?=$thread["pinned"]?"Открепить":"Закрепить"?>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" title="<?=$thread["pinned"]?"Открепить":"Закрепить"?>" data-id="<?=$thread_id?>">
+                            <?=$thread["pinned"]?"<i class='bi bi-pin-angle'></i>":"<i class='bi bi-pin'></i>"?>
                           </button>
-                          <button class="btn btn-dark btn-sm thread-btn" data-action="lock_thread" data-id="<?=$thread_id?>">
-                            <?=$thread["locked"]?"Открыть":"Закрыть"?>
+                          <button class="btn btn-dark btn-sm thread-btn" data-action="lock_thread" title="<?=$thread["locked"]?"Открыть":"Закрыть"?>" data-id="<?=$thread_id?>">
+                            <?=$thread["locked"]?"<i class='bi bi-unlock'></i>":"<i class='bi bi-lock'></i>"?>
                           </button>
                       <?php } ?>
-                          <button class="btn btn-danger btn-sm thread-btn" data-action="<?=$viscnt==1?"delete_thread":"delete_post"?>" data-id="<?=$viscnt==1?$thread_id:$post["id"]?>">Удалить<?=$$viscnt==1?" Тред":""?>
+                          <button class="btn btn-danger btn-sm thread-btn" title="<?=$viscnt==1?"Удалить Тред":"Удалить Пост"?>"data-action="<?=$viscnt==1?"delete_thread":"delete_post"?>" data-id="<?=$viscnt==1?$thread_id:$post["id"]?>">
+                            <?=$viscnt==1?"<i class='bi bi-x-square'></i>":"<i class='bi bi-trash3'></i>"?>
                           </button>
                       <?php } ?>
                       </div>
