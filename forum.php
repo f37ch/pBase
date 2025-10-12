@@ -72,6 +72,7 @@ if (isset($_GET["thread"])){//get thread
 .ql-editor {
   padding:.5rem;
   min-height:6rem;
+  text-shadow: none;
 }
 #smiles {
   display: flex;
@@ -549,7 +550,7 @@ endforeach; // cats?>
                       <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" title="Изменить" data-id="<?=$post["id"]?>"><i class="bi bi-pencil"></i></button>
                       <?php } ?>
-                      <?php if (hasAccess("forum_admin")){ if ($counter==1){ ?>
+                      <?php if (hasAccess("forum_admin")){ if ($viscnt==1){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" title="<?=$thread["pinned"]?"Открепить":"Закрепить"?>" data-id="<?=$thread_id?>">
                             <?=$thread["pinned"]?"<i class='bi bi-pin-angle'></i>":"<i class='bi bi-pin'></i>"?>
                           </button>
@@ -611,7 +612,7 @@ endforeach; // cats?>
           </div>
           <div class="card-footer d-flex justify-content-end gap-2">
             <button type="button" id="clear" class="btn btn-danger btn-sm text-end">Очистить Поле</button>
-            <button type="button" id="publish" class="btn btn-success btn-sm text-end">Ответить</button>
+            <button type="button" id="publish" class="btn btn-success btn-sm text-end" data-counter="<?=$counter?>">Ответить</button>
           </div>
           <?php } ?>
         </div>

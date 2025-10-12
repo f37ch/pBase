@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded",function(){
         publishBtn.addEventListener("click",()=>{
             const content=JSON.stringify(window.quill.getContents());
             const threadId=new URLSearchParams(window.location.search).get("thread");
+            const counter=publishBtn.dataset.counter;
 
             let formData;
             if (window.editingPostId) {
@@ -78,7 +79,19 @@ document.addEventListener("DOMContentLoaded",function(){
                 window.editingPostId=null;
                 publishBtn.innerText="Ответить"
                 if (data.success){
-                    location.reload();
+                    if (counter==8){
+                        const url = new URL(window.location.href);
+                        const params=url.searchParams;
+
+                        let page=parseInt(params.get("pg")||"1",10);
+                        page=isNaN(page)?1:page;
+                        params.set("pg",page+1);
+
+                        url.search=params.toString();
+                        window.location.href=url.toString();
+                    }else{
+                        location.reload();
+                    }
                 } else {
                     alert(data.error||"Ошибка при публикации");
                 }
@@ -127,8 +140,7 @@ document.addEventListener("DOMContentLoaded",function(){
             .then(data => {
                 if (data.success) {
                     if (action==="delete_post") {
-                        const postEl=document.querySelector(`#post-${id}`);
-                        if (postEl) postEl.remove();
+                        window.location.reload();
                     } else if (action==="delete_thread") {
                         window.location.href="/forum.php";
                     } else if (action==="pin_thread") {
