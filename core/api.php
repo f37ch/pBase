@@ -266,6 +266,13 @@ if (isset($_POST["user_management"])){
     }
 }
 // Forum
+function forum_strVal($content,$min=44,$max=40000){
+    if (mb_strlen(trim(str_replace("\n","",$content)),"UTF-8")>$max||mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<$min){
+        return false;
+    }else{
+        return true;
+    }
+}
 if (isset($_POST["forum"])){
     
     $action=$_POST["forum"];
@@ -282,11 +289,8 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        if (mb_strlen(trim(str_replace("\n","",$content)),"UTF-8")<60||mb_strlen(trim($topic,"UTF-8"))<1) {
+        if (!forum_strVal($content)||!forum_strVal($topic,1,64)) {
             echo json_encode(["error"=>"Тема либо содержание поста слишком коротки."]);
-            exit;
-        }else if (mb_strlen($content,"UTF-8")>40000||mb_strlen(trim($topic,"UTF-8"))>28){
-			echo json_encode(["error"=>"Тема либо содержание поста слишком длинные."]);
             exit;
         }
 
@@ -345,6 +349,7 @@ if (isset($_POST["forum"])){
     }elseif ($action==="new_post"){
         $thread_id=intval($_POST["thread_id"]??0);
         $content=$_POST["content"]??"";
+        $reply_id=isset($_POST["reply_id"])&&$_POST["reply_id"]!==""?intval($_POST["reply_id"]):"NULL";
         $sid=$_SESSION["steamid"];
 
         if (!$sid){
@@ -357,11 +362,8 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
-            echo json_encode(["error"=>"Содержание поста слишком короткое."]);
-            exit;
-        }else if (mb_strlen($content,"UTF-8")>40000){
-			echo json_encode(["error"=>"Содержание поста слишком длинное."]);
+        if (!forum_strVal($content,26)){
+            echo json_encode(["error"=>"Содержание поста слишком короткое/длинное."]);
             exit;
         }
 
@@ -379,11 +381,21 @@ if (isset($_POST["forum"])){
         }elseif($checkQ->fetch_assoc()["locked"]==1){
            echo json_encode(["error"=>"Тред закрыт для далнейших постов."]); exit; 
         }
+
+        if ($reply_id!=="NULL"){
+            $replyCheck=$database->query("SELECT id, thread_id FROM forum_posts WHERE id = $reply_id");
+            if ($replyCheck->num_rows===0) {
+                echo json_encode(["error"=>"Ответный пост не найден"]);
+                exit;
+            }
+            $replyData=$replyCheck->fetch_assoc();
+            if ($replyData["thread_id"]!=$thread_id) {
+                echo json_encode(["error"=>"Вы не можете ответить на пост из другого треда."]);
+                exit;
+            }
+        }
     
-        $database->query("
-            INSERT INTO forum_posts (thread_id, sid, content, timestamp) 
-            VALUES ($thread_id, '$sid', '".$database->real_escape_string($content)."', UNIX_TIMESTAMP())
-        ");
+        $database->query("INSERT INTO forum_posts (thread_id, sid, content, timestamp, isreplyto) VALUES ($thread_id,'$sid','".$database->real_escape_string($content)."',UNIX_TIMESTAMP(),".($reply_id==="NULL"?"NULL":$reply_id).")");
     
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
     
@@ -404,11 +416,8 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        if (mb_strlen(trim(str_replace("\n","",$content),"UTF-8"))<26) {
-            echo json_encode(["error"=>"Содержание поста слишком короткое."]);
-            exit;
-        }elseif(mb_strlen($content,"UTF-8")>40000){
-            echo json_encode(["error"=>"Содержание поста слишком длинное."]);
+        if (!forum_strVal($content,26)) {
+            echo json_encode(["error"=>"Содержание поста слишком короткое/длинное."]);
             exit;
         }
 

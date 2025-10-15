@@ -73,7 +73,14 @@ if (isset($_GET["thread"])){//get thread
   padding:.5rem;
   min-height:6rem;
   text-shadow: none;
+  p {
+      font-size: 1.17em;
+  }
+  blockquote {
+    font-size: 1.17em;
+  }
 }
+
 #smiles {
   display: flex;
   align-items: center;
@@ -472,22 +479,30 @@ endforeach; // cats?>
                 p.id, 
                 p.sid,
                 p.edited,
+                p.isreplyto,
                 p.content, 
                 p.timestamp, 
                 u.name, 
                 u.avatarfull, 
                 u.ugroup,
-                (SELECT COUNT(*) FROM forum_posts WHERE sid = p.sid) AS user_posts,
 
+                u2.name AS replyto_nick,
+            
+                (SELECT COUNT(*) FROM forum_posts WHERE sid = p.sid) AS user_posts,
+            
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'like') AS `like`,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'love') AS love,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'funny') AS funny,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'wow') AS wow,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'sad') AS sad,
-
+            
                 (SELECT reaction_type FROM forum_reactions r WHERE r.post_id = p.id AND r.steamid = '$sid' LIMIT 1) AS my_reaction
+
             FROM forum_posts p
             JOIN users u ON u.steamid = p.sid
+            LEFT JOIN forum_posts p2 ON p.isreplyto = p2.id
+            LEFT JOIN users u2 ON u2.steamid = p2.sid
+            
             WHERE p.thread_id = {$thread_id}
             ORDER BY p.timestamp ASC
             LIMIT {$start}, {$limit}
@@ -496,15 +511,25 @@ endforeach; // cats?>
         ?>
         <?php
         $counter=0;
+        $allPostsQ=$database->query("SELECT id FROM forum_posts WHERE thread_id = {$thread_id} ORDER BY timestamp ASC");
+        $postPositions=[];
+        $pos=1;
+        while ($row=$allPostsQ->fetch_assoc()){
+          $postPositions[$row["id"]]=$pos++;
+        }
         while ($post=$postsQ->fetch_assoc()){
             $rankname=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["name"]:"User";
             $rankcol=$post["ugroup"]?$GLOBALS["settings"]["ugroups"][$post["ugroup"]]["color"]:"rgba(71, 71, 71, 1)";
             $counter++;
-            $viscnt=$counter+($page>1?$limit*($page-1):0);
+            $viscnt=$postPositions[$post["id"]];
+            $replyToPage=null;
+            if ($post["isreplyto"]&&isset($postPositions[$post["isreplyto"]])){
+              $replyToPage=ceil($postPositions[$post["isreplyto"]]/$limit);
+            }
             ?>
             <div id="post-<?=$post["id"]?>" class="card mb-3">
               <div class="d-flex">
-                <div class="d-flex flex-grow-1 flex-column" style="overflow: auto;">
+                <div class="d-flex flex-grow-1 flex-column" style="overflow: auto; height: fit-content;">
                   <div class="card-header" style="padding: .5rem;">
                     <div class="text-start d-flex align-items-center">
                       <a href="/profile.php?id=<?=$post["sid"]?>" class="text-decoration-none text-black">
@@ -520,7 +545,13 @@ endforeach; // cats?>
                       </a>
                     </div>    
                   </div>
-                  <div class="card-body pt-2 p-0">
+                  <div class="card-body p-0"><!-- pt-2 -->
+                    <?php if ($post["isreplyto"]) {?>
+                      <a href="?thread=<?=$thread_id?>&pg=<?=$replyToPage?>#post-<?=$post["isreplyto"]?>" type="button" class="w-100 d-flex justify-content-between rounded-0 btn btn-secondary text-white">
+                        <i class='bi bi-reply'>&nbsp;Ответ на пост <?=$post["replyto_nick"]?></i>
+                        <span class="rounded-pill badge text-bg-dark">&nbsp;#<?=$postPositions[$post["isreplyto"]]?>&nbsp;</span>
+                    </a>
+                    <?php }?>
                     <span class="post-content" style="border:unset;" data-delta="<?=htmlspecialchars($post["content"],ENT_QUOTES,"UTF-8")?>">
                       
                     </span>
@@ -547,9 +578,11 @@ endforeach; // cats?>
                         ?>
                       </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
+                      <?php if (!$thread["locked"]) {?>
+                      <button class="btn btn-dark btn-sm thread-btn" data-action="reply_post" title="Ответить" data-id="<?=$post["id"]?>" data-vicnt="#<?=$viscnt?>"><i class="bi bi-reply"></i></button>
                       <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" title="Изменить" data-id="<?=$post["id"]?>"><i class="bi bi-pencil"></i></button>
-                      <?php } ?>
+                      <?php }} ?>
                       <?php if (hasAccess("forum_admin")){ if ($viscnt==1){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" title="<?=$thread["pinned"]?"Открепить":"Закрепить"?>" data-id="<?=$thread_id?>">
                             <?=$thread["pinned"]?"<i class='bi bi-pin-angle'></i>":"<i class='bi bi-pin'></i>"?>

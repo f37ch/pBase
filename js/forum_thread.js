@@ -7,12 +7,11 @@ document.addEventListener("DOMContentLoaded",function(){
                 syntax:true,
                 toolbar:{
                     container:[
-                        [{header:[1,2,3,false]}],
+                        [{header:[1,2,false]}],
                         ["blockquote","link"],
-                        ["bold","italic","underline","strike"],
+                        ["bold","italic","underline","strike",{"align":[]},{"color":[]}],
                         ["image","video","code-block"],
                         [{"list":"ordered"},{"list":"bullet"},{"font":[]}],
-                        [{"align":[]},{"color":[]}],
                     ],
                     handlers: {
                         image: function() {
@@ -44,6 +43,7 @@ document.addEventListener("DOMContentLoaded",function(){
         clearBtn.addEventListener("click",()=>{
             window.quill.setContents();
             window.editingPostId=null;
+            window.replyPostId=null;
             clearBtn.innerText="Очистить поле";
             publishBtn.innerText="Ответить";
         });
@@ -63,7 +63,14 @@ document.addEventListener("DOMContentLoaded",function(){
                     post_id:window.editingPostId,
                     content:content
                 });
-            } else {
+            } else if(window.replyPostId) {
+                formData=new URLSearchParams({
+                    forum:"new_post",
+                    thread_id:threadId,
+                    reply_id:window.replyPostId,
+                    content:content
+                });
+            }else{
                 formData=new URLSearchParams({
                     forum:"new_post",
                     thread_id:threadId,
@@ -76,10 +83,8 @@ document.addEventListener("DOMContentLoaded",function(){
             })
             .then(r=>r.json())
             .then(data=>{
-                window.editingPostId=null;
-                publishBtn.innerText="Ответить"
                 if (data.success){
-                    if (counter==8){
+                    if (counter==8&&!window.editingPostId){
                         const url = new URL(window.location.href);
                         const params=url.searchParams;
 
@@ -95,9 +100,16 @@ document.addEventListener("DOMContentLoaded",function(){
                 } else {
                     alert(data.error||"Ошибка при публикации");
                 }
+                window.editingPostId=null;
+                window.replyPostId=null;
+                publishBtn.innerText="Ответить"
+                clearBtn.innerText="Очистить поле";
             })
             .catch(err=>{
                 window.editingPostId=null;
+                window.replyPostId=null;
+                publishBtn.innerText="Ответить";
+                clearBtn.innerText="Очистить поле";
                 alert("Не удалось отправить пост");
             });
         });
@@ -122,6 +134,22 @@ document.addEventListener("DOMContentLoaded",function(){
                 document.querySelector("#editor").scrollIntoView({behavior: "smooth"});
                 publishBtn.innerText="Сохранить"
                 clearBtn.innerText="Отменить редактирование"
+
+                return;
+            }
+
+            if (action==="reply_post") {
+                const postEl=document.querySelector(`#post-${id} .post-content`);
+                if (!postEl){
+                    alert("Не удалось найти содержимое поста");
+                    return;
+                }
+
+  
+                window.replyPostId=id;
+                document.querySelector("#editor").scrollIntoView({behavior: "smooth"});
+                publishBtn.innerText="Ответить на пост "+this.dataset.vicnt;
+                clearBtn.innerText="Отменить ответ"
 
                 return;
             }
