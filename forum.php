@@ -578,7 +578,7 @@ endforeach; // cats?>
                         ?>
                       </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
-                      <?php if (!$thread["locked"]) {?>
+                      <?php if (!$thread["locked"]&&$sid) {?>
                       <button class="btn btn-dark btn-sm thread-btn" data-action="reply_post" title="Ответить" data-id="<?=$post["id"]?>" data-vicnt="#<?=$viscnt?>"><i class="bi bi-reply"></i></button>
                       <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" title="Изменить" data-id="<?=$post["id"]?>"><i class="bi bi-pencil"></i></button>
