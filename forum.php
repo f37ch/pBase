@@ -234,7 +234,9 @@ if ($total==0){?>
         </div>
         <div class="card-body pt-2 p-0">
         
-          <span class="post-content" style="border:unset;" data-delta="<?=htmlspecialchars($post["content"],ENT_QUOTES,"UTF-8")?>"></span>
+          <span class="post-content" style="border:unset;" data-delta="<?=htmlspecialchars($post["content"],ENT_QUOTES,"UTF-8")?>">
+            
+          </span>
         </div>
         <div class="card-footer post-footer">
           <div class="d-flex flex-wrap">

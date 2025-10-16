@@ -294,20 +294,38 @@ document.addEventListener("DOMContentLoaded",function(){
         if (resp.pages>1) {
             threadPag.classList.remove("d-none");
             threadPag.innerHTML="";
-
-            // prev
-            threadPag.innerHTML+=`<li class="page-item ${resp.page==1?"disabled":""}">
-                <a class="page-link shadow-none text-black" onclick="get_threads('${subcatId}','${resp.prev}')">Prev</a></li>`;
-
-            // pg num
-            for (let i=1;i<=resp.pages;i++){
-                threadPag.innerHTML+=`<li class="page-item ${resp.page==i?"active":""}">
-                    <a class="page-link shadow-none text-black" onclick="get_threads('${subcatId}','${i}')">${i}</a></li>`;
+            
+            if (resp.page>4){
+                threadPag.innerHTML+=`<li class='page-item'>
+                    <a class='page-link text-black shadow-none' onclick="get_threads('${subcatId}', 1)">
+                        <span aria-hidden='true'>&laquo;</span>
+                    </a>
+                </li>`;
             }
 
-            // next
-            threadPag.innerHTML+=`<li class="page-item ${resp.page==resp.pages?"disabled":""}">
-                <a class="page-link shadow-none text-black" onclick="get_threads('${subcatId}','${resp.next}')">Next</a></li>`;
+            threadPag.innerHTML+=`<li class='page-item ${resp.page==1?"disabled":""}'>
+                <a class='page-link text-black shadow-none' onclick="get_threads('${subcatId}', ${resp.prev})">Prev</a>
+            </li>`;
+
+            for (let i=1;i<=resp.pages;i++){
+                if (i>=resp.page-3&&i<=resp.page+3){
+                    threadPag.innerHTML+=`<li class='page-item ${resp.page==i?"active":""}'>
+                        <a class='page-link text-black shadow-none' onclick="get_threads('${subcatId}', ${i})">${i}</a>
+                    </li>`;
+                }
+            }
+
+            threadPag.innerHTML+=`<li class='page-item ${resp.page==resp.pages?"disabled":""}'>
+                <a class='page-link text-black shadow-none' onclick="get_threads('${subcatId}', ${resp.next})">Next</a>
+            </li>`;
+
+            if (resp.page<resp.pages-2) {
+                threadPag.innerHTML+=`<li class='page-item'>
+                    <a class='page-link text-black shadow-none' onclick="get_threads('${subcatId}', ${resp.pages})">
+                        <span aria-hidden='true'>&raquo;</span>
+                    </a>
+                </li>`;
+            }
         }
     } catch (e) {
         alert(e);
