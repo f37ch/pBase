@@ -396,10 +396,21 @@ if (isset($_POST["forum"])){
         }
     
         $database->query("INSERT INTO forum_posts (thread_id, sid, content, timestamp, isreplyto) VALUES ($thread_id,'$sid','".$database->real_escape_string($content)."',UNIX_TIMESTAMP(),".($reply_id==="NULL"?"NULL":$reply_id).")");
+
+        $newPostId=$database->insert_id;
     
         $database->query("UPDATE forum_threads SET last_posted = UNIX_TIMESTAMP(), last_post_sid = '$sid' WHERE id = $thread_id");
-    
-        echo json_encode(["success"=>true]);
+
+        $countRes=$database->query("SELECT COUNT(*) AS total_posts FROM forum_posts WHERE thread_id = $thread_id");
+        $totalPosts=$countRes?intval($countRes->fetch_assoc()["total_posts"]):0;
+
+        echo json_encode([
+            "success"=>true,
+            "thread"=>[
+                "total_posts"=>$totalPosts,
+                "last_post_id"=>$newPostId
+            ]
+        ]);
         exit;
     }elseif ($action==="edit_post") {
         $post_id=intval($_POST["post_id"]??0);

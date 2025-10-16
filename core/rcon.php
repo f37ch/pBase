@@ -60,7 +60,7 @@ function getplayers($ip,$port) {
 }
 if (isset($_POST["get_players"]))
 {
-    $svname=$_POST["get_players"];
+    $svname=$database->real_escape_string($_POST["get_players"]);
 	$cached=Cache::get("players_".$svname);
 	if ($cached){
 		echo json_encode($cached);

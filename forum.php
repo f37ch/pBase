@@ -440,16 +440,15 @@ foreach ($subcats as $subcat):
             <?php endif; ?>
         </div>
     </div>
-    
     <div class="collapse" id="<?=$collapseId?>">
-        <div id="threadList-<?=$subcat["id"]?>"></div>
+            <div id="threadList-<?=$subcat["id"]?>"></div>
             <?php if (isset($_SESSION["steamid"])){ ?>
-              <button data-bs-toggle="modal" href="#write_modal" data-name="<?=$subcat["name"]?>" class="btn btn-outline-secondary w-100 btn-sm newpost-btn" id="newpost_btn-<?=$subcat["id"]?>" type="button">Создать Новый Тред</button>
+              <button data-bs-toggle="modal" href="#write_modal" data-name="<?=$subcat["name"]?>" class="mt-2 btn btn-outline-secondary w-100 btn-sm newpost-btn" id="newpost_btn-<?=$subcat["id"]?>" type="button">Создать Новый Тред</button>
             <?php }else{ ?>
-              <a href="?login" class="btn btn-outline-secondary w-100 btn-sm" type="button">Войдите Чтобы Создать Тред</a>
+              <a href="?login" class="mt-2 btn btn-outline-secondary w-100 btn-sm" type="button">Войдите Чтобы Создать Тред</a>
             <?php } ?>
         <ul class="pagination pagination-sm mt-2 mb-0 d-none" id="threadPag-<?=$subcat["id"]?>"></ul>
-        </div>
+      </div>
 <?php endforeach; // subcats ?>
     </div>
 </div>

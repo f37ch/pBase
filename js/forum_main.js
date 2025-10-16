@@ -264,30 +264,37 @@ document.addEventListener("DOMContentLoaded",function(){
             alert(resp.error);
             return;
         }
-
         threadList.innerHTML="";
-        for (const thread of resp.data) {
-            threadList.innerHTML += `
-                <div class="d-flex align-items-center mb-2" style="margin-left:1rem;">
-                    <a href="/profile.php?id=${thread.author_steamid}" title="${thread.author_name}" class="text-decoration-none text-body-secondary">
-                        <img class="col-auto rounded-circle"
-                             style="border:2px solid rgba(71,71,71,1);width:2.3rem;"
-                             src="${thread.author_avatar}">
-                    </a>
-                    <div class="p-2 fs-6">
-                        <div class="text-start">
-                        <a href="?thread=${thread.id}" class="text-decoration-none text-body-secondary">
-                                <span class="mb-0">${thread.topic} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
+        if (resp.data.length>0) {
+            let html=`<div class="card pt-3 pb-2">`;
+
+            for (let i=0;i<resp.data.length;i++){
+                const thread=resp.data[i];
+                html+=`
+                    <div class="d-flex align-items-center mb-2" style="margin-left:1rem;">
+                        <a href="/profile.php?id=${thread.author_steamid}" title="${thread.author_name}" class="text-decoration-none text-body-secondary">
+                            <img class="col-auto rounded-circle"
+                                 style="border:2px solid rgba(71,71,71,1);width:2.3rem;"
+                                 src="${thread.author_avatar}">
+                        </a>
+                        <div class="p-2 fs-6">
+                            <div class="text-start">
+                                <a href="?thread=${thread.id}" class="text-decoration-none text-body-secondary">
+                                    <span class="mb-0">${thread.topic} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
+                                </a>
                             </div>
                             <div class="text-start">
                                 <span style="color:#178649ff;">${thread.created} • </span>
                                 <span style="color:#178649ff;">${thread.replies} ${plural(parseInt(thread.replies),'ответ','ответа','ответов')}</span>
                             </div>
-                        </a>
+                        </div>
                     </div>
-                </div>
-                <hr>
-            `;
+                    ${i<resp.data.length-1?"<hr>":""}
+                `;
+            }
+
+            html+="</div>";
+            threadList.innerHTML+=html;
         }
 
         // pagination
@@ -328,7 +335,8 @@ document.addEventListener("DOMContentLoaded",function(){
             }
         }
     } catch (e) {
-        alert(e);
+        //alert(e);
+        console.log(e);
     }
 }
 

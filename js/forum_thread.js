@@ -85,14 +85,12 @@ document.addEventListener("DOMContentLoaded",function(){
             .then(data=>{
                 if (data.success){
                     if (counter==8&&!window.editingPostId){
-                        const url = new URL(window.location.href);
-                        const params=url.searchParams;
+                        const postsPerPage=8;
+                        const lastPage=Math.ceil(data.thread.total_posts/postsPerPage);
 
-                        let page=parseInt(params.get("pg")||"1",10);
-                        page=isNaN(page)?1:page;
-                        params.set("pg",page+1);
-
-                        url.search=params.toString();
+                        const url=new URL(window.location.href);
+                        url.searchParams.set("pg",lastPage);
+                        url.hash="post-"+data.thread.last_post_id;
                         window.location.href=url.toString();
                     }else{
                         location.reload();
