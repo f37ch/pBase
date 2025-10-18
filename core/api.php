@@ -311,7 +311,7 @@ if (isset($_POST["forum"])){
     }elseif ($action==="get_threads"){
         $subcat_id=intval($_POST["subcat_id"]??0);
         $page=max(intval($_POST["page"]??1),1);
-        $perPage=5;
+        $perPage=8;
         $offset=($page-1)*$perPage;
 
         $cntQ=$database->query("SELECT COUNT(*) as cnt FROM forum_threads WHERE subcat_id = $subcat_id");

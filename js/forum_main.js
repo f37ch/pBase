@@ -44,10 +44,25 @@ document.addEventListener("DOMContentLoaded",function(){
     });
 
     // collapse
+    const pagesCache={};
+    var lastCollapse;
 
     const collapses=document.querySelectorAll(".collapse");
     collapses.forEach(collapse=>{
         collapse.addEventListener("show.bs.collapse",function () {
+            if (collapse.id.startsWith("threadCollapse-")){
+
+                const sid=collapse.id.replace("threadCollapse-","")
+                updateURL(sid,pagesCache[sid])
+
+                const onHide=function(){
+                    if (lastCollapse==sid)
+                   history.replaceState(null,"",window.location.pathname);
+                   collapse.removeEventListener("hide.bs.collapse",onHide);
+                };
+                collapse.addEventListener("hide.bs.collapse",onHide);
+                lastCollapse=sid
+            }
             collapses.forEach(other=>{
                 if (other!==collapse&&other.classList.contains("show")){
                     const bsCollapse=bootstrap.Collapse.getInstance(other);
@@ -246,7 +261,18 @@ document.addEventListener("DOMContentLoaded",function(){
         if (n1==1) return one;
         return many;
     }
-    window.get_threads=async function(subcatId,page=1){
+    function updateURL(subcatId,page){
+        const params=new URLSearchParams(window.location.search);
+        params.set("scid",subcatId);
+        if(page&&page>1){
+            params.set("scpg",page);
+        }else{
+            params.delete("scpg"); 
+        }
+        history.replaceState(null,"",`?${params.toString()}`);
+    }
+
+    window.get_threads=async function(subcatId,page=1,ignoreUpd){
     const threadList=document.getElementById("threadList-"+subcatId);
     const threadPag=document.getElementById("threadPag-"+subcatId);
 
@@ -256,7 +282,11 @@ document.addEventListener("DOMContentLoaded",function(){
     fd.append("forum","get_threads");
     fd.append("subcat_id",subcatId);
     fd.append("page",page);
-
+    
+    if(!ignoreUpd){
+        updateURL(subcatId,page);
+    }
+    
     try {
         const resp=await apiRequest(fd);
 
@@ -266,30 +296,32 @@ document.addEventListener("DOMContentLoaded",function(){
         }
         threadList.innerHTML="";
         if (resp.data.length>0) {
-            let html=`<div class="card pt-3 pb-2">`;
+            let html=`<div class="card">`;
 
             for (let i=0;i<resp.data.length;i++){
                 const thread=resp.data[i];
                 html+=`
-                    <div class="d-flex align-items-center mb-2" style="margin-left:1rem;">
-                        <a href="/profile.php?id=${thread.author_steamid}" title="${thread.author_name}" class="text-decoration-none text-body-secondary">
+                    <a href="?thread=${thread.id}" class="btn btn-light d-flex align-items-center text-decoration-none text-body-secondary rounded-0 ${i==0?"rounded-top-1":""} ${i==resp.data.length-1?"rounded-bottom-1":""}">
                             <img class="col-auto rounded-circle"
                                  style="border:2px solid rgba(71,71,71,1);width:2.3rem;"
                                  src="${thread.author_avatar}">
-                        </a>
                         <div class="p-2 fs-6">
                             <div class="text-start">
-                                <a href="?thread=${thread.id}" class="text-decoration-none text-body-secondary">
+                                <div class="text-decoration-none text-body-secondary">
                                     <span class="mb-0">${thread.topic} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
-                                </a>
+                                </div>
                             </div>
+                            
                             <div class="text-start">
-                                <span style="color:#178649ff;">${thread.created} • </span>
-                                <span style="color:#178649ff;">${thread.replies} ${plural(parseInt(thread.replies),'ответ','ответа','ответов')}</span>
+                                <span style="color:#178649ff;">${thread.created}</span>
                             </div>
                         </div>
-                    </div>
-                    ${i<resp.data.length-1?"<hr>":""}
+                        <div class="text-end d-grid border-start ps-3" style="margin-left:auto;">
+                            <span class="fs-4" style="margin:auto;">${thread.replies}</span>
+                            <span>${plural(parseInt(thread.replies),'пост','поста','постов')}</span>
+                        </div>
+                    </a>
+                    ${i<resp.data.length-1?"<hr class='m-0'>":""}
                 `;
             }
 
@@ -301,6 +333,7 @@ document.addEventListener("DOMContentLoaded",function(){
         if (resp.pages>1) {
             threadPag.classList.remove("d-none");
             threadPag.innerHTML="";
+            pagesCache[subcatId]=resp.page;
             
             if (resp.page>4){
                 threadPag.innerHTML+=`<li class='page-item'>
@@ -341,13 +374,25 @@ document.addEventListener("DOMContentLoaded",function(){
 }
 
     const lists=[...document.querySelectorAll('[id^="threadList-"]')];
-
     async function loadThreadsSequentially(){
         for (const list of lists) {
             const subcatId=list.id.replace("threadList-","");
-            await get_threads(subcatId);
+            await get_threads(subcatId,1,true);
         }
     }
-    loadThreadsSequentially();
+    loadThreadsSequentially().then(()=>{
+        const params=new URLSearchParams(window.location.search);
+        const subcatId=parseInt(params.get("scid"));
+        const page=parseInt(params.get("scpg"));
+        if (subcatId){
+            const subcatContainer=document.querySelector(`[href="#threadCollapse-${subcatId}"]`);
+            if (subcatContainer){
+                subcatContainer.click();
+                if (page){
+                    get_threads(subcatId,page);
+                }      
+            }
+        }
+    });
 
 });
