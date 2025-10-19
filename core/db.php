@@ -72,6 +72,7 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
         name VARCHAR(50) NOT NULL,
         icon VARCHAR(100) DEFAULT NULL,
         prior TINYINT(4) DEFAULT NULL,
+        locked tinyint(1),
         PRIMARY KEY (id),
         KEY fk_fc_fsc (cat_id),
         CONSTRAINT fk_fc_fsc FOREIGN KEY (cat_id) REFERENCES forum_cats(id) ON DELETE CASCADE ON UPDATE CASCADE

@@ -273,6 +273,18 @@ function forum_strVal($content,$min=44,$max=40000){
         return true;
     }
 }
+function isSubcatLocked($subcatid){
+    $subcatCheck=$GLOBALS["database"]->query("SELECT locked FROM forum_subcats WHERE id = ".$subcatid);
+    if ($subcatCheck&&$subcatCheck->num_rows>0){
+        $subcat=$subcatCheck->fetch_assoc();
+        if ($subcat["locked"]==1){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
+
 if (isset($_POST["forum"])){
     
     $action=$_POST["forum"];
@@ -286,6 +298,11 @@ if (isset($_POST["forum"])){
         if (!$sid){
             http_response_code(403);
             echo json_encode(["error"=>"Access denied."]);
+            exit;
+        }
+
+        if (isSubcatLocked($subcat_id)){
+            echo json_encode(["error"=>"Сабкатегория закрыта для дальнейших постов."]);
             exit;
         }
 
@@ -375,11 +392,15 @@ if (isset($_POST["forum"])){
             }
         }
     
-        $checkQ=$database->query("SELECT id,locked FROM forum_threads WHERE id = $thread_id");
-        if ($checkQ->num_rows===0) {
-            echo json_encode(["error"=>"Тред не найден"]); exit;
-        }elseif($checkQ->fetch_assoc()["locked"]==1){
-           echo json_encode(["error"=>"Тред закрыт для далнейших постов."]); exit; 
+        $checkQ=$database->query("SELECT locked,subcat_id FROM forum_threads WHERE id = $thread_id");
+        if ($checkQ->num_rows===0){
+            echo json_encode(["error"=>"Тред не найден"]); 
+            exit;
+        }
+        $threadData=$checkQ->fetch_assoc();
+        if (($threadData["locked"]==1||isSubcatLocked($threadData["subcat_id"]))&&!hasAccess("forum_admin")){
+            echo json_encode(["error"=>"Тред закрыт для дальнейших постов."]);
+            exit; 
         }
 
         if ($reply_id!=="NULL"){
@@ -448,8 +469,9 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        $threadQ=$database->query("SELECT locked FROM forum_threads WHERE id = $thread_id");
-        if ($threadQ && $threadQ->num_rows>0 && $threadQ->fetch_assoc()["locked"]==1 && !hasAccess("forum_admin")) {
+        $threadQ=$database->query("SELECT locked,subcat_id FROM forum_threads WHERE id = $thread_id");
+        $threadData=$threadQ->fetch_assoc();
+        if ($threadQ&&$threadQ->num_rows>0&&($threadData["locked"]==1||isSubcatLocked($threadData["subcat_id"]))&&!hasAccess("forum_admin")){
             echo json_encode(["error"=>"Тред закрыт для редактирования постов."]);
             exit;
         }
@@ -486,7 +508,7 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        $allowed=["like","love","funny","wow","sad"];
+        $allowed=["love","funny","wow","sad","trash"];
 
         if (!in_array($type,$allowed,true)){
             http_response_code(400);

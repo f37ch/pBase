@@ -19,6 +19,7 @@ if (isset($_GET["thread"])){//get thread
             u.avatarfull, 
             u.ugroup,
             sc.name AS subcat_name,
+            sc.locked AS subcat_locked,
             c.name AS cat_name
         FROM forum_threads t
         JOIN users u ON u.steamid = t.sid
@@ -322,10 +323,18 @@ if ($total==0){?>
 foreach ($cats as $cat):
   $subcats=[];
   $subQ=$database->query("
-      SELECT s.id, s.name, s.icon, s.prior
-      FROM forum_subcats s
-      WHERE s.cat_id = {$cat["id"]}
-      ORDER BY COALESCE(s.prior, 999) ASC, s.id ASC
+    SELECT 
+        s.id,
+        s.name,
+        s.icon,
+        s.prior,
+        s.locked,
+        COUNT(t.id) AS threads_count
+    FROM forum_subcats s
+    LEFT JOIN forum_threads t ON t.subcat_id = s.id
+    WHERE s.cat_id = {$cat["id"]}
+    GROUP BY s.id
+    ORDER BY COALESCE(s.prior, 999) ASC, s.id ASC
   ");
   while($row=$subQ->fetch_assoc()){
     $subcats[]=$row;
@@ -405,7 +414,7 @@ foreach ($subcats as $subcat):
     ");
     $count=$countQ->fetch_assoc()["cnt"]??0;
 ?>
-    <div class="d-flex align-items-center mb-2 <?php if ($index<$total){echo "subcat-container";}; ?>" id="subcat-<?=$subcat["id"]?>">
+    <div class="d-flex align-items-center mb-2 <?php if ($index<$total){echo "subcat-container";}; ?>" id="subcat-<?=$subcat["id"]?>" data-bs-toggle="collapse" href="#<?=$collapseId?>" role="button" aria-expanded="false" aria-controls="<?=$collapseId?>">
         <?php if (!empty($subcat["icon"])): ?>
             <?php if (filter_var($subcat["icon"],FILTER_VALIDATE_URL)): ?>
                 <span class="fs-1 d-inline-flex align-items-center justify-content-center" style="line-height:1;">
@@ -419,12 +428,8 @@ foreach ($subcats as $subcat):
         <?php else: ?>
             <i class="fs-1 bi bi-textarea-t text-end"></i>
         <?php endif; ?>
-        <div class="p-2" data-bs-toggle="collapse"
-             href="#<?= $collapseId ?>" role="button"
-             aria-expanded="false" aria-controls="<?= $collapseId ?>">
-
+        <div class="p-2">
             <h5 class="mb-0 text-start text-decoration-none text-body-secondary subcat-name"><?=$subcat["name"]?></h5>
-
             <?php if($last): ?>
             <div class="text-start" title="<?=$last["author_name"]?>" class="text-decoration-none text-body-secondary">
                 <span class="fw-light">
@@ -436,17 +441,21 @@ foreach ($subcats as $subcat):
                 <span style="color:#178649ff;">• <?=elapsed($last["last_time"])?></span>
             </div>
             <?php else: ?>
-            <div class="text-muted small text-start">Нет постов</div>
+            <div class="text-muted small text-start">Нет тредов</div>
             <?php endif; ?>
+        </div>
+        <div class="text-end d-grid border-start ps-3" style="margin-left:auto;">
+            <span class="fs-4" style="margin:auto;"><?=$subcat["threads_count"]?></span>
+            <span><?=plural($subcat["threads_count"],"тред","треда","тредов")?></span>
         </div>
     </div>
     <div class="collapse" id="<?=$collapseId?>">
             <div id="threadList-<?=$subcat["id"]?>"></div>
-            <?php if (isset($_SESSION["steamid"])){ ?>
+            <?php if ($subcat["locked"]!=1){ if (isset($_SESSION["steamid"])){ ?>
               <button data-bs-toggle="modal" href="#write_modal" data-name="<?=$subcat["name"]?>" class="mt-2 btn btn-outline-secondary w-100 btn-sm newpost-btn" id="newpost_btn-<?=$subcat["id"]?>" type="button">Создать Новый Тред</button>
             <?php }else{ ?>
               <a href="?login" class="mt-2 btn btn-outline-secondary w-100 btn-sm" type="button">Войдите Чтобы Создать Тред</a>
-            <?php } ?>
+            <?php }} ?>
         <ul class="pagination pagination-sm mt-2 mb-0 d-none" id="threadPag-<?=$subcat["id"]?>"></ul>
       </div>
 <?php endforeach; // subcats ?>
@@ -491,11 +500,11 @@ endforeach; // cats?>
             
                 (SELECT COUNT(*) FROM forum_posts WHERE sid = p.sid) AS user_posts,
             
-                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'like') AS `like`,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'love') AS love,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'funny') AS funny,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'wow') AS wow,
                 (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'sad') AS sad,
+                (SELECT COUNT(*) FROM forum_reactions r WHERE r.post_id = p.id AND r.reaction_type = 'trash') AS `trash`,
             
                 (SELECT reaction_type FROM forum_reactions r WHERE r.post_id = p.id AND r.steamid = '$sid' LIMIT 1) AS my_reaction
 
@@ -562,16 +571,16 @@ endforeach; // cats?>
                       <div class="d-flex gap-2 reactions">
                         <?php
                         $emojiList=[
-                            "like"=>"👍",
                             "love"=>"❤️",
                             "funny"=>"😂",
                             "wow"=>"😮",
-                            "sad"=>"😢"
+                            "sad"=>"😢",
+                            "trash"=>"🗑️",
                         ];
                         foreach ($emojiList as $type=>$emoji){
                             $count=$post[$type]??0;
                             echo "
-                            <div class='reaction' data-pid='{$post["id"]}' data-type='{$type}'>
+                            <div class='reaction' data-pid='{$post["id"]}' data-type='{$type}' title='{$type}'>
                                 <span class='emoji'>{$emoji}</span>
                                 ".($count>0?"<span class='count'>{$count}</span>":"<span class='count' style='display:none;'></span>")."
                             </div>";
@@ -579,7 +588,7 @@ endforeach; // cats?>
                         ?>
                       </div>
                       <div class="d-flex gap-1" style="margin-left:auto;">
-                      <?php if (!$thread["locked"]&&$sid) {?>
+                      <?php if (((!$thread["locked"]&&!$thread["subcat_locked"]==1)||hasAccess("forum_admin"))&&$sid) {?>
                       <button class="btn btn-dark btn-sm thread-btn" data-action="reply_post" title="Ответить" data-id="<?=$post["id"]?>" data-vicnt="#<?=$viscnt?>"><i class="bi bi-reply"></i></button>
                       <?php if (hasAccess("forum_admin")||$post["sid"]==$sid){ ?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="edit_post" title="Изменить" data-id="<?=$post["id"]?>"><i class="bi bi-pencil"></i></button>
@@ -588,10 +597,11 @@ endforeach; // cats?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="pin_thread" title="<?=$thread["pinned"]?"Открепить":"Закрепить"?>" data-id="<?=$thread_id?>">
                             <?=$thread["pinned"]?"<i class='bi bi-pin-angle'></i>":"<i class='bi bi-pin'></i>"?>
                           </button>
+                        <?php if (!$thread["subcat_locked"]==1) {?>
                           <button class="btn btn-dark btn-sm thread-btn" data-action="lock_thread" title="<?=$thread["locked"]?"Открыть":"Закрыть"?>" data-id="<?=$thread_id?>">
                             <?=$thread["locked"]?"<i class='bi bi-unlock'></i>":"<i class='bi bi-lock'></i>"?>
                           </button>
-                      <?php } ?>
+                      <?php }} ?>
                           <button class="btn btn-danger btn-sm thread-btn" title="<?=$viscnt==1?"Удалить Тред":"Удалить Пост"?>"data-action="<?=$viscnt==1?"delete_thread":"delete_post"?>" data-id="<?=$viscnt==1?$thread_id:$post["id"]?>">
                             <?=$viscnt==1?"<i class='bi bi-x-square'></i>":"<i class='bi bi-trash3'></i>"?>
                           </button>
@@ -635,7 +645,7 @@ endforeach; // cats?>
         <?php } ?>
         <?php if (isset($_SESSION["steamid"])){ ?>
         <div class="card mb-3">
-          <?php if ($thread["locked"]){ ?>
+          <?php if (($thread["locked"]||$thread["subcat_locked"]==1)&&!hasAccess("forum_admin")){ ?>
           <div class="card-body col-red p-1">
             <h3>Тред Был Закрыт</h3>
             <h2><i class="bi bi-lock"></i></h2>
