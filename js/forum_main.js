@@ -91,9 +91,24 @@ document.addEventListener("DOMContentLoaded",function(){
         selectAction.addEventListener("change",toggleCreateFields);
         toggleCreateFields();
     }
+    document.querySelectorAll("[id^='lock_subcat']").forEach(btn=>{
+        btn.addEventListener("click",async(ev)=>{
+            const scatId=btn.id.split("-")[1];
+
+            const fd=new FormData();
+            fd.append("forum_admin","lock_subcat");
+            fd.append("id",scatId);
+        
+            try {
+                const data=await apiRequest(fd);
+                if (data.error) alert(data.error);
+                else location.reload();
+            } catch (e) {alert("Ошибка: "+e.message); }
+        });
+    });
 
     if (createBtn) {
-        createBtn.addEventListener("click",async () => {
+        createBtn.addEventListener("click",async()=>{
             const action=selectAction?selectAction.value:"new_cat";
             const name=document.getElementById("name").value.trim();
             const prior=document.getElementById("prior").value.trim();

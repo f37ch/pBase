@@ -451,12 +451,20 @@ foreach ($subcats as $subcat):
     </div>
     <div class="collapse" id="<?=$collapseId?>">
             <div id="threadList-<?=$subcat["id"]?>"></div>
-            <?php if ($subcat["locked"]!=1){ if (isset($_SESSION["steamid"])){ ?>
-              <button data-bs-toggle="modal" href="#write_modal" data-name="<?=$subcat["name"]?>" class="mt-2 btn btn-outline-secondary w-100 btn-sm newpost-btn" id="newpost_btn-<?=$subcat["id"]?>" type="button">Создать Новый Тред</button>
+            
+        <div class="d-flex justify-content-between gap-1 flex-wrap">
+          <ul class="pagination pagination-sm mt-2 mb-0 d-none" id="threadPag-<?=$subcat["id"]?>"></ul>
+          <?php if ($subcat["locked"]!=1||hasAccess("forum_admin")){ if (isset($_SESSION["steamid"])){ ?>
+              <button data-bs-toggle="modal" href="#write_modal" data-name="<?=$subcat["name"]?>" class="mt-2 btn btn-outline-secondary flex-fill btn-sm newpost-btn" id="newpost_btn-<?=$subcat["id"]?>" type="button">Создать Новый Тред</button>
             <?php }else{ ?>
-              <a href="?login" class="mt-2 btn btn-outline-secondary w-100 btn-sm" type="button">Войдите Чтобы Создать Тред</a>
+              <a href="?login" class="mt-2 btn btn-outline-secondary flex-fill btn-sm" type="button">Войдите Чтобы Создать Тред</a>
             <?php }} ?>
-        <ul class="pagination pagination-sm mt-2 mb-0 d-none" id="threadPag-<?=$subcat["id"]?>"></ul>
+          <?php if (hasAccess("forum_admin")) { ?>
+          <button class="btn btn-dark btn-sm mt-2 mb-0" id="lock_subcat-<?=$subcat["id"]?>" title="<?=$subcat["locked"]?"Открыть":"Закрыть"?>">
+            <?=$subcat["locked"]?"<i class='bi bi-unlock'></i>":"<i class='bi bi-lock'></i>"?>
+          </button>
+          <?php } ?>
+        </div>
       </div>
 <?php endforeach; // subcats ?>
     </div>

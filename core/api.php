@@ -301,7 +301,7 @@ if (isset($_POST["forum"])){
             exit;
         }
 
-        if (isSubcatLocked($subcat_id)){
+        if (isSubcatLocked($subcat_id)&&!hasAccess("forum_admin")){
             echo json_encode(["error"=>"Сабкатегория закрыта для дальнейших постов."]);
             exit;
         }
@@ -580,6 +580,11 @@ if (isset($_POST["forum_admin"])){
         $row=$database->query("SELECT locked FROM forum_threads WHERE id='$id' LIMIT 1")->fetch_assoc();
         $locked=$row["locked"]==1?"NULL":1;
         $response=$database->query("UPDATE forum_threads SET locked=$locked WHERE id='$id'");
+    }elseif($action==="lock_subcat"){
+        $id=(int)$_POST["id"];
+        $row=$database->query("SELECT locked FROM forum_subcats WHERE id='$id' LIMIT 1")->fetch_assoc();
+        $locked=$row["locked"]==1?"NULL":1;
+        $response=$database->query("UPDATE forum_subcats SET locked=$locked WHERE id='$id'");
     }elseif($action==="edit_cat"){
         $id=(int)$_POST["id"];
         $name=$database->real_escape_string($_POST["name"]);
