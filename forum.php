@@ -182,6 +182,7 @@ $resultsQ=$database->query("
     SELECT 
         p.id AS post_id,
         p.content,
+        p.sid,
         p.timestamp,
         t.id AS thread_id,
         u.name AS author_name,
