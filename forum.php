@@ -20,6 +20,7 @@ if (isset($_GET["thread"])){//get thread
             u.ugroup,
             sc.name AS subcat_name,
             sc.locked AS subcat_locked,
+            sc.id AS subcat_id,
             c.name AS cat_name
         FROM forum_threads t
         JOIN users u ON u.steamid = t.sid
@@ -114,7 +115,7 @@ if (isset($_GET["thread"])){//get thread
     <div class="card-body d-flex justify-content-between" style="padding: .5rem;">
         <h6 class="text-start mb-0 flex-grow-1 text-truncate" style="line-height:unset; max-width:calc(100%-100px);">
           <?php if (isset($_GET["thread"])){
-            echo $thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"];
+            echo "<a class='text-decoration-none text-black' href='/forum.php?scid=".$thread["subcat_id"]."'>".$thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"]."</a>";
           }elseif(isset($search)){
             echo "Поиск по запросу «".htmlspecialchars($search)."»";
           }else{
