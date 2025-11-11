@@ -81,8 +81,11 @@ if (isset($_GET["thread"])){//get thread
   blockquote {
     font-size: 1.17em;
   }
+  .ql-video {
+    width:100%;
+    height:28em;
+  }
 }
-
 #smiles {
   display: flex;
   align-items: center;
