@@ -74,8 +74,46 @@ function getRandomScreenshot($ids){
 }
 
 $stbg=getSetting("loadscr_img",false);
-$bg=filter_var($stbg,FILTER_VALIDATE_URL)?$stbg:getRandomScreenshot($stbg); // fallback
+$isVideo=false;
+if ($stbg) {
+    $ext=strtolower(pathinfo($stbg,PATHINFO_EXTENSION));
+    if (in_array($ext,["webm","mp4","ogg"])) {
+      $isVideo=true;
+    }
+}
+
+$bg=(!$isVideo&&filter_var($stbg,FILTER_VALIDATE_URL))?$stbg:(!$isVideo?getRandomScreenshot($stbg):$stbg);
 ?>
+
+<?php if ($isVideo): ?>
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#bgvideo {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  filter: blur(4px);
+  z-index: -2;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: -1;
+}
+</style>
+
+<video id="bgvideo" autoplay muted loop playsinline>
+    <source src="<?=$bg?>" type="video/<?=pathinfo($bg,PATHINFO_EXTENSION)?>">
+</video>
+
+<?php else: ?>
 <style>
   body {
   margin: 0;
@@ -100,6 +138,7 @@ body::after {
   z-index: -1;
 }
 </style>
+<?php endif; ?>
 <h3 class="mb-3 font_big" id="project_name"><?php echo getSetting("project_name",false)??"pBase"?></h3>
 <div data-aos="zoom-in" data-aos-delay="100" class="card mt-auto mb-auto border-0 bggrad text-white" style="border-radius:20px; overflow: hidden; height: auto;">
   <div class="d-flex mt-1 p-2" style="overflow: hidden;height:15vw;">
