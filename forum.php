@@ -81,7 +81,7 @@ if (isset($_GET["thread"])){//get thread
   blockquote {
     font-size: 1.17em;
   }
-  .ql-video {
+  .ql-video, video {
     width:100%;
     height:28em;
   }

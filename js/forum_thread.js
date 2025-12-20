@@ -27,6 +27,38 @@ document.addEventListener("DOMContentLoaded",function(){
         });
     }
 
+
+    let BlockEmbed=Quill.import("blots/block/embed");
+    class VideoBlot extends BlockEmbed {
+      static create(value) {
+        let node;
+        const isYouTube=value.includes("youtube.com")||value.includes("youtu.be");
+
+        if (isYouTube) {
+          node = document.createElement("iframe");
+          node.setAttribute("src",value);
+          node.setAttribute("frameborder","0");
+          node.setAttribute("allowfullscreen","true");
+          node.classList.add("ql-video");
+        } else {
+          node = document.createElement("video");
+          node.setAttribute("src",value);
+          node.setAttribute("controls","true");
+          node.setAttribute("preload","metadata");
+          node.removeAttribute("autoplay");
+        }
+        return node;
+      }
+
+      static value(node) {
+        return node.getAttribute("src");
+      }
+    }
+    VideoBlot.blotName="video";
+    VideoBlot.tagName=["iframe","video"];
+    Quill.register(VideoBlot,true);
+
+
     document.querySelectorAll(".post-content").forEach(function(el){
         const delta=JSON.parse(el.dataset.delta);
 
