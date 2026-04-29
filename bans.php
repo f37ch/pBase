@@ -10,17 +10,44 @@ $wherend=isset($_GET["type"])?"AND":"WHERE";
 $sid=isset($_GET["sid"])&&$_GET["sid"]!=""?$wherend." (offender_steamid='".$database->real_escape_string($_GET["sid"])."' or admin_steamid='".$database->real_escape_string($_GET["sid"])."')":"";
 
 $limit=13;
+$params=[];
+$ptypes="";
+$conds=[];
 
-$countres=$database->query("SELECT count(id) AS id FROM bans $type $sid")??NULL;
-$fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
-$total=$fetchedcount[0]['id'];
+if (isset($_GET["type"])&&$_GET["type"]!==""){
+    $conds[] = "type = ?";
+    $params[] = $_GET["type"];
+    $ptypes .= "s";
+}
+if (isset($_GET["sid"])&&$_GET["sid"]!==""){
+    if (!preg_match('/^7656\d{13}$/',$_GET["sid"])){
+        header("Location: /bans.php");
+        exit;
+    }
+    $conds[] = "(offender_steamid = ? OR admin_steamid = ?)";
+    $params[] = $_GET["sid"];
+    $params[] = $_GET["sid"];
+    $ptypes .= "ss";
+}
+
+$where = count($conds)?"WHERE ".implode(" AND ",$conds):"";
+
+$stmt=$database->prepare("SELECT count(id) AS id FROM bans $where");
+if ($params) $stmt->bind_param($ptypes,...$params);
+$stmt->execute();
+$total=$stmt->get_result()->fetch_assoc()["id"];
+
 $pages=ceil($total/$limit);
-
 $page=isset($_GET["pg"])?intval($_GET["pg"]):1;
 $page=max(1,min($page,$pages));
 $start=($page-1)*$limit;
 
-$result=$database->query("SELECT * FROM bans $type $sid ORDER BY id DESC LIMIT $start, $limit")??NULL;
+$sparams=array_merge($params,[$start,$limit]);
+$stmt2=$database->prepare("SELECT * FROM bans $where ORDER BY id DESC LIMIT ?,?");
+$stmt2->bind_param($ptypes."ii",...$sparams);
+$stmt2->execute();
+$result=$stmt2->get_result();
+
 $prev=$page>1?$page-1:1;
 $nxt=$page!=$pages?$page+1:$pages;
 function elapsedb($created,$expire)

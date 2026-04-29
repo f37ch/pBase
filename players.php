@@ -14,18 +14,27 @@ $sort_column="last_played";
 if (isset($_GET["type"]) && in_array($_GET["type"],$allowed_columns,true)){
     $sort_column=$_GET["type"];
 }
-$where="";
+
 if (isset($_GET["search"])&&$_GET["search"]!==""){
-  $search=$database->real_escape_string($_GET["search"]);
-  if (preg_match('/^7656\d{13}$/',$search)){
-      $where="WHERE steamid = '$search'";
-  } else {
-      $where="WHERE name LIKE '%$search%'";
-  }
+    $search=trim($_GET["search"]);
+    $isSteamId=preg_match('/^7656\d{13}$/',$search);
+    $param=$isSteamId?$search:"%".$search."%";
+    $cond=$isSteamId?"steamid = ?":"name LIKE ?";
+
+    $stmt=$database->prepare("SELECT * FROM users WHERE $cond ORDER BY $sort_column DESC LIMIT ?,?");
+    $stmt->bind_param("sii",$param,$start,$limit);
+    $stmt->execute();
+    $result=$stmt->get_result();
+
+    $stmt2=$database->prepare("SELECT count(steamid) AS cnt FROM users WHERE $cond");
+    $stmt2->bind_param("s",$param);
+    $stmt2->execute();
+    $fetchedcount=$stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
+} else {
+    $result=$database->query("SELECT * FROM users ORDER BY $sort_column DESC LIMIT $start,$limit")??NULL;
+    $fetchedcount=$database->query("SELECT count(steamid) AS cnt FROM users")->fetch_all(MYSQLI_ASSOC);
 }
-$result=$database->query("SELECT * FROM users $where ORDER BY $sort_column DESC LIMIT $start, $limit")??NULL;
-$countres=$database->query("SELECT count(steamid) AS cnt FROM users $where") ?? NULL;
-$fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
+
 $total=$fetchedcount[0]["cnt"];
 $pages=ceil($total/$limit);
 $prev=$page>1?$page-1:1;

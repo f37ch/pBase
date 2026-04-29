@@ -372,7 +372,7 @@ if (isset($_GET["id"])){
   <script src="<?=asset_version("/js/pip.min.js")?>"></script>
 <?php }else{ ?>
     <h1 class="text-danger" data-aos="zoom-in" data-aos-delay="100">ОШИБКА</h1>
-    <p class="lead" data-aos="fade-down" data-aos-delay="400"><?=$_GET["error"];?></p>
+    <p class="lead" data-aos="fade-down" data-aos-delay="400"><?=htmlspecialchars($_GET["error"],ENT_QUOTES,"UTF-8")?></p>
     <?php if (!isset($_GET["id"])){ ?>
     <p class="lead">
     <a class="btn mt-3 position-relative fixed-bottom btn-sm btn-secondary fw-bold border-white bg-white" data-aos="zoom-in-up" data-aos-delay="500" data-aos-offset="0" href="?login">Войдите через
