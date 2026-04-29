@@ -178,31 +178,51 @@ body::after {
 <script>
   var songs=<?php echo json_encode($settings["loading_music"]); ?>;
   var words=<?php echo json_encode($settings["loading_words"]); ?>;
-  var imgs=<?php echo json_encode($settings["loading_imgs"]); ?>;
   
-  var volume = <?php echo $settings["loading_volume"]; ?>;
+  var volume = <?php echo $settings["loading_volume"];?>;
+
+  function isAprilFools() {
+    const now=new Date();
+    return (now.getMonth()===3&&now.getDate()===1);
+  }
+
   function playRandomSong() {
+    if (isAprilFools()) {
+        var audio = new Audio("loadscreen/music/xd/2.ogg");
+        audio.volume = .5;
+        audio.loop = true;
+        audio.play();
+      
+        document.getElementById("curm").innerHTML = "Играет: ??? 🤡";
+        return;
+    }
+
+    // обычный режим
     var randomIndex = Math.floor(Math.random() * songs.length);
     var song = songs[randomIndex];
-    document.getElementById("curm").innerHTML=document.getElementById("curm").innerHTML+song.title
+
+    document.getElementById("curm").innerHTML = "Играет: " + song.title;
+
     var audio = new Audio(song.file);
-    audio.volume=volume/100
+    audio.volume = volume / 100;
     audio.play();
-    audio.addEventListener("ended",function(){
+
+    audio.addEventListener("ended", function(){
       playRandomSong();
     });
   }
   playRandomSong();
-  document.getElementById("gm_img").src=imgs["unknwn"];
+  document.getElementById("gm_img").src="img/unknwn.jpg"//imgs["unknwn"];
   function GameDetails(servername,serverurl,mapname,maxplayers,steamid,gamemode) {
 	  document.getElementById("gameinf").innerHTML=gamemode
     document.getElementById("mapinf").innerHTML="Карта: "+mapname
     document.getElementById("playercnt").innerHTML="Игровых слотов: "+maxplayers
-    var gmlw=gamemode.toLowerCase()
-    if (imgs.hasOwnProperty(gmlw)) {
-      var value=imgs[gmlw];
-      document.getElementById("gm_img").src=value
-    }
+    document.getElementById("gm_img").src="img/maps_logos/"+mapname+".png"
+    //var gmlw=gamemode.toLowerCase()
+    //if (imgs.hasOwnProperty(gmlw)) {
+    //  var value=imgs[gmlw];
+    //  document.getElementById("gm_img").src=value
+    //}
   }
   var textContainer=document.getElementById("words");
   var fadeIn=function() {textContainer.style.opacity="1";};
@@ -216,6 +236,64 @@ body::after {
   }
   setInterval(updateText,8000);
   updateText();
+
+
+  //FOOOOOOOOOOOOOOOOLS
+  if (isAprilFools()) {
+
+    document.body.classList.add("april-fools");
+
+    // создаём стиль динамически (чтобы точно применился)
+    const style = document.createElement("style");
+    style.innerHTML = `
+      body.april-fools * {
+        animation: chaos 2s infinite linear !important;
+      }
+
+      @keyframes chaos {
+        0% { transform: rotate(0deg) scale(1); filter: hue-rotate(0deg); }
+        25% { transform: rotate(5deg) scale(1.05) translate(5px,-5px); }
+        50% { transform: rotate(-5deg) scale(0.95) translate(-5px,5px); filter: hue-rotate(180deg); }
+        75% { transform: rotate(3deg) scale(1.1); }
+        100% { transform: rotate(0deg) scale(1); filter: hue-rotate(360deg); }
+      }
+
+      body.april-fools::before,
+      body.april-fools #bgvideo {
+        animation: spinbg 10s infinite linear !important;
+      }
+
+      @keyframes spinbg {
+        from { transform: scale(1.2) rotate(0deg); }
+        to { transform: scale(1.2) rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // ЖЁСТКИЙ ХАОС
+    setInterval(() => {
+      document.querySelectorAll("*").forEach(el => {
+        el.style.transform = `
+          rotate(${Math.random()*20-10}deg)
+          translate(${Math.random()*30-15}px, ${Math.random()*30-15}px)
+          scale(${1 + Math.random()*0.3})
+        `;
+      });
+    }, 400);
+
+    // смена цветов
+    setInterval(() => {
+      document.body.style.filter = `hue-rotate(${Math.random()*360}deg)`;
+    }, 500);
+
+    // дергаем заголовок отдельно
+    setInterval(() => {
+      const title = document.getElementById("project_name");
+      if (title) {
+        title.style.transform = `rotate(${Math.random()*40-20}deg) scale(${1+Math.random()*0.5})`;
+      }
+    }, 200);
+  }
 </script>
 <script src="<?=asset_version("/js/aos.js")?>"></script>
 <?php include("components/footer.php") ?>
