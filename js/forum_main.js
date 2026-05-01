@@ -389,13 +389,22 @@ document.addEventListener("DOMContentLoaded",function(){
 }
 
     const lists=[...document.querySelectorAll('[id^="threadList-"]')];
-    async function loadThreadsSequentially(){
-        for (const list of lists) {
-            const subcatId=list.id.replace("threadList-","");
-            await get_threads(subcatId,1,true);
+    async function loadThreadsPooled(concurrency=2){
+        const queue=[...lists];
+        async function worker(){
+            while (queue.length){
+                const list=queue.shift();
+                await get_threads(list.id.replace("threadList-",""),1,true);
+            }
         }
+        const workers=[];
+        for (let i=0;i<Math.min(concurrency,lists.length);i++){
+            workers.push(worker());
+        }
+        await Promise.all(workers);
     }
-    loadThreadsSequentially().then(()=>{
+
+    loadThreadsPooled(2).then(()=>{
         const params=new URLSearchParams(window.location.search);
         const subcatId=parseInt(params.get("scid"));
         const page=parseInt(params.get("scpg"));
@@ -405,7 +414,7 @@ document.addEventListener("DOMContentLoaded",function(){
                 subcatContainer.click();
                 if (page){
                     get_threads(subcatId,page);
-                }      
+                }
             }
         }
     });
