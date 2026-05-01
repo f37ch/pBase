@@ -269,38 +269,71 @@ if (dropInput!=null){
 if (document.getElementById("srv_form")!=null){
   document.getElementById("srv_form").addEventListener("submit",(event)=>{
     event.preventDefault();
-    let tbl={svsave:""}
+    let tbl={svsave:""};
     let form=document.getElementById("srv_form");
     let elements=form.elements;
-    for (let i=0;i<elements.length;i++) {
-        let element=elements[i];
-        if (element.name) {
-            tbl[element.name]=element.value;
-        }
+    for (let i=0;i<elements.length;i++){
+      let element=elements[i];
+      if (element.name){tbl[element.name]=element.value;}
     }
-    makeRequest(tbl,function(){
-      get_servers()
-    })
+    makeRequest(tbl,function(){get_servers()})
   });
   function server_rm(name){
-    makeRequest({svrm:name},function(){
-        get_servers()
-    })
+    makeRequest({svrm:name},function(){get_servers()})
+  }
+  function server_reorder(){
+    let rows=document.querySelectorAll("#servertable [data-id]");
+    let ids=Array.from(rows).map(r=>r.dataset.id);
+    makeRequest({svreorder:JSON.stringify(ids)},null)
   }
   function get_servers(){
-    makeRequest({get_servers},function(resp){
-        document.getElementById("servertable").innerHTML=""
+    makeRequest({get_servers:""},function(resp){
+      let tbl=document.getElementById("servertable");
+      tbl.innerHTML="";
+      if (document.getElementById("rcon_servs")!=null){
+        document.getElementById("rcon_servs").innerHTML=""
+      }
+      for (var i=0,row;row=resp[i];i++){
+        tbl.innerHTML+="<div class='d-flex align-items-center gap-2 p-2 border rounded' data-id='"+row.id+"' style='background:#fff;cursor:grab;user-select:none;'>"
+          +"<i class='bi bi-grip-vertical text-secondary' style='cursor:grab;'></i>"
+          +"<span class='fw-bold me-auto'>"+row.sv_name+"</span>"
+          +"<span class='text-muted small'>"+row.sv_ip+":"+row.sv_port+"</span>"
+          +"<button class='btn btn-outline-dark btn-sm ms-2' title='Удалить сервер' onclick=\"server_rm('"+row.sv_name+"')\"><i class='bi bi-trash'></i></button>"
+          +"</div>";
         if (document.getElementById("rcon_servs")!=null){
-          document.getElementById("rcon_servs").innerHTML=""
+          document.getElementById("rcon_servs").innerHTML+="<option value="+row.id+">"+row.sv_name+"</option>"
         }
-        for (var i=0,row;row=resp[i];i++) {
-          let counter=eval(i+1)
-          document.getElementById("servertable").innerHTML+="<tr><th scope='row'>"+counter+"</  th><td>"+row.sv_name+"</td><td>"+row.sv_ip+"</td><td>"+row.sv_port+"</td><td><button class='btn btn-outline-dark btn-sm' title='Удалить сервер' onclick=\"server_rm('"+row.sv_name+"')\"><i class='bi bi-trash'></i></button></td></td></tr>";
-          if (document.getElementById("rcon_servs")!=null){
-            document.getElementById("rcon_servs").innerHTML+="<option value="+row.id+">"+row.sv_name +"</option>"
-          }
+      }
+      initDrag();
+    })
+  }
+  function initDrag(){
+    let tbl=document.getElementById("servertable");
+    let dragging=null;
+    tbl.querySelectorAll("[data-id]").forEach(function(el){
+      el.addEventListener("dragstart",function(e){
+        dragging=el;
+        el.style.opacity="0.5";
+        e.dataTransfer.effectAllowed="move";
+      });
+      el.addEventListener("dragend",function(){
+        el.style.opacity="";
+        dragging=null;
+        server_reorder();
+      });
+      el.addEventListener("dragover",function(e){
+        e.preventDefault();
+        if (!dragging||dragging===el) return;
+        let rect=el.getBoundingClientRect();
+        let mid=rect.top+rect.height/2;
+        if (e.clientY<mid){
+          tbl.insertBefore(dragging,el);
+        }else{
+          tbl.insertBefore(dragging,el.nextSibling);
         }
-      })
+      });
+      el.setAttribute("draggable","true");
+    });
   }
 }
 //----------------------------------------------RCON

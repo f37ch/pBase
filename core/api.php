@@ -186,7 +186,7 @@ if(isset($_POST["settings_insert"])){
 //Servers
 if (isset($_POST["get_servers"]))
 {
-    $response=$database->query("SELECT * FROM servers;");
+    $response=$database->query("SELECT * FROM servers ORDER BY prior ASC;");
     if (mysqli_num_rows($response)){
         echo json_encode($response->fetch_all(MYSQLI_ASSOC))??"";
     };
@@ -199,6 +199,26 @@ if(isset($_POST["svrm"])){
     }
     $name=$_POST["svrm"];
     $sql=$database->query("DELETE FROM servers WHERE sv_name='$name'");
+}
+if (isset($_POST["svreorder"])){
+    if (!hasAccess("servers")){
+        http_response_code(403);
+        echo json_encode(["error"=>"Access denied."]);
+        exit;
+    }
+    $ids=json_decode($_POST["svreorder"],true);
+    if (!is_array($ids)){
+        http_response_code(400);
+        echo json_encode(["error"=>"Invalid data."]);
+        exit;
+    }
+    foreach($ids as $prior=>$id){
+        $id=(int)$id;
+        $prior=(int)$prior;
+        $database->query("UPDATE servers SET prior=$prior WHERE id=$id");
+    }
+    echo json_encode(["success"=>true]);
+    exit;
 }
 if (isset($_POST["svsave"]))
 {

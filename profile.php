@@ -230,27 +230,15 @@ if (isset($_GET["id"])){
         <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"   aria-controls="collapseTwo"><i class="bi bi-hdd-rack-fill"></i>&nbsp;Управление Серверами</button>
       </h2>
       <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionDada">
-        <div class="accordion-body table-responsive shadow border-light">
-          <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Имя</th>
-              <th scope="col">IP</th>
-              <th scope="col">Port</th>
-              <th scope="col">Действие</th>
-            </tr>
-          </thead>
-          <tbody id="servertable">
-          </tbody>
-          </table>
-          <form class="input-group input-group-sm mb-2" id="srv_form">
+        <div class="accordion-body shadow border-light">
+          <div id="servertable" class="d-flex flex-column gap-2 mb-3"></div>
+            <form class="input-group input-group-sm mb-2" id="srv_form">
             <input type="text" class="form-control shadow-none" placeholder="Имя" name="name" required>
             <input type="text" class="form-control shadow-none" placeholder="IP" name="ip" required>
             <input type="number" class="form-control shadow-none" placeholder="Port" name="port" required>
             <button class="btn border-success fw-bold btn-success btn-sm col-2" type="submit" id="button-addon2"><i class="bi bi-database-fill-up"></i> Добавить</button>
-          </frorm>
-          </div> 
+            </form>
+        </div>
       </div>
     </div>
     <?php } ?>
