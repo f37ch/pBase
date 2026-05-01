@@ -19,6 +19,7 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
         sv_name VARCHAR(100) NOT NULL,
         sv_ip VARCHAR(100) NOT NULL,
         sv_port INT(20) NOT NULL,
+        prior INT DEFAULT NULL,
         PRIMARY KEY (id)
     )ENGINE=InnoDB;",
 
