@@ -296,7 +296,7 @@ if (document.getElementById("srv_form")!=null){
       for (var i=0,row;row=resp[i];i++){
         tbl.innerHTML+="<div class='d-flex align-items-center gap-2 p-2 border rounded' data-id='"+row.id+"' style='background:#fff;cursor:grab;user-select:none;'>"
           +"<i class='bi bi-grip-vertical text-secondary' style='cursor:grab;'></i>"
-          +"<span class='fw-bold me-auto'>"+row.sv_name+"</span>"
+          +"<span class='me-auto'>"+row.sv_name+"</span>"
           +"<span class='text-muted small'>"+row.sv_ip+":"+row.sv_port+"</span>"
           +"<button class='btn btn-outline-dark btn-sm ms-2' title='Удалить сервер' onclick=\"server_rm('"+row.sv_name+"')\"><i class='bi bi-trash'></i></button>"
           +"</div>";
