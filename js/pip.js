@@ -193,28 +193,39 @@ if (document.getElementById("write_modal")!=null){
     })
   }
   function get_notes(np){
-    makeRequest({get_notes:np??1},function(resp){
-      notes_curpage=np??1;
-      let noteList=document.getElementById("notes_list")
-      noteList.innerHTML=""
-      for (var i = 0, row; row = resp.data[i]; i++) {
-        noteList.innerHTML+="<div class='card mb-2 text-black hoverscale' style='height:fit-content;cursor:pointer;overflow:hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px; object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'><a href='/"+row.type+".php?id="+row.id+"' style='color:black;width:fit-content;height:fit-content;'>"+row.title+"</a></h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div></div>"
-      }
-      if(resp.pages>1){
-        let notespag=document.getElementById("notes_pag")
-        notespag.classList.remove("d-none")
-        notespag.innerHTML=""
-        notespag.innerHTML+=(resp.page>4?"<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes()\"><span aria-hidden='true'>&laquo;</span></a></li>":"")+"<li class='page-item "+(resp.page==1?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.prev+"')\"><span aria-hidden='true'>Prev</span></a></li>"
-        for (let i=1;i<=resp.pages;i++){
-          notespag.innerHTML+="<li class='page-item'><a class='page-link shadow-none text-black "+(resp.page==i?"active":"")+"' onclick=\"get_notes('"+i+"')\">"+i+"</a></li>"
-        }
-        notespag.innerHTML+="<li class='page-item "+(resp.page==resp.pages?"disabled":"")+"'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.next+"')\"><span aria-hidden='true'>Next</span></a></li>"
-        if(resp.page<resp.pages-2) {
-          notespag.innerHTML+="<li class='page-item'><a class='page-link text-black shadow-none' onclick=\"get_notes('"+resp.pages+"')\"><span aria-hidden='true'>&raquo;</span></a></li>"
-        }
-      }
-    })
-  }
+      makeRequest({get_notes:np??1},function(resp){
+          notes_curpage=np??1;
+          let noteList=document.getElementById("notes_list");
+          noteList.innerHTML="";
+          for (var i=0,row;row=resp.data[i];i++){
+              noteList.innerHTML+="<div class='card mb-2 text-black hoverscale' style='height:fit-content;cursor:pointer;overflow:hidden;'><div class='card-body p-0'><div class='row'><img class='col-3' style='height:60px;object-fit:cover;' src='"+row.headimg+"'></img><h6 class='col title my-auto'><a href='/"+row.type+".php?id="+row.id+"' style='color:black;width:fit-content;height:fit-content;'>"+row.title+"</a></h6><h6 class='col title my-auto' style='color:#46B7AA;'>Тип: "+row.type+"</h6><button title='Редактировать запись' class='m-2 col-1 btn btn-sm btn-outline-dark' onclick=\"note_edit('"+row.id+"')\"><i class='bi bi-pencil-fill'></i></button></div></div></div>";
+          }
+          if (resp.pages>1){
+              let notespag=document.getElementById("notes_pag");
+              notespag.classList.remove("d-none");
+              notespag.innerHTML="";
+              if (resp.page>4){
+                  notespag.innerHTML+=`<li class='page-item'><a class='page-link text-black shadow-none' onclick="get_notes(1)"><span aria-hidden='true'>&laquo;</span></a></li>`;
+              }
+              notespag.innerHTML+=`<li class='page-item ${resp.page==1?"disabled":""}'>
+                  <a class='page-link text-black shadow-none' onclick="get_notes(${resp.prev})">Prev</a>
+              </li>`;
+              for (let i=1;i<=resp.pages;i++){
+                  if (i>=resp.page-3&&i<=resp.page+3){
+                      notespag.innerHTML+=`<li class='page-item'>
+                          <a class='page-link text-black shadow-none ${resp.page==i?"active":""}' onclick="get_notes(${i})">${i}</a>
+                      </li>`;
+                  }
+              }
+              notespag.innerHTML+=`<li class='page-item ${resp.page==resp.pages?"disabled":""}'>
+                  <a class='page-link text-black shadow-none' onclick="get_notes(${resp.next})">Next</a>
+              </li>`;
+              if (resp.page<resp.pages-2){
+                notespag.innerHTML+=`<li class='page-item'><a class='page-link text-black shadow-none' onclick="get_notes(${resp.pages})"><span aria-hidden='true'>&raquo;</span></a></li>`;
+              }
+          }
+      });
+    }
 }
 //----------------------------------------------GLOBAL SETTINGS
 let dropInput=document.getElementById("dropInput");

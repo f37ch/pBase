@@ -129,19 +129,19 @@ if (isset($_POST["get_notes"]))
         echo json_encode(["error"=>"Access denied."]);
         exit;
     }
-    $page=is_numeric($_POST["get_notes"])?$_POST["get_notes"]:1;
+    $page=is_numeric($_POST["get_notes"])?(int)$_POST["get_notes"]:1;
     $limit=5;
     $start=($page-1)*$limit;
     $countres=$database->query("SELECT count(id) AS id FROM notes")??NULL;
     $fetchedcount=$countres->fetch_all(MYSQLI_ASSOC);
-    $total=$fetchedcount[0]["id"];
-    $pages=ceil($total/$limit);
-    $prev=$page>1?$page-1:1;
-	$nxt=$page!=$pages?$page+1:$pages;
+    $total=(int)$fetchedcount[0]["id"];
+    $pages=(int)ceil($total/$limit);
+    $prev=max(1,$page-1);
+    $nxt=min($pages,$page+1);
     $response=$database->query("SELECT * FROM notes ORDER BY ID DESC LIMIT $start, $limit;");
     if (mysqli_num_rows($response)){
-        echo json_encode(array("page"=>$page,"pages"=>$pages,"prev"=>$prev,"next"=>$nxt,"data"=>$response->fetch_all(MYSQLI_ASSOC))??"");
-    };
+        echo json_encode(["page"=>$page,"pages"=>$pages,"prev"=>$prev,"next"=>$nxt,"data"=>$response->fetch_all(MYSQLI_ASSOC)]);
+    }
 }
 if(isset($_POST["nrm"])){
     if (!hasAccess("notes")){
