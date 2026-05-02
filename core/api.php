@@ -138,7 +138,7 @@ if (isset($_POST["get_notes"]))
     $pages=(int)ceil($total/$limit);
     $prev=max(1,$page-1);
     $nxt=min($pages,$page+1);
-    $response=$database->query("SELECT * FROM notes ORDER BY ID DESC LIMIT $start, $limit;");
+    $response=$database->query("SELECT * FROM notes ORDER BY created DESC LIMIT $start, $limit;");
     if (mysqli_num_rows($response)){
         echo json_encode(["page"=>$page,"pages"=>$pages,"prev"=>$prev,"next"=>$nxt,"data"=>$response->fetch_all(MYSQLI_ASSOC)]);
     }
