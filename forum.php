@@ -408,7 +408,7 @@ foreach ($cats as $cat):
           <input type="text" id="edit_name-<?=$cat["id"]?>" class="form-control shadow-none edit-name" placeholder="Наименование..." value="<?=$cat["name"]?>">
           <span class="input-group-text bg-light shadow-none"><i class="bi bi-list-ol"></i></span>
           <input type="number" id="edit_prior-<?=$cat["id"]?>" class="form-control shadow-none edit-prior" placeholder="Приоритет..." style="max-width:130px;" value="<?=$cat["prior"]?>">
-          <span class="input-group-text bg-light shadow-none"><i class="bi bi-image-fill"></i></span>
+          <span class="input-group-text bg-light shadow-none" id="iconimg_cat_id-<?=$cat["id"]?>"><i class="bi bi-image-fill"></i></span>
           <input type="text" id="edit_icon-<?=$cat["id"]?>" class="form-control shadow-none edit-icon" placeholder="Иконка..." style="display:none;">
         </div>
         <div class="btn-group btn-group-sm mt-1" role="group">

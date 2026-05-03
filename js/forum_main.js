@@ -173,6 +173,7 @@ document.addEventListener("DOMContentLoaded",function(){
         const catId=sel.id.split("-")[1];
         const catSel=document.getElementById("cat_id-"+catId);
         const catSelIcon=document.getElementById("icon_cat_id-"+catId);
+        const catSelIconImg=document.getElementById("iconimg_cat_id-"+catId);
         const nameInp=document.getElementById("edit_name-"+ catId);
         const priorInp=document.getElementById("edit_prior-"+catId);
         const iconInp=document.getElementById("edit_icon-"+catId);
@@ -183,6 +184,7 @@ document.addEventListener("DOMContentLoaded",function(){
             if (iconInp) iconInp.style.display=isSub?"":"none";
             if (catSel) catSel.style.display=isSub?"":"none";
             if (catSelIcon) catSelIcon.style.display=isSub?"":"none";
+            if (catSelIconImg) catSelIconImg.style.display=isSub?"":"none";
 
             if (isSub&&catSel){
                 nameInp.value=catSel.options[catSel.selectedIndex].text;
