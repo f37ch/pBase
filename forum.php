@@ -385,15 +385,17 @@ foreach ($cats as $cat):
       <?php } ?>
   </div>
   
-  <?php if (hasAccess("forum_admin")){ ?>
+    <?php if (hasAccess("forum_admin")){ ?>
   <div class="collapse" id="edit_collapse-<?=$cat["id"]?>">
       <div class="card text-black" style="padding: .5rem;">
         <?php if ($total>0) { ?>
         <div class="input-group input-group-sm mb-1">
+          <span class="input-group-text bg-light shadow-none"><i class="bi bi-tag"></i></span>
           <select class="form-select shadow-none edit-action" id="action_edit-<?=$cat["id"]?>">
             <option value="edit_cat" selected>Категория</option>
             <option value="edit_subcat">Подкатегории</option>
           </select>
+          <span class="input-group-text bg-light shadow-none" id="icon_cat_id-<?=$cat["id"]?>" style="display:none;"><i class="bi bi-folder"></i></span>
           <select class="form-select shadow-none edit-catlist" id="cat_id-<?=$cat["id"]?>" style="display:none;">
             <?php foreach ($subcats as $k=>$subcat){ ?>
               <option value="<?=$subcat["id"]?>" data-prior="<?=$subcat["prior"]?>" data-icon="<?=$subcat["icon"]?>" <?=$k===0?"selected":""?>><?=$subcat["name"]?></option>
@@ -402,8 +404,11 @@ foreach ($cats as $cat):
         </div>
         <?php } ?>
         <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light shadow-none"><i class="bi bi-fonts"></i></span>
           <input type="text" id="edit_name-<?=$cat["id"]?>" class="form-control shadow-none edit-name" placeholder="Наименование..." value="<?=$cat["name"]?>">
+          <span class="input-group-text bg-light shadow-none"><i class="bi bi-list-ol"></i></span>
           <input type="number" id="edit_prior-<?=$cat["id"]?>" class="form-control shadow-none edit-prior" placeholder="Приоритет..." style="max-width:130px;" value="<?=$cat["prior"]?>">
+          <span class="input-group-text bg-light shadow-none"><i class="bi bi-image-fill"></i></span>
           <input type="text" id="edit_icon-<?=$cat["id"]?>" class="form-control shadow-none edit-icon" placeholder="Иконка..." style="display:none;">
         </div>
         <div class="btn-group btn-group-sm mt-1" role="group">
