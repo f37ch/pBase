@@ -109,6 +109,21 @@ if (isset($_GET["thread"])){//get thread
   font-size: 14px;
   color: #555;
 }
+.subcat-drop-active {
+    outline: 2px dashed #198754;
+    background: rgba(25,135,84,0.07);
+    border-radius: 4px;
+}
+a[data-thread-id] {
+    cursor: grab;
+}
+a[data-thread-id]:active {
+    cursor: grabbing;
+}
+.cat-drop-active>.card-header {
+    outline: 2px dashed #198754;
+    background: rgba(25,135,84,0.07);
+}
 </style>
 
 <script src="<?=asset_version("/js/highlight.min.js")?>"></script>
@@ -154,7 +169,6 @@ if (isset($_GET["thread"])){//get thread
               </select>
 
               <input type="text" id="name" class="form-control shadow-none" placeholder="Наименование...">
-              <input type="number" id="prior" class="form-control shadow-none" placeholder="Приоритет..." style="max-width:130px;">
               <input type="text" id="icon" class="form-control shadow-none" placeholder="Иконка..." style="display:none;">
             </div>
             <button class="btn btn-outline-secondary w-100 btn-sm" id="createBtn" type="button">Создать</button>
@@ -387,24 +401,24 @@ foreach ($cats as $cat):
   <?php if (hasAccess("forum_admin")){ ?>
   <div class="collapse" id="edit_collapse-<?=$cat["id"]?>">
       <div class="card text-black" style="padding: .5rem;">
-        <div class="input-group input-group-sm">
-          <?php  if ($total>0) { ?>
-          <select class="form-select w-100 shadow-none edit-action" id="action_edit-<?=$cat["id"]?>">
+        <?php if ($total>0) { ?>
+        <div class="input-group input-group-sm mb-1">
+          <select class="form-select shadow-none edit-action" id="action_edit-<?=$cat["id"]?>">
             <option value="edit_cat" selected>Категория</option>
             <option value="edit_subcat">Подкатегории</option>
           </select>
-          <select class="form-select w-100 shadow-none edit-catlist" id="cat_id-<?=$cat["id"]?>" style="display:none;">
-            <?php  foreach ($subcats as $k=>$subcat){ ?>
+          <select class="form-select shadow-none edit-catlist" id="cat_id-<?=$cat["id"]?>" style="display:none;">
+            <?php foreach ($subcats as $k=>$subcat){ ?>
               <option value="<?=$subcat["id"]?>" data-prior="<?=$subcat["prior"]?>" data-icon="<?=$subcat["icon"]?>" <?=$k===0?"selected":""?>><?=$subcat["name"]?></option>
-            <?php  } ?>
+            <?php } ?>
           </select>
-          <?php } ?>
-          
+        </div>
+        <?php } ?>
+        <div class="input-group input-group-sm">
           <input type="text" id="edit_name-<?=$cat["id"]?>" class="form-control shadow-none edit-name" placeholder="Наименование..." value="<?=$cat["name"]?>">
-          <input type="number" id="edit_prior-<?=$cat["id"]?>" class="form-control shadow-none edit-prior" placeholder="Приоритет..." style="max-width:130px;" value="<?=$cat["prior"]?>">
           <input type="text" id="edit_icon-<?=$cat["id"]?>" class="form-control shadow-none edit-icon" placeholder="Иконка..." style="display:none;">
         </div>
-        <div class="btn-group btn-group-sm" role="group">
+        <div class="btn-group btn-group-sm mt-1" role="group">
           <button class="btn btn-outline-secondary w-100 edit-btn" id="edit_btn-<?=$cat["id"]?>" type="button">Редактировать</button>
           <button class="btn btn-outline-danger w-100 rm-btn" id="rm_btn-<?=$cat["id"]?>" type="button">Удалить</button>
         </div>
