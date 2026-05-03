@@ -78,6 +78,8 @@ document.addEventListener("DOMContentLoaded",function(){
             window.replyPostId=null;
             clearBtn.innerText="Очистить поле";
             publishBtn.innerText="Ответить";
+            const moveWrap=document.getElementById("move_thread_wrap");
+            if (moveWrap) moveWrap.classList.add("d-none");
         });
     }
 
@@ -116,16 +118,33 @@ document.addEventListener("DOMContentLoaded",function(){
             .then(r=>r.json())
             .then(data=>{
                 if (data.success){
-                    if (counter==8&&!window.editingPostId){
-                        const postsPerPage=8;
-                        const lastPage=Math.ceil(data.thread.total_posts/postsPerPage);
-
-                        const url=new URL(window.location.href);
-                        url.searchParams.set("pg",lastPage);
-                        url.hash="post-"+data.thread.last_post_id;
-                        window.location.href=url.toString();
-                    }else{
-                        location.reload();
+                    const moveWrap=document.getElementById("move_thread_wrap");
+                    const moveSubcatSel=document.getElementById("move_subcat_select");
+                    if (moveWrap&&!moveWrap.classList.contains("d-none")&&moveSubcatSel&&moveSubcatSel.value){
+                        const threadId=moveWrap.dataset.threadId;
+                        fetch("core/api.php",{
+                            method:"POST",
+                            body:new URLSearchParams({
+                                forum_admin:"move_thread",
+                                id:threadId,
+                                subcat_id:moveSubcatSel.value
+                            })
+                        }).then(()=>{
+                            moveWrap.classList.add("d-none");
+                            location.reload();
+                        });
+                    } else {
+                        if (counter==8&&!window.editingPostId){
+                            const postsPerPage=8;
+                            const lastPage=Math.ceil(data.thread.total_posts/postsPerPage);
+                        
+                            const url=new URL(window.location.href);
+                            url.searchParams.set("pg",lastPage);
+                            url.hash="post-"+data.thread.last_post_id;
+                            window.location.href=url.toString();
+                        }else{
+                            location.reload();
+                        }
                     }
                 } else {
                     alert(data.error||"Ошибка при публикации");
@@ -134,12 +153,16 @@ document.addEventListener("DOMContentLoaded",function(){
                 window.replyPostId=null;
                 publishBtn.innerText="Ответить"
                 clearBtn.innerText="Очистить поле";
+                const moveWrap=document.getElementById("move_thread_wrap");
+                if (moveWrap) moveWrap.classList.add("d-none");
             })
             .catch(err=>{
                 window.editingPostId=null;
                 window.replyPostId=null;
                 publishBtn.innerText="Ответить";
                 clearBtn.innerText="Очистить поле";
+                const moveWrap=document.getElementById("move_thread_wrap");
+                if (moveWrap) moveWrap.classList.add("d-none");
                 alert("Не удалось отправить пост");
             });
         });
@@ -165,6 +188,67 @@ document.addEventListener("DOMContentLoaded",function(){
                 publishBtn.innerText="Сохранить"
                 clearBtn.innerText="Отменить редактирование"
 
+                const moveWrap=document.getElementById("move_thread_wrap");
+                const moveCatSel=document.getElementById("move_cat_select");
+                const moveSubcatSel=document.getElementById("move_subcat_select");
+
+                const isFirstPost=(document.querySelector(`#post-${id}`)?.previousElementSibling==null);
+                const hasThreadControls=document.querySelector(`#post-${id} [data-action="pin_thread"]`);
+
+                if (moveWrap&&hasThreadControls){
+                    moveWrap.classList.remove("d-none");
+                
+                    function loadSubcats(catId,selectedSubcatId){
+                        fetch("core/api.php",{
+                            method:"POST",
+                            body:new URLSearchParams({forum_admin:"get_forum_subcats",cat_id:catId})
+                        })
+                        .then(r=>r.json())
+                        .then(data=>{
+                            moveSubcatSel.innerHTML="";
+                            (data.subcats||[]).forEach(s=>{
+                                const opt=document.createElement("option");
+                                opt.value=s.id;
+                                opt.textContent=s.name;
+                                if (selectedSubcatId&&s.id==selectedSubcatId) opt.selected=true;
+                                moveSubcatSel.appendChild(opt);
+                            });
+                        });
+                    }
+                
+                    fetch("core/api.php",{
+                        method:"POST",
+                        body:new URLSearchParams({forum_admin:"get_forum_cats"})
+                    })
+                    .then(r=>r.json())
+                    .then(data => {
+                        const nav=document.getElementById("forum-breadcrumbs");
+                        const currentCatid=nav.dataset.current_catid;
+                        const currentSubcatId=nav.dataset.current_subcatid;
+                        moveCatSel.innerHTML="";
+                        (data.cats || []).forEach(c => {
+                            const opt=document.createElement("option");
+                            opt.value=c.id;
+                            opt.textContent=c.name;
+                            if (currentCatid && c.id==currentCatid) {
+                                opt.selected=true;
+                            }
+                            moveCatSel.appendChild(opt);
+                        });
+                    
+                        if (data.cats && data.cats.length > 0) {
+                            const targetCatId=currentCatid||data.cats[0].id;
+                            loadSubcats(targetCatId,currentSubcatId);
+                        }
+                    });
+                
+                    moveCatSel.addEventListener("change",function(){
+                        loadSubcats(this.value,null);
+                    });
+                } else if (moveWrap){
+                    moveWrap.classList.add("d-none");
+                }
+
                 return;
             }
 
@@ -180,6 +264,8 @@ document.addEventListener("DOMContentLoaded",function(){
                 document.querySelector("#editor").scrollIntoView({behavior: "smooth"});
                 publishBtn.innerText="Ответить на пост "+this.dataset.vicnt;
                 clearBtn.innerText="Отменить ответ"
+                const moveWrap=document.getElementById("move_thread_wrap");
+                if (moveWrap) moveWrap.classList.add("d-none");
 
                 return;
             }

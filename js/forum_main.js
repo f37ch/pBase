@@ -138,6 +138,7 @@ document.addEventListener("DOMContentLoaded",function(){
             const actionSel=document.getElementById("action_edit-"+catId);
             const catSel=document.getElementById("cat_id-"+catId);
             const nameInp=document.getElementById("edit_name-"+catId);
+            const priorInp=document.getElementById("edit_prior-"+catId);
             const iconInp=document.getElementById("edit_icon-"+catId);
 
             const act=actionSel?actionSel.value:"edit_cat";
@@ -147,10 +148,12 @@ document.addEventListener("DOMContentLoaded",function(){
                 fd.append("forum_admin","edit_cat");
                 fd.append("id",catId);
                 fd.append("name",nameInp.value.trim());
+                fd.append("prior",priorInp.value.trim());
             }else{
                 fd.append("forum_admin","edit_subcat");
                 fd.append("id",catSel?catSel.value:"");
                 fd.append("name",nameInp.value.trim());
+                fd.append("prior",priorInp.value.trim());
                 fd.append("cat_id",catId); 
                 fd.append("icon",iconInp?iconInp.value.trim():"");
             }
@@ -170,6 +173,7 @@ document.addEventListener("DOMContentLoaded",function(){
         const catId=sel.id.split("-")[1];
         const catSel=document.getElementById("cat_id-"+catId);
         const nameInp=document.getElementById("edit_name-"+ catId);
+        const priorInp=document.getElementById("edit_prior-"+catId);
         const iconInp=document.getElementById("edit_icon-"+catId);
 
         function updateFields(){
@@ -180,6 +184,7 @@ document.addEventListener("DOMContentLoaded",function(){
 
             if (isSub&&catSel){
                 nameInp.value=catSel.options[catSel.selectedIndex].text;
+                priorInp.value=catSel.options[catSel.selectedIndex].dataset.prior||"";
                 iconInp.value=catSel.options[catSel.selectedIndex].dataset.icon||"";
             } else {
                 // fallback — value already set from PHP
@@ -192,6 +197,7 @@ document.addEventListener("DOMContentLoaded",function(){
             catSel.addEventListener("change",()=> {
                 if (nameInp && priorInp && iconInp){
                     nameInp.value=catSel.options[catSel.selectedIndex].text;
+                    priorInp.value=catSel.options[catSel.selectedIndex].dataset.prior||"";
                     iconInp.value=catSel.options[catSel.selectedIndex].dataset.icon||"";
                 }
             });
@@ -310,11 +316,7 @@ document.addEventListener("DOMContentLoaded",function(){
             for (let i=0;i<resp.data.length;i++){
                 const thread=resp.data[i];
                 html+=`
-                    <a href="?thread=${thread.id}" 
-                       class="btn btn-light d-flex align-items-center text-decoration-none text-body-secondary rounded-0 ${i==0?"rounded-top-1":""} ${i==resp.data.length-1?"rounded-bottom-1":""}"
-                       draggable="true"
-                       data-thread-id="${thread.id}"
-                       data-subcat-id="${subcatId}">
+                    <a href="?thread=${thread.id}" class="btn btn-light d-flex align-items-center text-decoration-none text-body-secondary rounded-0 ${i==0?"rounded-top-1":""} ${i==resp.data.length-1?"rounded-bottom-1":""}">
                             <img class="col-auto rounded-circle"
                                  style="border:2px solid rgba(71,71,71,1);width:2.3rem;"
                                  src="${thread.author_avatar}">
@@ -340,20 +342,6 @@ document.addEventListener("DOMContentLoaded",function(){
 
             html+="</div>";
             threadList.innerHTML+=html;
-            threadList.querySelectorAll("a[data-thread-id]").forEach(a=>{
-                a.addEventListener("dragstart",function(ev){
-                    ev.dataTransfer.setData("thread_id",this.dataset.threadId);
-                    ev.dataTransfer.setData("from_subcat",this.dataset.subcatId);
-                    ev.dataTransfer.effectAllowed="move";
-                    this.classList.add("opacity-50");
-                });
-                a.addEventListener("dragend",function(){
-                    this.classList.remove("opacity-50");
-                    document.querySelectorAll(".subcat-drop-active").forEach(el=>{
-                        el.classList.remove("subcat-drop-active");
-                    });
-                });
-            });
         }
 
         // pagination
@@ -399,118 +387,7 @@ document.addEventListener("DOMContentLoaded",function(){
         console.log(e);
     }
 }
-    document.querySelectorAll("[id^='subcat-']").forEach(el=>{
-        el.addEventListener("dragstart",function(ev){
-            const subcatId=this.id.replace("subcat-","");
-            ev.dataTransfer.setData("subcat_id",subcatId);
-            ev.dataTransfer.effectAllowed="move";
-            this.classList.add("opacity-50");
-            ev.stopPropagation();
-        });
-        el.setAttribute("draggable","true");
-        el.addEventListener("dragend",function(){
-            this.classList.remove("opacity-50");
-            document.querySelectorAll(".cat-drop-active").forEach(el2=>el2.classList.remove("cat-drop-active"));
-        });
-        el.addEventListener("dragover",function(ev){
-            if (ev.dataTransfer.types.includes("thread_id")||ev.dataTransfer.types.includes("subcat_id")){
-                ev.preventDefault();
-                ev.dataTransfer.dropEffect="move";
-                this.classList.add("subcat-drop-active");
-            }
-        });
-        el.addEventListener("dragleave",function(){
-            this.classList.remove("subcat-drop-active");
-        });
-        el.addEventListener("drop",async function(ev){
-            ev.preventDefault();
-            this.classList.remove("subcat-drop-active");
-            const threadId=ev.dataTransfer.getData("thread_id");
-            const fromSubcat=ev.dataTransfer.getData("from_subcat");
-            const toSubcat=this.id.replace("subcat-","");
-            const dragSubcat=ev.dataTransfer.getData("subcat_id");
-            if (dragSubcat&&dragSubcat!==toSubcat){
-                const fd=new FormData();
-                fd.append("forum_admin","swap_subcat_prior");
-                fd.append("subcat_id",dragSubcat);
-                fd.append("target_subcat_id",toSubcat);
-                try {
-                    const data=await apiRequest(fd);
-                    if (data.error) alert(data.error);
-                    else location.reload();
-                } catch(e){alert("Ошибка: "+e.message);}
-                return;
-            }
-            if (!threadId||fromSubcat===toSubcat) return;
-            const fd=new FormData();
-            fd.append("forum_admin","move_thread");
-            fd.append("thread_id",threadId);
-            fd.append("subcat_id",toSubcat);
-            try {
-                const data=await apiRequest(fd);
-                if (data.error) alert(data.error);
-                else location.reload();
-            } catch(e){alert("Ошибка: "+e.message);}
-        });
-    });
 
-    document.querySelectorAll("[id^='category-']").forEach(el=>{
-        el.setAttribute("draggable","true");
-        el.addEventListener("dragstart",function(ev){
-            ev.dataTransfer.setData("cat_id",this.id.replace("category-",""));
-            ev.dataTransfer.effectAllowed="move";
-            this.classList.add("opacity-50");
-            ev.stopPropagation();
-        });
-        el.addEventListener("dragend",function(){
-            this.classList.remove("opacity-50");
-            document.querySelectorAll(".cat-drop-active").forEach(el2=>el2.classList.remove("cat-drop-active"));
-        });
-        el.addEventListener("dragover",function(ev){
-            if (ev.dataTransfer.types.includes("subcat_id")||ev.dataTransfer.types.includes("cat_id")){
-                ev.preventDefault();
-                ev.dataTransfer.dropEffect="move";
-                this.classList.add("cat-drop-active");
-            }
-        });
-        el.addEventListener("dragleave",function(ev){
-            if (!this.contains(ev.relatedTarget)){
-                this.classList.remove("cat-drop-active");
-            }
-        });
-        el.addEventListener("drop",async function(ev){
-            ev.preventDefault();
-            this.classList.remove("cat-drop-active");
-            const subcatId=ev.dataTransfer.getData("subcat_id");
-            const catId=this.id.replace("category-","");
-
-            if (subcatId){
-                const fd=new FormData();
-                fd.append("forum_admin","move_subcat");
-                fd.append("subcat_id",subcatId);
-                fd.append("cat_id",catId);
-                try {
-                    const data=await apiRequest(fd);
-                    if (data.error) alert(data.error);
-                    else location.reload();
-                } catch(e){alert("Ошибка: "+e.message);}
-                return;
-            }
-
-            const fromCatId=ev.dataTransfer.getData("cat_id");
-            if (!fromCatId||fromCatId===catId) return;
-
-            const fd=new FormData();
-            fd.append("forum_admin","swap_cat_prior");
-            fd.append("cat_id",fromCatId);
-            fd.append("target_cat_id",catId);
-            try {
-                const data=await apiRequest(fd);
-                if (data.error) alert(data.error);
-                else location.reload();
-            } catch(e){alert("Ошибка: "+e.message);}
-        });
-    });
     const lists=[...document.querySelectorAll('[id^="threadList-"]')];
     async function loadThreadsPooled(concurrency=2){
         const queue=[...lists];

@@ -608,35 +608,32 @@ if (isset($_POST["forum_admin"])){
     }elseif($action==="edit_cat"){
         $id=(int)$_POST["id"];
         $name=$database->real_escape_string($_POST["name"]);
-        $response=$database->query("UPDATE forum_cats SET name='$name' WHERE id='$id'");
+        $prior=(int)$_POST["prior"];
+        $response=$database->query("UPDATE forum_cats SET name='$name',prior='$prior' WHERE id='$id'");
     }elseif($action==="edit_subcat"){
         $id=(int)$_POST["id"];
         $name=$database->real_escape_string($_POST["name"]);
         $cat_id=(int)$_POST["cat_id"];
+        $prior=(int)$_POST["prior"];
         $icon=$database->real_escape_string($_POST["icon"]);
-        $response=$database->query("UPDATE forum_subcats SET name='$name',cat_id='$cat_id',icon='$icon' WHERE id='$id'");
+        $response=$database->query("UPDATE forum_subcats SET name='$name',prior='$prior',cat_id='$cat_id',icon='$icon' WHERE id='$id'");
     }elseif($action==="move_thread"){
-        $thread_id=(int)$_POST["thread_id"];
+        $id=(int)$_POST["id"];
         $subcat_id=(int)$_POST["subcat_id"];
-        $response=$database->query("UPDATE forum_threads SET subcat_id='$subcat_id' WHERE id='$thread_id'");
-    }elseif($action==="move_subcat"){
-        $subcat_id=(int)$_POST["subcat_id"];
-        $cat_id=(int)$_POST["cat_id"];
-        $response=$database->query("UPDATE forum_subcats SET cat_id='$cat_id' WHERE id='$subcat_id'");
-    }elseif($action==="swap_cat_prior"){
-        $cat_id=(int)$_POST["cat_id"];
-        $target_id=(int)$_POST["target_cat_id"];
-        $a=$database->query("SELECT prior FROM forum_cats WHERE id='$cat_id' LIMIT 1")->fetch_assoc()["prior"];
-        $b=$database->query("SELECT prior FROM forum_cats WHERE id='$target_id' LIMIT 1")->fetch_assoc()["prior"];
-        $database->query("UPDATE forum_cats SET prior='$b' WHERE id='$cat_id'");
-        $response=$database->query("UPDATE forum_cats SET prior='$a' WHERE id='$target_id'");
-    }elseif($action==="swap_subcat_prior"){
-        $subcat_id=(int)$_POST["subcat_id"];
-        $target_id=(int)$_POST["target_subcat_id"];
-        $a=$database->query("SELECT prior FROM forum_subcats WHERE id='$subcat_id' LIMIT 1")->fetch_assoc()["prior"];
-        $b=$database->query("SELECT prior FROM forum_subcats WHERE id='$target_id' LIMIT 1")->fetch_assoc()["prior"];
-        $database->query("UPDATE forum_subcats SET prior='$b' WHERE id='$subcat_id'");
-        $response=$database->query("UPDATE forum_subcats SET prior='$a' WHERE id='$target_id'");
+        $response=$database->query("UPDATE forum_threads SET subcat_id=$subcat_id WHERE id=$id");
+    }elseif ($action==="get_forum_cats"){
+        $catsQ=$database->query("SELECT id,name FROM forum_cats ORDER BY COALESCE(prior,999) ASC, id ASC");
+        $cats=[];
+        while ($row=$catsQ->fetch_assoc()){$cats[]=$row;}
+        echo json_encode(["success"=>true,"cats"=>$cats]);
+        exit;
+    }elseif ($action==="get_forum_subcats"){
+        $cat_id=intval($_POST["cat_id"]??0);
+        $subsQ=$database->query("SELECT id,name FROM forum_subcats WHERE cat_id=$cat_id ORDER BY COALESCE(prior,999) ASC, id ASC");
+        $subs=[];
+        while ($row=$subsQ->fetch_assoc()){$subs[]=$row;}
+        echo json_encode(["success"=>true,"subcats"=>$subs]);
+        exit;
     }
     if (!$response){
         http_response_code(500);

@@ -21,6 +21,7 @@ if (isset($_GET["thread"])){//get thread
             sc.name AS subcat_name,
             sc.locked AS subcat_locked,
             sc.id AS subcat_id,
+            sc.cat_id AS cat_id,
             c.name AS cat_name
         FROM forum_threads t
         JOIN users u ON u.steamid = t.sid
@@ -109,27 +110,12 @@ if (isset($_GET["thread"])){//get thread
   font-size: 14px;
   color: #555;
 }
-.subcat-drop-active {
-    outline: 2px dashed #198754;
-    background: rgba(25,135,84,0.07);
-    border-radius: 4px;
-}
-a[data-thread-id] {
-    cursor: grab;
-}
-a[data-thread-id]:active {
-    cursor: grabbing;
-}
-.cat-drop-active>.card-header {
-    outline: 2px dashed #198754;
-    background: rgba(25,135,84,0.07);
-}
 </style>
 
 <script src="<?=asset_version("/js/highlight.min.js")?>"></script>
 <script src="<?=asset_version("/js/quill.js")?>"></script>
 <?php if (!isset($_GET["thread"])||(isset($_GET["thread"])&&$thread)){?>
-<nav class="card mb-4 text-black"  data-aos="flip-right" data-aos-delay="100">
+<nav class="card mb-4 text-black" id="forum-breadcrumbs" data-current_catid="<?=$thread["cat_id"]??""?>" data-current_subcatid="<?=$thread["subcat_id"]??""?>" data-aos="flip-right" data-aos-delay="100">
     <div class="card-body d-flex justify-content-between" style="padding: .5rem;">
         <h6 class="text-start mb-0 flex-grow-1 text-truncate" style="line-height:unset; max-width:calc(100%-100px);">
           <?php if (isset($_GET["thread"])){
@@ -169,6 +155,7 @@ a[data-thread-id]:active {
               </select>
 
               <input type="text" id="name" class="form-control shadow-none" placeholder="Наименование...">
+              <input type="number" id="prior" class="form-control shadow-none" placeholder="Приоритет..." style="max-width:130px;">
               <input type="text" id="icon" class="form-control shadow-none" placeholder="Иконка..." style="display:none;">
             </div>
             <button class="btn btn-outline-secondary w-100 btn-sm" id="createBtn" type="button">Создать</button>
@@ -416,6 +403,7 @@ foreach ($cats as $cat):
         <?php } ?>
         <div class="input-group input-group-sm">
           <input type="text" id="edit_name-<?=$cat["id"]?>" class="form-control shadow-none edit-name" placeholder="Наименование..." value="<?=$cat["name"]?>">
+          <input type="number" id="edit_prior-<?=$cat["id"]?>" class="form-control shadow-none edit-prior" placeholder="Приоритет..." style="max-width:130px;" value="<?=$cat["prior"]?>">
           <input type="text" id="edit_icon-<?=$cat["id"]?>" class="form-control shadow-none edit-icon" placeholder="Иконка..." style="display:none;">
         </div>
         <div class="btn-group btn-group-sm mt-1" role="group">
@@ -711,9 +699,23 @@ endforeach; // cats?>
             <div class="card-body p-0">
             <span id="editor" style="border:unset;"></span>
           </div>
-          <div class="card-footer d-flex justify-content-end gap-2">
-            <button type="button" id="clear" class="btn btn-danger btn-sm text-end">Очистить Поле</button>
-            <button type="button" id="publish" class="btn btn-success btn-sm text-end" data-counter="<?=$counter?>">Ответить</button>
+          <div class="card-footer d-flex justify-content-end gap-2 flex-wrap">
+              <div id="move_thread_wrap" class="d-none d-flex gap-2 align-items-center w-100" data-thread-id="<?=$thread_id?>">
+                 <div class="input-group input-group-sm flex-fill">
+                     <span class="input-group-text bg-light shadow-none">
+                         <i class="bi bi-folder2"></i>
+                     </span>
+                     <select id="move_cat_select" class="form-select shadow-none"></select>
+                 </div>
+                 <div class="input-group input-group-sm flex-fill">
+                     <span class="input-group-text bg-light shadow-none">
+                         <i class="bi bi-tag"></i>
+                     </span>
+                     <select id="move_subcat_select" class="form-select shadow-none"></select>
+                 </div>
+              </div>
+              <button type="button" id="clear" class="btn btn-danger btn-sm text-end">Очистить Поле</button>
+              <button type="button" id="publish" class="btn btn-success btn-sm text-end" data-counter="<?=$counter?>">Ответить</button>
           </div>
           <?php } ?>
         </div>
