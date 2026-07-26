@@ -37,7 +37,7 @@ if (isset($_GET["login"])) {
                 session_write_close();
 
                 ob_end_clean();
-                header("Location: core/steamauth/postlogin.php");
+                header("Location: ".$rooturl."core/steamauth/postlogin.php");
                 exit;
             } else {
                 ob_end_clean();
