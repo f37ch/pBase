@@ -273,7 +273,7 @@ function maybeRetryFailedSteamIDs(){
     flock($fp,LOCK_EX);
 
     $data=readF37chCache($fp);
-    if (time()-$data["last_retry"]<3600){
+    if (time()-$data["last_retry"]<43200){
         flock($fp,LOCK_UN);
         fclose($fp);
         return;
