@@ -10,9 +10,13 @@ function getRandomScreenshot($ids){
     if (file_exists($cacheFile)&&(time()-filemtime($cacheFile)<$cacheTime)){
       $screens=json_decode(file_get_contents($cacheFile),true);
     } else {
+      $ua=["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"];
       $profile=$profiles[array_rand($profiles)];
+
       $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid";
-      $html=@file_get_contents($url);
+      $context=stream_context_create(["http"=>["header"=>implode("\r\n",$ua),"timeout"=>5]]);
+      $html=@file_get_contents($url,false,$context);
+
       $maxPage=1;
       if ($html){
           if (preg_match_all('/<a class="pagingPageLink" href="[^"]*p=(\d+)/i',$html,$matches)){
@@ -22,41 +26,54 @@ function getRandomScreenshot($ids){
               }
           }
       }
-      $randomPage=rand(1,max(1,$maxPage));
 
-      $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid&p=$randomPage";
-      $html=@file_get_contents($url);
       $screens=[];
+      $triedPages=[];
+      $attempts=0;
 
-      if ($html){
+      while ($attempts<3&&empty($screens)){
+          $attempts++;
+          do {
+              $randomPage=rand(1,max(1,$maxPage));
+          } while (in_array($randomPage,$triedPages)&&count($triedPages)<$maxPage);
+          $triedPages[]=$randomPage;
+
+          usleep(300000); // 0.3 сек пауза перед каждым запросом, чтобы не спамить steamcommunity
+
+          $url="https://steamcommunity.com/profiles/$profile/screenshots/?appid=$appid&sort=newestfirst&browsefilter=myfiles&view=grid&p=$randomPage";
+          $context=stream_context_create(["http"=>["header"=>implode("\r\n",$ua),"timeout"=>5]]);
+          $html=@file_get_contents($url,false,$context);
+
+          if (!$html) continue;
+
           preg_match_all('/filedetails\/\?id=(\d+)/',$html,$matches);
-          $ids=array_unique($matches[1]);
+          $pageIds=array_unique($matches[1]);
+          if (empty($pageIds)) continue;
 
-          if (!empty($ids)) {
-              $postdata=http_build_query([
-                  "itemcount"=>count($ids),
-              ]);
-              foreach ($ids as $i=>$id){
-                  $postdata.="&publishedfileids[".$i."]=".urlencode($id);
-              }
+          $postdata=http_build_query(["itemcount"=>count($pageIds)]);
+          foreach ($pageIds as $i=>$id){
+              $postdata.="&publishedfileids[".$i."]=".urlencode($id);
+          }
 
-              $opts=[
-                  "http"=>[
-                      "method"=>"POST",
-                      "header"=>"Content-Type: application/x-www-form-urlencoded\r\n",
-                      "content"=>$postdata
-                  ]
-              ];
-              $context=stream_context_create($opts);
-              $result=file_get_contents("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",false,$context);
+          usleep(300000);
 
-              if ($result){
-                  $json=json_decode($result,true);
-                  if (isset($json["response"]["publishedfiledetails"])) {
-                      foreach ($json["response"]["publishedfiledetails"] as $detail){
-                          if (!empty($detail["file_url"])) {
-                              $screens[]=$detail["file_url"];
-                          }
+          $opts=[
+              "http"=>[
+                  "method"=>"POST",
+                  "header"=>"Content-Type: application/x-www-form-urlencoded\r\n",
+                  "content"=>$postdata,
+                  "timeout"=>5
+              ]
+          ];
+          $context=stream_context_create($opts);
+          $result=@file_get_contents("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",false,$context);
+
+          if ($result){
+              $json=json_decode($result,true);
+              if (isset($json["response"]["publishedfiledetails"])) {
+                  foreach ($json["response"]["publishedfiledetails"] as $detail){
+                      if (!empty($detail["file_url"])) {
+                          $screens[]=$detail["file_url"];
                       }
                   }
               }

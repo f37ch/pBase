@@ -98,22 +98,22 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
         CONSTRAINT fk_ft_usr_lp FOREIGN KEY (last_post_sid) REFERENCES users(steamid) ON DELETE CASCADE ON UPDATE CASCADE
     )ENGINE=InnoDB;",
 
-    "CREATE TABLE IF NOT EXISTS forum_posts (
-        id int NOT NULL AUTO_INCREMENT,
-        thread_id int NOT NULL,
-        isreplyto int(11) DEFAULT NULL,
-        sid BIGINT(20) NOT NULL,
-        content mediumtext NOT NULL,
-        timestamp int(11) NOT NULL,
-        edited int(11) DEFAULT NULL,
-        PRIMARY KEY (id),
-        KEY fk_fp_ft (thread_id),
-        KEY fk_fp_usr (sid),
-        KEY fk_fp_fp (isreplyto),
-        CONSTRAINT fk_fp_fp FOREIGN KEY (isreplyto) REFERENCES forum_posts(id) ON DELETE SET NULL,
-        CONSTRAINT fk_fp_ft FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT fk_fp_usr FOREIGN KEY (sid) REFERENCES users(steamid)
-    )ENGINE=InnoDB;",
+   "CREATE TABLE IF NOT EXISTS forum_posts (
+       id int NOT NULL AUTO_INCREMENT,
+       thread_id int NOT NULL,
+       isreplyto int(11) DEFAULT NULL,
+       sid BIGINT(20) NOT NULL,
+       content mediumtext NOT NULL,
+       timestamp int(11) NOT NULL,
+       edited int(11) DEFAULT NULL,
+       PRIMARY KEY (id),
+       KEY fk_fp_ft (thread_id),
+       KEY fk_fp_usr (sid),
+       KEY fk_fp_fp (isreplyto),
+       CONSTRAINT fk_fp_fp FOREIGN KEY (isreplyto) REFERENCES forum_posts(id) ON DELETE SET NULL,
+       CONSTRAINT fk_fp_ft FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE ON UPDATE CASCADE,
+       CONSTRAINT fk_fp_usr FOREIGN KEY (sid) REFERENCES users(steamid)
+   )ENGINE=InnoDB;",
 
     "CREATE TABLE IF NOT EXISTS forum_reactions (
         id INT NOT NULL AUTO_INCREMENT,
@@ -160,13 +160,133 @@ function InitDB($server="localhost",$user="root",$pass="",$dbname="pBase")
 }
 $database=InitDB($settings["db"]["host"].":".$settings["db"]["port"],$settings["db"]["username"],$settings["db"]["password"],$settings["db"]["database"]);
 //all auth stuff is down here
+define("F37CH_CACHE_FILE",$_SERVER["DOCUMENT_ROOT"]."/cache/f37ch_failed.json");
+function readF37chCache($fp){
+    $size=filesize(F37CH_CACHE_FILE);
+    $data=json_decode($size?fread($fp,$size):"",true);
+    if (!is_array($data)) $data=[];
+    if (!isset($data["last_retry"])) $data["last_retry"]=0;
+    if (!isset($data["failed"])||!is_array($data["failed"])) $data["failed"]=[];
+    return $data;
+}
+function writeF37chCache($fp,$data){
+    ftruncate($fp,0);
+    rewind($fp);
+    fwrite($fp,json_encode($data,JSON_PRETTY_PRINT));
+}
+function logFailedSteamID($sid){
+    $dir=dirname(F37CH_CACHE_FILE);
+    if (!is_dir($dir)) mkdir($dir,0755,true);
+
+    $fp=fopen(F37CH_CACHE_FILE,"c+");
+    if (!$fp) return;
+    flock($fp,LOCK_EX);
+
+    $data=readF37chCache($fp);
+    $sid=(string)$sid;
+    if (!in_array($sid,$data["failed"],true)){
+        $data["failed"][]=$sid;
+        writeF37chCache($fp,$data);
+    }
+
+    flock($fp,LOCK_UN);
+    fclose($fp);
+}
+function removeFailedSteamIDs($sids){
+    if (!file_exists(F37CH_CACHE_FILE)||empty($sids)) return;
+
+    $fp=fopen(F37CH_CACHE_FILE,"c+");
+    if (!$fp) return;
+    flock($fp,LOCK_EX);
+
+    $data=readF37chCache($fp);
+    $data["failed"]=array_values(array_diff($data["failed"],$sids));
+    writeF37chCache($fp,$data);
+
+    flock($fp,LOCK_UN);
+    fclose($fp);
+}
 function fetchdata($sid){
-    $json=@file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=".$GLOBALS["settings"]["steam_api_key"]."&steamids=".$sid); 
+    $context=stream_context_create(["http"=>["timeout"=>2]]);
+    $json=@file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=".$GLOBALS["settings"]["steam_api_key"]."&steamids=".$sid,false,$context);
     if (!$json){
+        logFailedSteamID($sid);
         return null;
     }
-    return json_decode($json,true);
+    $data=json_decode($json,true);
+    if (!$data||empty($data["response"]["players"][0])){
+        logFailedSteamID($sid);
+        return $data;
+    }
+    return $data;
 }
+function retryFailedSteamIDs(){
+    if (!file_exists(F37CH_CACHE_FILE)) return;
+
+    $fp=fopen(F37CH_CACHE_FILE,"c+");
+    if (!$fp) return;
+    flock($fp,LOCK_EX);
+    $data=readF37chCache($fp);
+    flock($fp,LOCK_UN);
+    fclose($fp);
+
+    $failed=$data["failed"];
+    if (empty($failed)) return;
+
+    $chunks=array_chunk($failed,100);
+    foreach ($chunks as $chunk){
+        $ids=implode(",",$chunk);
+        $context=stream_context_create(["http"=>["timeout"=>2]]);
+        $json=@file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=".$GLOBALS["settings"]["steam_api_key"]."&steamids=".$ids,false,$context);
+
+        if (!$json){
+            sleep(1);
+            continue;
+        }
+
+        $resp=json_decode($json,true);
+        $players=$resp["response"]["players"]??[];
+        if (empty($players)){
+            sleep(1);
+            continue;
+        }
+
+        $resolved=[];
+        foreach ($players as $player){
+            $upd_personanm=$GLOBALS["database"]->real_escape_string($player["personaname"]);
+            $upd_avatar=$GLOBALS["database"]->real_escape_string($player["avatarfull"]);
+            $sid=$GLOBALS["database"]->real_escape_string($player["steamid"]);
+            $GLOBALS["database"]->query("INSERT INTO users (steamid, name, avatarfull) VALUES ('$sid','$upd_personanm','$upd_avatar') ON DUPLICATE KEY UPDATE name='$upd_personanm', avatarfull='$upd_avatar'");
+            $resolved[]=$player["steamid"];
+        }
+
+        removeFailedSteamIDs($resolved);
+        sleep(1);
+    }
+}
+function maybeRetryFailedSteamIDs(){
+    $dir=dirname(F37CH_CACHE_FILE);
+    if (!is_dir($dir)) mkdir($dir,0755,true);
+
+    $fp=fopen(F37CH_CACHE_FILE,"c+");
+    if (!$fp) return;
+    flock($fp,LOCK_EX);
+
+    $data=readF37chCache($fp);
+    if (time()-$data["last_retry"]<3600){
+        flock($fp,LOCK_UN);
+        fclose($fp);
+        return;
+    }
+
+    $data["last_retry"]=time();
+    writeF37chCache($fp,$data);
+    flock($fp,LOCK_UN);
+    fclose($fp);
+
+    retryFailedSteamIDs();
+}
+maybeRetryFailedSteamIDs();
 function getSteamData($sid,$forsenew=false){
     if (!$sid) return false;
 
