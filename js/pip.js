@@ -221,7 +221,7 @@ if (document.getElementById("write_modal")!=null){
                   <a class='page-link text-black shadow-none' onclick="get_notes(${resp.next})">Next</a>
               </li>`;
               if (resp.page<resp.pages-2){
-                notespag.innerHTML+=`<li class='page-item'><a class='page-link text-black shadow-none' onclick="get_notes(${resp.pages})"><span aria-hidden='true'>&raquo;</span></a></li>`;
+                  notespag.innerHTML+=`<li class='page-item'><a class='page-link text-black shadow-none' onclick="get_notes(${resp.pages})"><span aria-hidden='true'>&raquo;</span></a></li>`;
               }
           }
       });
@@ -388,6 +388,6 @@ function renderStorageCards() {
   if (!container) return;
   container.innerHTML="";
   resp.forEach(function(row) {
-    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:25px; width:200px; cursor: pointer;' onclick=\"get_file_list('"+row.steamid+"','"+row.name+"')\">"+"<div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+"<img class='col-auto rounded-circle mb-3' style='width: 80px;border: 4px solid #000;' src='"+row.avatarfull+"'>"+"<h4 class='title my-0'>"+row.name+"</h4>"+"<h6 class='title' style='color:#5ec582;'>"+row.rank+"</h6>"+"<small class='title' style='color:#46B7AA; font-weight: bold;'>"+format_size_js(row.size)+" | Файлов: "+row.cnt+"</small>"+"</div></div></div></div>";
+    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:25px; width:200px; cursor: pointer;' onclick=\"get_file_list('"+row.steamid+"','"+row.name+"')\">"+"<div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+"<img class='col-auto rounded-circle mb-3' style='width: 80px;border: 4px solid #000;' src='"+row.avatarfull+"'>"+"<h4 class='title my-0'>"+row.name+"</h4>"+"<h6 class='title' style='color:"+row.rank_color+";'>"+row.rank+"</h6>"+"<small class='title' style='color:#46B7AA; font-weight: bold;'>"+format_size_js(row.size)+" | Файлов: "+row.cnt+"</small>"+"</div></div></div></div>";
   });
 }

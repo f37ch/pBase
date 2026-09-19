@@ -256,7 +256,8 @@ if (isset($_POST["get_storage_cards"])){
             "steamid"=>$actualsid,
             "name"=>str_replace($badchrs,'',$fm_userdata['name']),
             "avatarfull"=>$fm_userdata["avatarfull"],
-            "rank"=>$settings["ranks"][$actualsid]??"User",
+            "rank"=>getRankArray($actualsid)["name"]??"User",
+            "rank_color"=>getRankArray($actualsid)["color"]??"rgba(71, 71, 71, 1)",
             "size"=>$size,
             "cnt"=>$cnt
         ];
