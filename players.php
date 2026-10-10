@@ -46,7 +46,7 @@ href=new URL(location);
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div class="input-group" data-aos="flip-right" data-aos-delay="100" style="width: 100%;">
     <span class="input-group-text" id="da"><i class="bi bi-steam"></i></span>
-    <input type="text" onchange="href.searchParams.delete('pg');href.searchParams.set('search',this.value); location = href.toString()" class="form-control shadow-none" placeholder="steamid64/ник" value="<?php echo $_GET["search"]??""?>" aria-describedby="da" >
+    <input type="text" onchange="href.searchParams.delete('pg');href.searchParams.set('search',this.value); location = href.toString()" class="form-control shadow-none" placeholder="steamid64/ник" value="<?=htmlspecialchars($_GET["search"]??"",ENT_QUOTES,"UTF-8")?>" aria-describedby="da" >
     <select class="form-select shadow-none" name="svid" title="сортировка" style="width: 20px" onchange="href.searchParams.delete('pg');href.searchParams.set('type',this.value); location = href.toString()">
       <?php foreach ($stypes as $label => $type):?>
         <option value="<?php echo $type; ?>" <?php

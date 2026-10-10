@@ -119,7 +119,7 @@ if (isset($_GET["thread"])){//get thread
     <div class="card-body d-flex justify-content-between" style="padding: .5rem;">
         <h6 class="text-start mb-0 flex-grow-1 text-truncate" style="line-height:unset; max-width:calc(100%-100px);">
           <?php if (isset($_GET["thread"])){
-            echo "<a class='text-decoration-none text-black' href='/forum.php?scid=".$thread["subcat_id"]."'>".$thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"]."</a>";
+            echo "<a class='text-decoration-none text-black' href='/forum.php?scid=".$thread["subcat_id"]."'>".htmlspecialchars($thread["cat_name"]." > ".$thread["subcat_name"]." > ".$thread["topic"],ENT_QUOTES,"UTF-8")."</a>";
           }elseif(isset($search)){
             echo "Поиск по запросу «".htmlspecialchars($search)."»";
           }else{
@@ -230,7 +230,7 @@ if ($total==0){?>
               <img class="col-auto rounded-circle" style="border: 4px solid rgba(71,71,71,1); width:5rem; min-width:5rem;" src="<?=$post["avatarfull"]?>">
             </a>
             <div class="p-2 text-truncate">
-              <h5 class="mb-0 text-truncate"><?=$post["author_name"]?></h5>
+              <h5 class="mb-0 text-truncate"><?=htmlspecialchars($post["author_name"],ENT_QUOTES,"UTF-8")?></h5>
               <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
               <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"])?></div>
             </div>
@@ -260,6 +260,7 @@ if ($total==0){?>
         let BlockEmbed=Quill.import("blots/block/embed");
         class VideoBlot extends BlockEmbed {
           static create(value) {
+            if (!/^https?:\/\//i.test(value)) value="about:blank";
             let node;
             const isYouTube=value.includes("youtube.com")||value.includes("youtu.be");
 
@@ -473,12 +474,12 @@ foreach ($subcats as $subcat):
         <div class="p-2">
             <h5 class="mb-0 text-start text-decoration-none text-body-secondary subcat-name"><?=$subcat["name"]?></h5>
             <?php if($last): ?>
-            <div class="text-start" title="<?=$last["author_name"]?>" class="text-decoration-none text-body-secondary">
+            <div class="text-start" title="<?=htmlspecialchars($last["author_name"],ENT_QUOTES,"UTF-8")?>" class="text-decoration-none text-body-secondary">
                 <span class="fw-light">
                     <img class="col-auto rounded-circle"
                          style="border:1px solid rgba(71,71,71,1);width:1.5rem;"
                          src="<?=$last["author_avatar"]?>">
-                    <?=mb_strimwidth($last["last_post_topic"],0,28,"…")?>
+                    <?=htmlspecialchars(mb_strimwidth($last["last_post_topic"],0,28,"…"),ENT_QUOTES,"UTF-8")?>
                 </span>
                 <span style="color:#178649ff;">• <?=elapsed($last["last_time"])?></span>
             </div>
@@ -596,7 +597,7 @@ endforeach; // cats?>
                         <img class="col-auto rounded-circle" style="border: 4px solid rgba(71,71,71,1); width:5rem; min-width:5rem;" src="<?=$post["avatarfull"]?>">
                       </a>
                         <div class="p-2 text-truncate">
-                          <h5 class="mb-0 text-truncate"><?=$post["name"]?></h5>
+                          <h5 class="mb-0 text-truncate"><?=htmlspecialchars($post["name"],ENT_QUOTES,"UTF-8")?></h5>
                           <span class="title text-truncate" style="color: <?=$rankcol?>;"><?=$rankname?></span>
                           <div class="text-start text-truncate" title="<?=date("Y-m-d H:i:s",$post["timestamp"])?>"><?=elapsed($post["timestamp"]).($post["edited"]?"<span title='Изменено ".date("Y-m-d H:i:s",$post["edited"])."' style='color: #7c7c7cff;'> • <i class='bi bi-pencil'></i> ".elapsed($post["edited"])."</span>":"")?></div>
                         </div>
@@ -608,7 +609,7 @@ endforeach; // cats?>
                   <div class="card-body p-0"><!-- pt-2 -->
                     <?php if ($post["isreplyto"]) {?>
                       <a href="?thread=<?=$thread_id?>&pg=<?=$replyToPage?>#post-<?=$post["isreplyto"]?>" type="button" class="w-100 d-flex justify-content-between rounded-0 btn btn-secondary text-white">
-                        <i class='bi bi-reply'>&nbsp;Ответ на пост <?=$post["replyto_nick"]?></i>
+                        <i class='bi bi-reply'>&nbsp;Ответ на пост <?=htmlspecialchars($post["replyto_nick"]??"",ENT_QUOTES,"UTF-8")?></i>
                         <span class="rounded-pill badge text-bg-dark">&nbsp;#<?=$postPositions[$post["isreplyto"]]?>&nbsp;</span>
                     </a>
                     <?php }?>

@@ -1,3 +1,4 @@
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";")}
 function makeRequest(data,callback,method="POST",url="core/rcon.php"){
     let xmlhttp=new XMLHttpRequest();
     xmlhttp.open(method,url);
@@ -18,7 +19,7 @@ function get_players(sv) {
         myModal.toggle();
         for (var i=0,row;row=resp[i];i++) {
             row.Name=(row.Name!="")?row.Name:"Подключается...";
-            document.getElementById("sudalol").innerHTML+="<th scope='row'>"+eval(i+1)+"</th><td>"+row.Name+"</td><td>"+row.TimeF+"</td><td>"+row.Frags+"</td></tr>";
+            document.getElementById("sudalol").innerHTML+="<th scope='row'>"+eval(i+1)+"</th><td>"+escHtml(row.Name)+"</td><td>"+row.TimeF+"</td><td>"+row.Frags+"</td></tr>";
         }
     })
 }

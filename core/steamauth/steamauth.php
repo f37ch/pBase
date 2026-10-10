@@ -1,7 +1,7 @@
 <?php
 ob_start();
 ini_set("session.gc_maxlifetime",1555200);
-session_set_cookie_params(1555200);
+session_set_cookie_params(["lifetime"=>1555200,"path"=>"/","httponly"=>true,"secure"=>!empty($_SERVER["HTTPS"]),"samesite"=>"Lax"]);
 session_start();
 require("SteamConfig.php");
 
@@ -33,6 +33,7 @@ if (isset($_GET["login"])) {
                     exit;
                 }
 
+                session_regenerate_id(true);
                 $_SESSION["steamid"]=$matches[1];
                 session_write_close();
 

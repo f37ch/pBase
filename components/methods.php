@@ -20,7 +20,7 @@ if (!isset($_GET["sid"])){ ?>
         <?php if (isset($methods)) {?>
         <?php foreach ($methods as $key=>$method){?>
             <div class="p-2 bggrad card hoverscale bg-dark" style="">
-                <a target="_blank" href="<?php echo (isset($_SERVER["HTTPS"])?"https://":"http://").$_SERVER["SERVER_NAME"]."/modules/autodonate/".$key.".php?check&amount=".$_GET["amount"]."&svid=".$_GET["svid"]."&steamid=".$_GET["sid"]; ?>" referrerpolicy="origin"><img class="card-img" src="<?php echo $method["img"]?>">
+                <a target="_blank" href="<?php echo (isset($_SERVER["HTTPS"])?"https://":"http://").$_SERVER["SERVER_NAME"]."/modules/autodonate/".$key.".php?check&".htmlspecialchars(http_build_query(["amount"=>$_GET["amount"]??"","svid"=>$_GET["svid"]??"","steamid"=>$_GET["sid"]]),ENT_QUOTES,"UTF-8"); ?>" referrerpolicy="origin"><img class="card-img" src="<?php echo $method["img"]?>">
             </div>
         <?php } ?>
         <?php }else{ ?>

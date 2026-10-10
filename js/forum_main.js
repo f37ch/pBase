@@ -1,3 +1,4 @@
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";")}
 document.addEventListener("DOMContentLoaded",function(){
     const apiUrl="core/api.php";
 
@@ -327,7 +328,7 @@ document.addEventListener("DOMContentLoaded",function(){
                         <div class="p-2 fs-6">
                             <div class="text-start">
                                 <div class="text-decoration-none text-body-secondary">
-                                    <span class="mb-0">${thread.topic} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
+                                    <span class="mb-0">${escHtml(thread.topic)} ${(thread.pinned==1?"<i class='bi bi-pin-angle-fill'></i>":"")} ${(thread.locked==1?"<i class='bi bi-lock-fill'></i>":"")}</span>
                                 </div>
                             </div>
                             

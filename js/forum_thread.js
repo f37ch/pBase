@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded",function(){
     let BlockEmbed=Quill.import("blots/block/embed");
     class VideoBlot extends BlockEmbed {
       static create(value) {
+        if (!/^https?:\/\//i.test(value)) value="about:blank";
         let node;
         const isYouTube=value.includes("youtube.com")||value.includes("youtu.be");
 

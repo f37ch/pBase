@@ -1,3 +1,4 @@
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";")}
 let availableSpace=null;
 function makeRequest(data,callback,url="core/api.php",progress,method="POST"){
   let xmlhttp=new XMLHttpRequest();
@@ -108,7 +109,7 @@ function get_file_list(sid,name,skip_render){
     if (sid&&name){
       var myModal = new bootstrap.Modal(document.getElementById("filemanager_modal"));
       myModal.toggle();
-      document.getElementById("fm_lbl").innerHTML="Moderate "+name+"'s Files"
+      document.getElementById("fm_lbl").innerHTML="Moderate "+escHtml(name)+"'s Files"
     }
   }, "core/file_manager.php")
 }
@@ -388,6 +389,6 @@ function renderStorageCards() {
   if (!container) return;
   container.innerHTML="";
   resp.forEach(function(row) {
-    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:25px; width:200px; cursor: pointer;' onclick=\"get_file_list('"+row.steamid+"','"+row.name+"')\">"+"<div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+"<img class='col-auto rounded-circle mb-3' style='width: 80px;border: 4px solid #000;' src='"+row.avatarfull+"'>"+"<h4 class='title my-0'>"+row.name+"</h4>"+"<h6 class='title' style='color:"+row.rank_color+";'>"+row.rank+"</h6>"+"<small class='title' style='color:#46B7AA; font-weight: bold;'>"+format_size_js(row.size)+" | Файлов: "+row.cnt+"</small>"+"</div></div></div></div>";
+    container.innerHTML+="<div class='card mb-4 text-black hoverscale stuser' style='border-radius:25px; width:200px; cursor: pointer;' onclick=\"get_file_list('"+row.steamid+"','"+escHtml(row.name)+"')\">"+"<div class='card-body'><div class='row p-1 mb-1'><div class='col'>"+"<img class='col-auto rounded-circle mb-3' style='width: 80px;border: 4px solid #000;' src='"+row.avatarfull+"'>"+"<h4 class='title my-0'>"+escHtml(row.name)+"</h4>"+"<h6 class='title' style='color:"+row.rank_color+";'>"+row.rank+"</h6>"+"<small class='title' style='color:#46B7AA; font-weight: bold;'>"+format_size_js(row.size)+" | Файлов: "+row.cnt+"</small>"+"</div></div></div></div>";
   });
 }
